@@ -1,0 +1,305 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>
+6.824 Schedule: Spring 2018
+</title>
+<script src="common.js"></script>
+</head>
+<body bgcolor="#ffffff" text="#000000" onload="page_onload()">
+<div align="center">
+<h2>
+<a href="index.html">6.824</a> Schedule: Spring 2018
+</h2>
+<h3>
+TR1-2:30, room 54-100
+</h3>
+</div>
+<b>This is still the schedule from 2017, not 2018.</b>
+<p>
+Here is the tentative schedule of lectures and due dates.
+The lecture notes and paper questions
+for future dates are copies from previous years,
+and may change.
+<p>
+<style>
+table.calendar {
+    font-family: arial, helvetica;
+    font-size: 10pt;
+    empty-cells: show;
+    border: 1px solid #000000;
+    border-collapse: collapse;
+}
+table.calendar tr td {
+    border: 1px solid #aaaaaa;
+}
+table.calendar tr {
+    vertical-align: top;
+    height: 6em;
+    background: #eeeeee;
+}
+table.calendar thead tr {
+    text-align: center;
+    background: #444444;
+    color: #ffffff;
+    height: auto;
+    font-weight: bold;
+}
+.lecture {
+    background: #ffffaa;
+}
+.recitation {
+    background: #cccc99;
+}
+.tutorial {
+    background: #dddd55;
+}
+.quiz {
+    background: #ff9900;
+}
+.holiday {
+    background: #ccffcc;
+}
+.special {
+    background: #aaaaff;
+}
+.important {
+    background: #ffaaaa;
+}
+.reading {
+    color: #3333ff;
+}
+.deadline {
+    color: #ff0000;
+}
+.assignment {
+    color: #0aa00a;
+}
+.date {
+    color: #444444;
+}
+.due {
+    background: #ffaaaa;
+}
+</style>
+<p>
+<table class="calendar" cellspacing="0" cellpadding="6" width="100%">
+ <thead>
+  <tr>
+   <td width="16%">Monday</td><td width="26%">Tuesday</td>
+   <td width="16%">Wednesday</td><td width="26%">Thursday</td>
+   <td width="16%">Friday</td>
+  </tr>
+ </thead>
+
+<tr> <!-- week of feb 5 -->
+  <td id="2018-2-5"><span class="date">feb 5</span></td>
+  <td id="2018-2-6" class="lecture"><span class="date">feb 6</span><br />
+    <b>LEC 1:</b> <a href="notes/l01.txt">Introduction</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/mapreduce.pdf">MapReduce (2004)</a></span><br />
+    <span class="reading"><b>Assigned:</b> <a href="labs/lab-1.html">Lab 1: MapReduce</a></span><br />
+    <i>Reg day</i></td>
+  <td id="2018-2-7"><span class="date">feb 7</span></td>
+  <td id="2018-2-8" class="lecture"><span class="date">feb 8</span><br />
+    <b>LEC 2:</b> <a href="notes/l-rpc.txt">RPC and Threads</a>, <a href="notes/crawler.go">Crawler</a>, <a href="notes/kv.go">K/V</a><br />
+    <span class="reading"><b>Preparation:</b>  Do <a href="http://tour.golang.org/">Online Go tutorial</a> (<a href="papers/go-faq.txt">FAQ</a>) (<a href="questions.html?q=q-gointro&amp;lec=2">Question</a>)</span></td>
+  <td id="2018-2-9"><span class="date">feb 9</span></td>
+</tr>
+<tr> <!-- week of feb 12 -->
+  <td id="2018-2-12"><span class="date">feb 12</span></td>
+  <td id="2018-2-13" class="lecture"><span class="date">feb 13</span><br />
+    <b>LEC 3:</b> <a href="notes/l-gfs-short.txt">GFS</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/gfs.pdf">GFS (2003)</a> (<a href="papers/gfs-faq.txt">FAQ</a>) (<a href="questions.html?q=q-gfs&amp;lec=3">Question</a>)</span><br />
+    <span class="reading"><b>Assigned:</b> <a href="labs/lab-raft.html">Lab 2: Raft</a></span><br />
+    <i>First day of classes</i></td>
+  <td id="2018-2-14"><span class="date">feb 14</span></td>
+  <td id="2018-2-15" class="lecture"><span class="date">feb 15</span><br />
+    <b>LEC 4:</b> <a href="notes/l-vm-ft.txt">Primary-Backup Replication</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/vm-ft.pdf">Fault-Tolerant Virtual Machines (2010)</a> (<a href="papers/vm-ft-faq.txt">FAQ</a>) (<a href="questions.html?q=q-vm-ft&amp;lec=4">Question</a>)</span></td>
+  <td id="2018-2-16" class="due"><span class="date">feb 16</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-1.html">Lab 1</a></span></td>
+</tr>
+<tr> <!-- week of feb 19 -->
+  <td id="2018-2-19"><span class="date">feb 19</span></td>
+  <td id="2018-2-20" class="holiday"><span class="date">feb 20</span><br />
+    President's day</td>
+  <td id="2018-2-21" class="special"><span class="date">feb 21</span><br />
+    <i>Monday schedule</i></td>
+  <td id="2018-2-22" class="lecture"><span class="date">feb 22</span><br />
+    <b>LEC 5:</b> <a href="notes/l-raft.txt">Fault Tolerance: Raft</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/raft-extended.pdf">Raft (extended) (2014), to end of Section 5</a>  (<a href="papers/raft-faq.txt">FAQ</a>) (<a href="questions.html?q=q-raft&amp;lec=5">Question</a>)</span></td>
+  <td id="2018-2-23" class="due"><span class="date">feb 23</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-raft.html">Lab 2A</a></span></td>
+</tr>
+<tr> <!-- week of feb 26 -->
+  <td id="2018-2-26"><span class="date">feb 26</span></td>
+  <td id="2018-2-27" class="lecture"><span class="date">feb 27</span><br />
+    <b>LEC 6:</b> <a href="notes/l-raft2.txt">Fault Tolerance: Raft</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/raft-extended.pdf">Raft (extended) (2014), Section 6 to end</a>  (<a href="papers/raft2-faq.txt">FAQ</a>) (<a href="questions.html?q=q-raft2&amp;lec=6">Question</a>)</span></td>
+  <td id="2018-2-28"><span class="date">feb 28</span></td>
+  <td id="2018-3-1" class="lecture"><span class="date">mar 1</span><br />
+    <b>LEC 7:</b> <a href="notes/l-spinnaker.txt">Spinnaker</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/spinnaker.pdf">Spinnaker (2011)</a>  (<a href="papers/spinnaker-faq.txt">FAQ</a>) (<a href="questions.html?q=q-spinnaker&amp;lec=7">Question</a>)</span></td>
+  <td id="2018-3-2" class="due"><span class="date">mar 2</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-raft.html">Lab 2B</a></span></td>
+</tr>
+<tr> <!-- week of mar 5 -->
+  <td id="2018-3-5"><span class="date">mar 5</span></td>
+  <td id="2018-3-6" class="lecture"><span class="date">mar 6</span><br />
+    <b>LEC 8:</b> <a href="notes/l-zookeeper.txt">Zookeeper</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/zookeeper.pdf">ZooKeeper (2010)</a>  (<a href="papers/zookeeper-faq.txt">FAQ</a>) (<a href="questions.html?q=q-zookeeper&amp;lec=8">Question</a>)</span><br />
+    <span class="reading"><b>Assigned:</b> <a href="labs/lab-kvraft.html">Lab 3: KV Raft</a></span></td>
+  <td id="2018-3-7"><span class="date">mar 7</span></td>
+  <td id="2018-3-8" class="lecture"><span class="date">mar 8</span><br />
+    <b>LEC 9:</b> <a href="notes/l-2pc.txt">Distributed Transactions</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/rstar.pdf">R* (1986)</a>, just Sections 1 through 3 (<a href="papers/rstar-faq.txt">FAQ</a>) (<a href="questions.html?q=q-rstar&amp;lec=9">Question</a>)</span></td>
+  <td id="2018-3-9" class="due"><span class="date">mar 9</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-raft.html">Lab 2C</a></span></td>
+</tr>
+<tr> <!-- week of mar 12 -->
+  <td id="2018-3-12"><span class="date">mar 12</span></td>
+  <td id="2018-3-13" class="lecture"><span class="date">mar 13</span><br />
+    <b>LEC 10:</b> <a href="notes/l-farm.txt">Optimistic Concurrency Control</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/farm-2015.pdf">FaRM (2015)</a>   (<a href="papers/farm-faq.txt">FAQ</a>) (<a href="questions.html?q=q-farm&amp;lec=10">Question</a>)</span></td>
+  <td id="2018-3-14"><span class="date">mar 14</span></td>
+  <td id="2018-3-15" class="lecture"><span class="date">mar 15</span><br />
+    <b>LEC 11:</b> <a href="notes/gopattern.pdf">Guest lecturer on Go</a> (<a href="http://swtch.com/~rsc/">Russ Cox</a> Google/Go)<br />
+    <span class="reading"><b>Preparation:</b>  (<a href="papers/go-faq.txt">FAQ</a>) (<a href="questions.html?q=q-go&amp;lec=11">Question</a>)</span></td>
+  <td id="2018-3-16" class="due"><span class="date">mar 16</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-kvraft.html">Lab 3A</a></span></td>
+</tr>
+<tr> <!-- week of mar 19 -->
+  <td id="2018-3-19"><span class="date">mar 19</span></td>
+  <td id="2018-3-20" class="lecture"><span class="date">mar 20</span><br />
+    <b>LEC 12:</b> <a href="notes/l-farm.txt">Optimistic Concurrency Control</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/farm-2015.pdf">FaRM (2015)</a>   (<a href="papers/farm-faq.txt">FAQ</a>) (<a href="questions.html?q=q-farm&amp;lec=12">Question</a>)</span><br />
+    <span class="reading"><b>Assigned:</b> <a href="project.html">Final Project</a></span></td>
+  <td id="2018-3-21"><span class="date">mar 21</span></td>
+  <td id="2018-3-22" class="quiz"><span class="date">mar 22</span><br />
+    <b>Exam 1:</b> Mid-term exam during lecture time in 54-100</b><br />
+    <b>Materials:</b> Open book and notes<br />
+    <b>Scope:</b> Lectures 1 through 12 (incl. FaRM), Labs 1 and 2</td>
+  <td id="2018-3-23" class="due"><span class="date">mar 23</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="project.html">Project proposals</a> (for people with their own project idea)</span></td>
+</tr>
+<tr> <!-- week of mar 26 -->
+  <td id="2018-3-26"><span class="date">mar 26</span></td>
+  <td id="2018-3-27" class="holiday"><span class="date">mar 27</span><br />
+    Spring break</td>
+  <td id="2018-3-28" class="holiday"><span class="date">mar 28</span><br />
+    Spring break</td>
+  <td id="2018-3-29" class="holiday"><span class="date">mar 29</span><br />
+    Spring break</td>
+  <td id="2018-3-30" class="holiday"><span class="date">mar 30</span><br />
+    Spring break</td>
+</tr>
+<tr> <!-- week of apr 2 -->
+  <td id="2018-4-2"><span class="date">apr 2</span></td>
+  <td id="2018-4-3" class="lecture"><span class="date">apr 3</span><br />
+    <b>LEC 13:</b> <a href="notes/l-munin.txt">Distributed shared memory</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/munin.pdf">Munin (1991)</a> (<a href="papers/munin-faq.txt">FAQ</a>) (<a href="questions.html?q=q-munin&amp;lec=13">Question</a>)</span><br />
+    <span class="reading"><b>Assigned:</b> <a href="labs/lab-shard.html">Lab 4: Sharded KV</a></span></td>
+  <td id="2018-4-4"><span class="date">apr 4</span></td>
+  <td id="2018-4-5" class="lecture"><span class="date">apr 5</span><br />
+    <b>LEC 14:</b> <a href="notes/l-spark.txt">Big Data</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/zaharia-spark.pdf">Spark (2012)</a> (<a href="papers/spark-faq.txt">FAQ</a>) (<a href="questions.html?q=q-spark&amp;lec=14">Question</a>)</span></td>
+  <td id="2018-4-6"><span class="date">apr 6</span></td>
+</tr>
+<tr> <!-- week of apr 9 -->
+  <td id="2018-4-9"><span class="date">apr 9</span></td>
+  <td id="2018-4-10" class="lecture"><span class="date">apr 10</span><br />
+    <b>LEC 15:</b> <a href="notes/l-bayou.txt">Disconnected Operation, Eventual Consistency</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/bayou-conflicts.pdf">Bayou (1995)</a>  (<a href="papers/bayou-faq.txt">FAQ</a>) (<a href="questions.html?q=q-bayou&amp;lec=15">Question</a>)</span></td>
+  <td id="2018-4-11"><span class="date">apr 11</span></td>
+  <td id="2018-4-12" class="lecture"><span class="date">apr 12</span><br />
+    <b>LEC 16:</b> <a href="notes/l-pnuts.txt">Relaxed Consistency</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/cooper-pnuts.pdf">PNUTS (2008)</a>  (<a href="papers/pnuts-faq.txt">FAQ</a>) (<a href="questions.html?q=q-pnuts&amp;lec=16">Question</a>)</span></td>
+  <td id="2018-4-13" class="due"><span class="date">apr 13</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-kvraft.html">Lab 3B</a></span></td>
+</tr>
+<tr> <!-- week of apr 16 -->
+  <td id="2018-4-16"><span class="date">apr 16</span></td>
+  <td id="2018-4-17" class="holiday"><span class="date">apr 17</span><br />
+    Patriots day</td>
+  <td id="2018-4-18" class="holiday"><span class="date">apr 18</span><br />
+    Patriots day</td>
+  <td id="2018-4-19" class="special"><span class="date">apr 19</span><br />
+    <i>Hacking day, no lecture</i></td>
+  <td id="2018-4-20" class="due"><span class="date">apr 20</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-shard.html">Lab 4A</a></span></td>
+</tr>
+<tr> <!-- week of apr 23 -->
+  <td id="2018-4-23"><span class="date">apr 23</span></td>
+  <td id="2018-4-24" class="lecture"><span class="date">apr 24</span><br />
+    <b>LEC 17:</b> <a href="notes/l-existential.txt">Measuring Consistency</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/fb-consistency.pdf">Existential Consistency (2015)</a> (<a href="papers/fb-consistency-faq.txt">FAQ</a>) (<a href="questions.html?q=q-fb-consistency&amp;lec=17">Question</a>)</span></td>
+  <td id="2018-4-25"><span class="date">apr 25</span></td>
+  <td id="2018-4-26" class="lecture"><span class="date">apr 26</span><br />
+    <b>LEC 18:</b> <a href="notes/l-dht.txt">Peer-to-peer, DHTs</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/stoica-chord.pdf">Chord (2001)</a> and <a href="http://www.bittorrent.org/beps/bep_0005.html">Trackerless Bittorrent (2008)</a> (<a href="papers/chord-faq.txt">FAQ</a>) (<a href="questions.html?q=q-chord&amp;lec=18">Question</a>)</span></td>
+  <td id="2018-4-27" class="special"><span class="date">apr 27</span><br />
+    <i><b class="deadline">DROP DATE</b></i></td>
+</tr>
+<tr> <!-- week of apr 30 -->
+  <td id="2018-4-30"><span class="date">apr 30</span></td>
+  <td id="2018-5-1" class="lecture"><span class="date">may 1</span><br />
+    <b>LEC 19:</b> <a href="notes/l-dynamo.txt">Dynamo</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/dynamo.pdf">Dynamo (2007)</a> (<a href="papers/dynamo-faq.txt">FAQ</a>) (<a href="questions.html?q=q-dynamo&amp;lec=19">Question</a>)</span></td>
+  <td id="2018-5-2"><span class="date">may 2</span></td>
+  <td id="2018-5-3" class="lecture"><span class="date">may 3</span><br />
+    <b>LEC 20:</b> Peer-to-peer: <a href="notes/l-bitcoin.txt">Bitcoin</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/bitcoin.pdf">Bitcoin</a>, <a href="http://www.michaelnielsen.org/ddi/how-the-bitcoin-protocol-actually-works">summary</a> (<a href="papers/bitcoin-faq.txt">FAQ</a>) (<a href="questions.html?q=q-bitcoin&amp;lec=20">Question</a>)</span></td>
+  <td id="2018-5-4"><span class="date">may 4</span></td>
+</tr>
+<tr> <!-- week of may 7 -->
+  <td id="2018-5-7"><span class="date">may 7</span></td>
+  <td id="2018-5-8" class="lecture"><span class="date">may 8</span><br />
+    <b>LEC 21:</b> <a href="notes/l-bft.txt">Byzantine Fault Tolerance</a><br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/castro-practicalbft.pdf">Practical BFT (1999)</a>  (<a href="papers/bft-faq.txt">FAQ</a>) (<a href="questions.html?q=q-bft&amp;lec=21">Question</a>)</span></td>
+  <td id="2018-5-9"><span class="date">may 9</span></td>
+  <td id="2018-5-10" class="special"><span class="date">may 10</span><br />
+    <i>Hacking day, no lecture</i></td>
+  <td id="2018-5-11" class="due"><span class="date">may 11</span><br />
+    <span class="deadline"><b>DUE:</b> <a href="labs/lab-shard.html">Lab 4B</a></span><br />
+    <span class="deadline"><b>DUE:</b> <a href="project.html">Project reports and code</a> (for people with the own project ideas)</span></td>
+</tr>
+<tr> <!-- week of may 14 -->
+  <td id="2018-5-14"><span class="date">may 14</span></td>
+  <td id="2018-5-15" class="lecture"><span class="date">may 15</span><br />
+    <b>LEC 22:</b> Guest lecturer: Frank Dabek of Google<br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="http://dl.acm.org.libproxy.mit.edu/citation.cfm?id=2408794">The Tail at Scale</a></span></td>
+  <td id="2018-5-16"><span class="date">may 16</span></td>
+  <td id="2018-5-17" class="lecture"><span class="date">may 17</span><br />
+    <b>LEC 23:</b> Project demos<br />
+    <span class="reading"><b>Preparation:</b>  Read <a href="papers/katabi-analogicfs.pdf">AnalogicFS experience paper</a> (<a href="papers/analogicfs-faq.txt">FAQ</a>) (<a href="questions.html?q=q-analogic&amp;lec=23">Question</a>)</span></td>
+  <td id="2018-5-18" class="special"><span class="date">may 18</span><br />
+    <i>Last day of classes</i></td>
+</tr>
+<tr> <!-- week of may 21 -->
+  <td id="2018-5-21"><span class="date">may 21</span></td>
+  <td id="2018-5-22"><span class="date">may 22</span></td>
+  <td id="2018-5-23"><span class="date">may 23</span></td>
+  <td id="2018-5-24" class="quiz"><span class="date">may 24</span><br />
+    <b>Final exam</b>, Rink, 9:00am to 11:00am<br />
+    <b>Materials:</b> Open book and notes<br />
+    <b>Scope:</b> Lectures 13 through 23, Lab 3</td>
+  <td id="2018-5-25"><span class="date">may 25</span></td>
+</tr>
+
+</table>
+<script type="text/javascript">
+var d = new Date();
+for (var fwd = 0; fwd < 3; fwd++) {
+  var i = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+  var e = document.getElementById(i);
+  if (e) { e.style.border = '2px solid blue'; break; }
+  d.setTime(d.getTime() + 24*60*60*1000);
+}
+</script>
+<p>
+For questions or comments, email <a href="mailto:6824-staff@lists.csail.mit.edu">6824-staff@lists.csail.mit.edu</a>.
+<p>
+Back to <a href=".">6.824 home</a>.
+</body></html>
+
