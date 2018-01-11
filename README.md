@@ -1,3 +1,6 @@
+# MIT 6.824: 分布式系统
+2018年春季课程学习资料汇总
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/aQuaYi/MIT-6.824-Distributed-Systems-Spring-2018/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
