@@ -1,4 +1,4 @@
-# <https://pdos.csail.mit.edu/6.824/> 
+# <https://pdos.csail.mit.edu/6.824/>
 
 ## 课程内容
 
@@ -23,4 +23,3 @@
 - [LEC 19: Dynamo](Lectures/LEC19)
 - [LEC 20: Peer-to-peer: Bitcoin](Lectures/LEC20)
 - [LEC 21: Project demos](Lectures/LEC21)
-
