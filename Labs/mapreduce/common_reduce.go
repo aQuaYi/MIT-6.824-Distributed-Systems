@@ -42,6 +42,6 @@ func doReduce(
 	// }
 	// file.Close()
 	//
-	// Your code here (Part I).
+	// TODO: Your code here (Part I).
 	//
 }
