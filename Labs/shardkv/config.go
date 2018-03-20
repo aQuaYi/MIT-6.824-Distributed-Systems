@@ -7,6 +7,7 @@ import "os"
 
 // import "log"
 import crand "crypto/rand"
+import "math/big"
 import "math/rand"
 import "encoding/base64"
 import "sync"
@@ -14,12 +15,20 @@ import "runtime"
 import "raft"
 import "strconv"
 import "fmt"
+import "time"
 
 func randstring(n int) string {
 	b := make([]byte, 2*n)
 	crand.Read(b)
 	s := base64.URLEncoding.EncodeToString(b)
 	return s[0:n]
+}
+
+func makeSeed() int64 {
+	max := big.NewInt(int64(1) << 62)
+	bigx, _ := crand.Int(crand.Reader, max)
+	x := bigx.Int64()
+	return x
 }
 
 // Randomize server handles
@@ -42,9 +51,10 @@ type group struct {
 }
 
 type config struct {
-	mu  sync.Mutex
-	t   *testing.T
-	net *labrpc.Network
+	mu    sync.Mutex
+	t     *testing.T
+	net   *labrpc.Network
+	start time.Time // time at which make_config() was called
 
 	nmasters      int
 	masterservers []*shardmaster.ShardMaster
@@ -59,10 +69,19 @@ type config struct {
 	maxraftstate int
 }
 
+func (cfg *config) checkTimeout() {
+	// enforce a two minute real-time limit on each test
+	if !cfg.t.Failed() && time.Since(cfg.start) > 120*time.Second {
+		cfg.t.Fatal("test took longer than 120 seconds")
+	}
+}
+
 func (cfg *config) cleanup() {
 	for gi := 0; gi < cfg.ngroups; gi++ {
 		cfg.ShutdownGroup(gi)
 	}
+	cfg.net.Cleanup()
+	cfg.checkTimeout()
 }
 
 // check that no server's log is too big.
@@ -318,12 +337,14 @@ func make_config(t *testing.T, n int, unreliable bool, maxraftstate int) *config
 		if runtime.NumCPU() < 2 {
 			fmt.Printf("warning: only one CPU, which may conceal locking bugs\n")
 		}
+		rand.Seed(makeSeed())
 	})
 	runtime.GOMAXPROCS(4)
 	cfg := &config{}
 	cfg.t = t
 	cfg.maxraftstate = maxraftstate
 	cfg.net = labrpc.MakeNetwork()
+	cfg.start = time.Now()
 
 	// master
 	cfg.nmasters = 3

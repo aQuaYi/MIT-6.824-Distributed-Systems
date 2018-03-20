@@ -84,6 +84,7 @@ func (rf *Raft) persist() {
 	// rf.persister.SaveRaftState(data)
 }
 
+
 //
 // restore previously persisted state.
 //

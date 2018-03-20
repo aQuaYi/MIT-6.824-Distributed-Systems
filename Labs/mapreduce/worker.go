@@ -11,19 +11,28 @@ import (
 	"net/rpc"
 	"os"
 	"sync"
+	"time"
 )
+
+// track whether workers executed in parallel.
+type Parallelism struct {
+	mu  sync.Mutex
+	now int32
+	max int32
+}
 
 // Worker holds the state for a server waiting for DoTask or Shutdown RPCs
 type Worker struct {
 	sync.Mutex
 
-	name       string
-	Map        func(string, string) []KeyValue
-	Reduce     func(string, []string) string
-	nRPC       int // quit after this many RPCs; protected by mutex
-	nTasks     int // total tasks executed; protected by mutex
-	concurrent int // number of parallel DoTasks in this worker; mutex
-	l          net.Listener
+	name        string
+	Map         func(string, string) []KeyValue
+	Reduce      func(string, []string) string
+	nRPC        int // quit after this many RPCs; protected by mutex
+	nTasks      int // total tasks executed; protected by mutex
+	concurrent  int // number of parallel DoTasks in this worker; mutex
+	l           net.Listener
+	parallelism *Parallelism
 }
 
 // DoTask is called by the master when a new task is being scheduled on this
@@ -44,6 +53,25 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 		log.Fatal("Worker.DoTask: more than one DoTask sent concurrently to a single worker\n")
 	}
 
+	pause := false
+	if wk.parallelism != nil {
+		wk.parallelism.mu.Lock()
+		wk.parallelism.now += 1
+		if wk.parallelism.now > wk.parallelism.max {
+			wk.parallelism.max = wk.parallelism.now
+		}
+		if wk.parallelism.max < 2 {
+			pause = true
+		}
+		wk.parallelism.mu.Unlock()
+	}
+
+	if pause {
+		// give other workers a chance to prove that
+		// they are executing in parallel.
+		time.Sleep(time.Second)
+	}
+
 	switch arg.Phase {
 	case mapPhase:
 		doMap(arg.JobName, arg.TaskNumber, arg.File, arg.NumOtherPhase, wk.Map)
@@ -54,6 +82,12 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 	wk.Lock()
 	wk.concurrent -= 1
 	wk.Unlock()
+
+	if wk.parallelism != nil {
+		wk.parallelism.mu.Lock()
+		wk.parallelism.now -= 1
+		wk.parallelism.mu.Unlock()
+	}
 
 	fmt.Printf("%s: %v task #%d done\n", wk.name, arg.Phase, arg.TaskNumber)
 	return nil
@@ -85,7 +119,7 @@ func (wk *Worker) register(master string) {
 func RunWorker(MasterAddress string, me string,
 	MapFunc func(string, string) []KeyValue,
 	ReduceFunc func(string, []string) string,
-	nRPC int,
+	nRPC int, parallelism *Parallelism,
 ) {
 	debug("RunWorker %s\n", me)
 	wk := new(Worker)
@@ -93,6 +127,7 @@ func RunWorker(MasterAddress string, me string,
 	wk.Map = MapFunc
 	wk.Reduce = ReduceFunc
 	wk.nRPC = nRPC
+	wk.parallelism = parallelism
 	rpcs := rpc.NewServer()
 	rpcs.Register(wk)
 	os.Remove(me) // only needed for "unix"

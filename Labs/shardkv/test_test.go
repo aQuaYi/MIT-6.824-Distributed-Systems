@@ -1,11 +1,16 @@
 package shardkv
 
+import "linearizability"
+
 import "testing"
 import "strconv"
 import "time"
 import "fmt"
 import "sync/atomic"
+import "sync"
 import "math/rand"
+
+const linearizabilityCheckTimeout = 1 * time.Second
 
 func check(t *testing.T, ck *Clerk, key string, value string) {
 	v := ck.Get(key)
@@ -540,6 +545,96 @@ func TestUnreliable2(t *testing.T) {
 
 	for i := 0; i < n; i++ {
 		check(t, ck, ka[i], va[i])
+	}
+
+	fmt.Printf("  ... Passed\n")
+}
+
+func TestUnreliable3(t *testing.T) {
+	fmt.Printf("Test: unreliable 3...\n")
+
+	cfg := make_config(t, 3, true, 100)
+	defer cfg.cleanup()
+
+	begin := time.Now()
+	var operations []linearizability.Operation
+	var opMu sync.Mutex
+
+	ck := cfg.makeClient()
+
+	cfg.join(0)
+
+	n := 10
+	ka := make([]string, n)
+	va := make([]string, n)
+	for i := 0; i < n; i++ {
+		ka[i] = strconv.Itoa(i) // ensure multiple shards
+		va[i] = randstring(5)
+		ck.Put(ka[i], va[i])
+	}
+
+	var done int32
+	ch := make(chan bool)
+
+	ff := func(i int) {
+		defer func() { ch <- true }()
+		ck1 := cfg.makeClient()
+		for atomic.LoadInt32(&done) == 0 {
+			ki := rand.Int() % n
+			nv := randstring(5)
+			var inp linearizability.KvInput
+			var out linearizability.KvOutput
+			start := int64(time.Since(begin))
+			if (rand.Int() % 1000) < 500 {
+				ck1.Append(ka[ki], nv)
+				inp = linearizability.KvInput{Op: 2, Key: ka[ki], Value: nv}
+			} else if (rand.Int() % 1000) < 100 {
+				ck1.Put(ka[ki], nv)
+				inp = linearizability.KvInput{Op: 1, Key: ka[ki], Value: nv}
+			} else {
+				v := ck1.Get(ka[ki])
+				inp = linearizability.KvInput{Op: 0, Key: ka[ki]}
+				out = linearizability.KvOutput{Value: v}
+			}
+			end := int64(time.Since(begin))
+			op := linearizability.Operation{Input: inp, Call: start, Output: out, Return: end}
+			opMu.Lock()
+			operations = append(operations, op)
+			opMu.Unlock()
+		}
+	}
+
+	for i := 0; i < n; i++ {
+		go ff(i)
+	}
+
+	time.Sleep(150 * time.Millisecond)
+	cfg.join(1)
+	time.Sleep(500 * time.Millisecond)
+	cfg.join(2)
+	time.Sleep(500 * time.Millisecond)
+	cfg.leave(0)
+	time.Sleep(500 * time.Millisecond)
+	cfg.leave(1)
+	time.Sleep(500 * time.Millisecond)
+	cfg.join(1)
+	cfg.join(0)
+
+	time.Sleep(2 * time.Second)
+
+	atomic.StoreInt32(&done, 1)
+	cfg.net.Reliable(true)
+	for i := 0; i < n; i++ {
+		<-ch
+	}
+
+	// log.Printf("Checking linearizability of %d operations", len(operations))
+	// start := time.Now()
+	ok := linearizability.CheckOperationsTimeout(linearizability.KvModel(), operations, linearizabilityCheckTimeout)
+	// dur := time.Since(start)
+	// log.Printf("Linearizability check done in %s; result: %t", time.Since(start).String(), ok)
+	if !ok {
+		t.Fatal("history is not linearizable")
 	}
 
 	fmt.Printf("  ... Passed\n")

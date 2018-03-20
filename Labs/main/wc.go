@@ -14,7 +14,7 @@ import (
 // of key/value pairs.
 //
 func mapF(filename string, contents string) []mapreduce.KeyValue {
-	// TODO: you have to write this function
+	// Your code here (Part II).
 }
 
 //
@@ -23,7 +23,7 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 // any map task.
 //
 func reduceF(key string, values []string) string {
-	// TODO: you also have to write this function
+	// Your code here (Part II).
 }
 
 // Can be run in 3 ways:
@@ -42,6 +42,6 @@ func main() {
 		}
 		mr.Wait()
 	} else {
-		mapreduce.RunWorker(os.Args[2], os.Args[3], mapF, reduceF, 100)
+		mapreduce.RunWorker(os.Args[2], os.Args[3], mapF, reduceF, 100, nil)
 	}
 }

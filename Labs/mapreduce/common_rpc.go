@@ -38,15 +38,15 @@ type RegisterArgs struct {
 // reply in reply. the reply argument should be the address
 // of a reply structure.
 //
-// call() returns true if the server responded, and false
-// if call() was not able to contact the server. in particular,
-// reply's contents are valid if and only if call() returned true.
+// call() returns true if the server responded, and false if call()
+// received no reply from the server. reply's contents are valid if
+// and only if call() returned true.
 //
-// you should assume that call() will time out and return an
-// error after a while if it doesn't get a reply from the server.
+// you should assume that call() will time out and return
+// false after a while if it doesn't get a reply from the server.
 //
-// please use call() to send all RPCs, in master.go, mapreduce.go,
-// and worker.go.  please don't change this function.
+// please use call() to send all RPCs. please don't change this
+// function.
 //
 func call(srv string, rpcname string,
 	args interface{}, reply interface{}) bool {

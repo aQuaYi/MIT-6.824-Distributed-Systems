@@ -20,8 +20,8 @@ func debug(format string, a ...interface{}) (n int, err error) {
 type jobPhase string
 
 const (
-	mapPhase    jobPhase = "Map"
-	reducePhase          = "Reduce"
+	mapPhase    jobPhase = "mapPhase"
+	reducePhase          = "reducePhase"
 )
 
 // KeyValue is a type used to hold the key/value pairs passed to the map and

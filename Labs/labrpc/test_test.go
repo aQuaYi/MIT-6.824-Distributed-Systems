@@ -55,6 +55,7 @@ func TestBasic(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	e := rn.MakeEnd("end1-99")
 
@@ -89,6 +90,7 @@ func TestTypes(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	e := rn.MakeEnd("end1-99")
 
@@ -130,6 +132,7 @@ func TestDisconnect(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	e := rn.MakeEnd("end1-99")
 
@@ -168,6 +171,7 @@ func TestCounts(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	e := rn.MakeEnd("end1-99")
 
@@ -203,6 +207,7 @@ func TestConcurrentMany(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	js := &JunkServer{}
 	svc := MakeService(js)
@@ -260,6 +265,7 @@ func TestUnreliable(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 	rn.Reliable(false)
 
 	js := &JunkServer{}
@@ -312,6 +318,7 @@ func TestConcurrentOne(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	js := &JunkServer{}
 	svc := MakeService(js)
@@ -373,6 +380,7 @@ func TestRegression1(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	js := &JunkServer{}
 	svc := MakeService(js)
@@ -447,6 +455,7 @@ func TestKilled(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	e := rn.MakeEnd("end1-99")
 
@@ -491,6 +500,7 @@ func TestBenchmark(t *testing.T) {
 	runtime.GOMAXPROCS(4)
 
 	rn := MakeNetwork()
+	defer rn.Cleanup()
 
 	e := rn.MakeEnd("end1-99")
 
