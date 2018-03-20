@@ -29,6 +29,6 @@
 - For what applications *doesn't* MapReduce work well?
 - How might a real-world web company use MapReduce?
 
-## 作业
+## Lab
 
-[Lab 1: MapReduce](../../Labs/mapreduce)
+[Lab 1: MapReduce](../../Labs/mapreduce) 的 [上机说明](6.824-Lab1-MapReduce.html)
