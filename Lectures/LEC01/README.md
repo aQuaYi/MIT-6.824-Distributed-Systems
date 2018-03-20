@@ -29,6 +29,8 @@
 - For what applications *doesn't* MapReduce work well?
 - How might a real-world web company use MapReduce?
 
+[这里](LEC01-QnA.md)是我对问题的解答。
+
 ## 作业
 
 [Lab 1: MapReduce](../../Labs/mapreduce)
