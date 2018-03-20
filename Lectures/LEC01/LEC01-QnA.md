@@ -33,6 +33,12 @@ How does detailed design reduce effect of slow network?
 
 How do they get good load balance?
 
+```text
+任务数量是 worker 的数倍。
+worker 在完成任务后，会被安排新的工作。
+能者多劳，所有的 worker 都能在差不多的时间内完成工作。
+```
+
 What about fault tolerance?
 
 ```text
