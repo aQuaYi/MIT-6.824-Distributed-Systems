@@ -50,14 +50,42 @@ What about fault tolerance?
 
 Details of worker crash recovery?
 
+```text
+A 所有已经完成的 map 任务都会被重新安排到其他 worker 执行 → map 任务的结果,仅保存在 A 上，A 失效后，执行 reduce 任务的 worker 无法读取结果，所以，由 B 重新执行 map 任务，任务结果会保存在 B 上。→ master 通知所有正在执行 reduce 任务的 worker，以前放在 A 上的结果，现在在 B 上了。
+A 正在执行执行的 map 或 reduce 任务，会被重新安排到其他 worker 执行。
+A 所有已经完成的 reduce 任务 不会 被重新执行 → reduce 任务的结果保存在 GFS 上，而非 A 上。所以 不 需要重新执行。
+```
+
 Other failures/problems?
 
+```text
 What if the master gives two workers the same Map() task?
+  先完成的工作成果会被 master 记录在案
 What if the master gives two workers the same Reduce() task?
+  依靠底层文件系统提供的原子化重命名操作，保证 reduce 任务完成的结果只有一个
 What if a single worker is very slow -- a "straggler"?
+  使用 backup task 机制，所有没有被标记为“完成”的任务都会被分配出去。通过重复指派任务，可以有效避免任务堆积。
 What if a worker computes incorrect output, due to broken h/w or s/w?
+  重新计算
 What if the master crashes?
+  通知 client 处理
+```
 
 For what applications *doesn't* MapReduce work well?
 
+```text
+无法被分隔成并行处理的任务，比如挖洞。
+
+```
+
 How might a real-world web company use MapReduce?
+
+```text
+处理海量的用户信息
+1. 分布式查找
+2. URL 获取频率统计
+3. 翻转网络结构图
+4. 用户画像描绘
+5. 插入索引
+6. 分布式排序
+```
