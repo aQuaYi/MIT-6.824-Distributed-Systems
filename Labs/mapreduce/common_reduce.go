@@ -50,47 +50,57 @@ func doReduce(
 	// }
 	// file.Close()
 
-	// TODO: Your code here (Part I).
-
-	kvs := make([]KeyValue, 0, 2048)
+	// 从 m*r 个 Map 任务生成的中间文件中，读取此 Reduce 任务需要的 m 个文件
+	kvs := make([]*KeyValue, 0, 2048)
 	for m := 0; m < nMap; m++ {
+		// 读取文件
 		filename := reduceName(jobName, m, reduceTask)
 		file, err := os.Open(filename)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		// 创建流式解码器
 		dec := json.NewDecoder(file)
 		for {
 			var kv KeyValue
-
+			// dec 读取一行，并解码到 kv 中
 			err := dec.Decode(&kv)
 			if err != nil {
 				if err == io.EOF {
+					// 读取到末尾
 					break
 				}
 				log.Fatal(err)
 			}
-
-			kvs = append(kvs, kv)
+			kvs = append(kvs, &kv)
 		}
+
+		file.Close()
 	}
 
+	// kvs 按照 key 的升序排列
 	sort.Slice(kvs, func(i int, j int) bool {
 		return kvs[i].Key < kvs[j].Key
 	})
 
+	// 集合所有的 values
 	values := make([]string, len(kvs))
 	for i := range values {
 		values[i] = kvs[i].Value
 	}
 
+	// 创建输出文件
 	file, err := os.Create(outFile)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
+
+	// 创建流式编码器
 	enc := json.NewEncoder(file)
 
+	// 对每个 key 都运用 reduceF
 	for i := range kvs {
 		key := kvs[i].Key
 		err := enc.Encode(KeyValue{key, reduceF(key, values)})
@@ -98,7 +108,4 @@ func doReduce(
 			log.Fatal(err)
 		}
 	}
-
-	file.Close()
-
 }
