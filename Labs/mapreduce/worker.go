@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// track whether workers executed in parallel.
+// Parallelism track whether workers executed in parallel.
 type Parallelism struct {
 	mu  sync.Mutex
 	now int32
