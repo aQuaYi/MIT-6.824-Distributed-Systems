@@ -15,3 +15,7 @@
 
 # 排除 .idea 文件夹
 .idea
+
+*mrinput*.txt
+
+mrtmp.test*
