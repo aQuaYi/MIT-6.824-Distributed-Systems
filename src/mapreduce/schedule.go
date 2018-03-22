@@ -3,7 +3,6 @@ package mapreduce
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 //
@@ -34,15 +33,17 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 	//
 	// TODO: Your code here (Part III, Part IV).
 	//
+	// 要等待所有的任务完成后，才能结束这个函数，所以，添加 wg
 	var wg sync.WaitGroup
 	wg.Add(ntasks)
 
 	for i := 0; i < ntasks; i++ {
+		// 从 registerChan 获取服务器的地址
 		srv := <-registerChan
 
 		fmt.Printf("开始 %v 阶段的第 %d 个任务: %s\n", phase, i, srv)
-		time.Sleep(time.Second)
 
+		// 为将要执行的任务准备相关参数
 		args := DoTaskArgs{
 			JobName:       jobName,
 			Phase:         phase,
@@ -50,16 +51,21 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 			NumOtherPhase: nOther,
 		}
 		if phase == mapPhase {
+			// 只有 mapPhase 才需要设置 .File 属性
 			args.File = mapFiles[i]
 		}
 
 		go func() {
+			// 把任务发送给 srv
 			call(srv, "Worker.DoTask", args, nil)
+			// 任务结束
 			wg.Done()
+			// 任务结束后，srv 闲置，srv 进入 registerChan 等待下一次分配任务
 			registerChan <- srv
 		}()
 	}
 
 	wg.Wait()
+
 	fmt.Printf("Schedule: %v done\n", phase)
 }
