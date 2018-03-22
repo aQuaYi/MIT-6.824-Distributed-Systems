@@ -51,9 +51,14 @@ func doReduce(
 	// file.Close()
 
 	// 从 m*r 个 Map 任务生成的中间文件中，读取此 Reduce 任务需要的 m 个文件
+
+	// Reduce 任务需要读取 Map 任务生成的 intermediate file 作为输入
+	// kvs 是存在这些输入的容器
 	kvs := make([]*KeyValue, 0, 2048)
+	// 每个 Map 任务，都为此 Reduce 任务生成了一个 intermediate file
+	// 所以，此 Reduce 任务总共需要读取 nMap 个文件
 	for m := 0; m < nMap; m++ {
-		// 读取文件
+		// 打开需要读取的文件
 		filename := reduceName(jobName, m, reduceTask)
 		file, err := os.Open(filename)
 		if err != nil {
@@ -73,6 +78,7 @@ func doReduce(
 				}
 				log.Fatal(err)
 			}
+			// 把新获取的值保存到 kvs 中
 			kvs = append(kvs, &kv)
 		}
 
@@ -97,7 +103,7 @@ func doReduce(
 	}
 	defer file.Close()
 
-	// 创建流式编码器
+	// 创建流式编码器，每次被编码的内容，都会输出到 file 的一个新行
 	enc := json.NewEncoder(file)
 
 	// 对每个 key 都运用 reduceF

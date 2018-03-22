@@ -31,4 +31,4 @@
 
 ## Lab
 
-[Lab 1: MapReduce](../../Labs/mapreduce) 的 [上机说明](6.824-Lab1-MapReduce.html)
+[Lab 1: MapReduce](../../src/mapreduce) 的 [上机说明](6.824-Lab1-MapReduce.html)
