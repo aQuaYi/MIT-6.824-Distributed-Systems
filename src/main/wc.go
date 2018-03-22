@@ -23,6 +23,7 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 	}
 	words := strings.FieldsFunc(contents, f)
 
+	// 统计 filename 中每个单词的次数
 	counter := make(map[string]int, 1024)
 	for i := range words {
 		counter[words[i]]++
@@ -31,7 +32,9 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 	res := make([]mapreduce.KeyValue, 0, len(counter))
 	for w, c := range counter {
 		res = append(res, mapreduce.KeyValue{
-			Key:   w,
+			Key: w,
+			// 把 w 和 c 绑定在一起
+			// reduce 任务才知道 value 是对应的哪个 w 的值
 			Value: fmt.Sprintf("%s:%d", w, c),
 		})
 	}
