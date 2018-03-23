@@ -35,6 +35,7 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 	var wg sync.WaitGroup
 	wg.Add(ntasks)
 
+	// 所有的任务都通过 taskChan 发送
 	taskChan := make(chan int, 3)
 	go func() {
 		for i := 0; i < ntasks; i++ {
@@ -48,8 +49,6 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 			// 从 registerChan 获取服务器的地址
 			srv := <-registerChan
 			i := <-taskChan
-
-			fmt.Printf("开始 %v 阶段的第 %d 个任务: %s\n", phase, i, srv)
 
 			// 为将要执行的任务准备相关参数
 			args := DoTaskArgs{
@@ -66,11 +65,12 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 			go func() {
 				// 把任务发送给 srv
 				if call(srv, "Worker.DoTask", args, nil) {
-					// 任务结束
+					// 任务成功的话，标记任务结束
 					wg.Done()
 					// 任务结束后，srv 闲置，srv 进入 registerChan 等待下一次分配任务
 					registerChan <- srv
 				} else {
+					// 任务失败了，把未完成的任务号，重新放入 taskChan 中，等待下一次分配
 					taskChan <- args.TaskNumber
 				}
 			}()
