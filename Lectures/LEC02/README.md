@@ -2,13 +2,10 @@
 
 ## 预习
 
-完成[Go 语言之旅](https://tour.golang.org/),[中文版](https://tour.go-zh.org/)
-
-阅读[常见问题清单](tour-faq.txt.md)
-
-了解 [Paper Question](6.824 Spring 2018 Paper Questions.html) 规则
-
-了解 [Go rpc 标准库](https://golang.org/pkg/net/rpc/)
+- 完成[Go 语言之旅](https://tour.golang.org/),[中文版](https://tour.go-zh.org/)
+- 阅读[常见问题清单](tour-faq.txt.md)
+- 了解 [Paper Question](6.824 Spring 2018 Paper Questions.html) 规则
+- 了解 [Go rpc 标准库](https://golang.org/pkg/net/rpc/)，[中文版](https://go-zh.org/pkg/net/rpc/)
 
 ## 课堂讲义
 

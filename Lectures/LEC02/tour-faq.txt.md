@@ -1,3 +1,5 @@
+# 常见问题
+
 Q: Why does 6.824 use Go for the labs?
 
 A: Until a few years ago 6.824 used C++, which worked well. Go works a
@@ -13,7 +15,7 @@ features that would probably work fine for 6.824 labs, such as Java.
 Q: How do Go channels work? How does Go make sure they are
 synchronized between the many possible goroutines?
 
-A: You can see the source at https://golang.org/src/runtime/chan.go,
+A: You can see the source at <https://golang.org/src/runtime/chan.go>,
 though it is not easy to follow.
 
 At a high level, a chan is a struct holding a buffer and a lock.
@@ -46,15 +48,13 @@ Use select with a default case to check for channel input without
 blocking. If you want to block for a short time, use select and
 time.After(). Here are examples:
 
-https://tour.golang.org/concurrency/6
-https://gobyexample.com/timeouts
+- <https://tour.golang.org/concurrency/6>
+- <https://gobyexample.com/timeouts>
 
 Q: Is Go used in industry?
 
 A: You can see an estimate of how much different programming languages
-are used here:
-
-https://www.tiobe.com/tiobe-index/
+are used here: <https://www.tiobe.com/tiobe-index/>
 
 Q: When should we use sync.WaitGroup instead of channels? and vice versa?
 
@@ -66,9 +66,7 @@ takes a few more lines of code than with WaitGroup.
 
 Q: What are some important/useful Go-specific concurrency patterns to know?
 
-A: Here's a slide deck on this topic, from a Go expert:
-
-https://talks.golang.org/2012/concurrency.slide
+A: Here's a slide deck on this topic, from a Go expert: <https://talks.golang.org/2012/concurrency.slide>
 
 Q: How are slices implemented?
 
@@ -77,16 +75,13 @@ end index into that array. This arrangement allows multiple slices to
 share an underlying array, with each slice perhaps exposing a different
 range of array elements.
 
-Here's a more extended discussion:
-
-  https://blog.golang.org/go-slices-usage-and-internals
+Here's a more extended discussion: <https://blog.golang.org/go-slices-usage-and-internals>
 
 I use slices a lot, but I rarely use them to share an array. I hardly
 ever directly use arrays. I basically use slices as if they were arrays.
 A Go slice is more flexible than a Go array since an array's size is
 part of its type, whereas a function that takes a slice as argument can
 take a slice of any length.
-
 
 Q: How do we know when the overhead of spawning goroutines exceeds
 the concurrency we gain from them?
@@ -99,7 +94,7 @@ about 10 goroutines concurrently fetching in order to use all of the
 network capacity. Experimentally, as you increase the number of
 goroutines, for a while you'll see increased throughput, and then you'll
 stop getting more throughput; at that point you have enough goroutines
-from the performance point of view. 
+from the performance point of view.
 
 Q: How would one create a Go channel that connects over the Internet?
 How would one specify the protocol to use to send messages?
@@ -110,7 +105,7 @@ used to talk to other programs or other computers.
 Have a look at Go's RPC package, which lets you talk to other Go
 programs over the Internet:
 
-  https://golang.org/pkg/net/rpc/
+  <https://golang.org/pkg/net/rpc/>
 
 Q: For what types of applications would you recommend using Go?
 
@@ -138,7 +133,7 @@ Q: fmt.Printf()
 As far as I know there's not a great debugger for Go, though gdb can be
 made to work:
 
-https://golang.org/doc/gdb
+<https://golang.org/doc/gdb>
 
 In any case, I find fmt.Printf() much more generally useful than any
 debugger I've ever used, regardless of language.
