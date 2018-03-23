@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0065)https://pdos.csail.mit.edu/6.824/questions.html?q=q-gointro&lec=2 -->
+<html class="_ok_app_hidden" style="width: 100%; margin-left: 0px;"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>
+6.824 Spring 2018 Paper Questions
+</title>
+
+<!-- To add a new question, just put in within a <div> tag, give it
+some identifier (i.e., 'ID="q-XX"'), and then add it to the questions
+array variable below.  To link directly to the question, just use a
+link to 'questions.html?q=q-XX'.
+ -->
+
+<script src="./6.824 Spring 2018 Paper Questions_files/common.js"></script>
+
+<style>
+div.questionbox {
+    margin: 1pc 4% 0pc 4%;
+    padding: 0.5pc 0.5pc 0.5pc 0.5pc;
+    background-color: #e0e0ff;
+    border: 1px dashed red;
+}
+</style>
+
+<meta http-equiv="Content-Security-Policy" content="style-src * &#39;unsafe-inline&#39; &#39;self&#39; blob: data: file:"><style>@media print {#ghostery-purple-box {display:none !important}}</style><style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head><div id="ok_frame_wrapper"><iframe id="ok_frame" src="./6.824 Spring 2018 Paper Questions_files/extension.html" class="MC42NzQ3OTYwODg3NTI5OTM0T0sxNTIxNzczNTc1Nzcx MC44NTQ2NzU2NjQ5MTIxNTMyT0sgQ29tcG9uZW50cyAxNTIxNzczNTc1Nzcw" style="display:none"></iframe><fp-div id="okmemo_overlay" class="MC44NTQ2NzU2NjQ5MTIxNTMyT0sgQ29tcG9uZW50cyAxNTIxNzczNTc1Nzcw"><fp-div class="okmemo-nav"></fp-div><fp-div class="okmemo-current okmemo-tag" style="height:891px;"><fp-div class="okmemo-current-mark"><fp-div class="okmemo-con" id="okmemo_current_tag"><fp-span class="public-collection">&#20840;&#37096;</fp-span><fp-span class="collect-success">&#27491;&#22312;&#20445;&#23384;</fp-span></fp-div><fp-div class="okmemo-description">&#25302;&#25341;&#33267;&#27492;&#22788;&#20197;&#23436;&#25104;&#25910;&#38598;</fp-div></fp-div><fp-div class="okmemo-tmp-note"><fp-div class="okmemo-note-title"><fp-h2><fp-span id="okmemo_note_title"></fp-span></fp-h2></fp-div><fp-div class="okmemo-note-content"><fp-div class="okmemo-padding-con" id="okmemo_note_content"></fp-div></fp-div></fp-div></fp-div><fp-div class="okmemo-bottom-btn"><fp-div class="okmemo-bottom-area okmemo-no-tag okmemo-tag"><fp-div class="okmemo-con">&#24453;&#20998;&#31867;</fp-div></fp-div></fp-div><fp-div class="okmemo-others-wrapper" id="okmemo_others_wrapper"><fp-div class="okmemo-other okmemo-private okmemo-tag"><fp-div class="okmemo-con">&#31169;&#23494;</fp-div></fp-div></fp-div></fp-div><a id="okmemo_switcher" href="https://pdos.csail.mit.edu/6.824/questions.html?q=q-gointro&amp;lec=2#" class="MC44NTQ2NzU2NjQ5MTIxNTMyT0sgQ29tcG9uZW50cyAxNTIxNzczNTc1Nzcw fp-tooltips" data-tooltip="&#23637;&#24320;&#26041;&#29255;(Alt + 1)" data-placement="right" style="background-image:url(chrome-extension://bicdefpoleoohkhgcbbhambpghigfeid/images/switcher_c.png) !important;"></a></div>
+
+<body bgcolor="#ffffff" text="#00000" onload="page_onload()">
+
+<div align="center">
+<h2>
+<a href="https://pdos.csail.mit.edu/6.824/index.html">6.824</a> Spring 2018 Paper Questions
+</h2>
+</div>
+
+<a name="top"></a>
+<p>
+For each paper, your assignment is two-fold.  By midnight the night
+before lecture:
+
+</p><ul>
+<li>Submit your answer for each lecture's paper question via the
+    <a href="https://6824.scripts.mit.edu/2018/handin.py/">submission
+    web site</a>, and
+</li><li>Submit your own question about the paper (e.g., what you find most
+    confusing about the paper or the paper's general context/problem).
+    You cannot use the question below.  To the extent possible, during
+    lecture we will try to answer questions submitted the evening before.
+</li></ul>
+
+<p></p>
+
+<p>
+You can also upload your questions and answers using curl:
+</p><pre>## Answer goes into lecN.txt
+$ curl -F file=@lec2.txt \
+       -F key=XXXXXXXX \
+       https://6824.scripts.mit.edu/2018/handin.py/upload
+## Question goes into sqN.txt
+$ curl -F file=@sq2.txt \
+       -F key=XXXXXXXX \
+       https://6824.scripts.mit.edu/2018/handin.py/upload
+</pre>
+<p>
+
+</p><div id="questions">
+
+<div class="questionbox" id="q-gointro"><p><b>Lecture 2</b></p>
+  <p>
+   The assigned reading for today is not a paper, but
+   the <a href="http://tour.golang.org/">Online Go tutorial</a>.  The assigned
+   "question" is the
+   <a href="https://tour.golang.org/concurrency/10">Crawler exercise</a> in the
+   tutorial.  Also, take a look at
+   Go's <a href="https://golang.org/pkg/net/rpc/">RPC package</a>, which you
+   will use in lab 1.
+</p></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- OLD, ARCHIVED QUESTIONS FOLLOW -->
+
+<!--<div class="questionbox" ID="q-ficus">
+<p><a href="papers/ficus.pdf">Ficus</a>
+
+Imagine a situation like the paper's Figure 1, but in which only Site
+A updates file Foo. What should Ficus do in that case when the
+partition is merged? Explain how Ficus could tell the difference
+between the situation in which both Site A and Site B update Foo,
+and the situation in which only Site A updates Foo.
+</div>
+
+<div class="questionbox" ID="q-spanner">
+<p><a href="papers/spanner.pdf">Spanner</a>
+Suppose a Spanner server's TT.now() returns correct
+information, but the uncertainty is large. For example,
+suppose the absolute time is 10:15:30, and TT.now()
+returns the interval [10:15:20,10:15:40]. That interval
+is correct in that it contains the absolute time, but the
+error bound is 10 seconds.
+See Section 3 for an explanation TT.now().
+What bad effect will a large error bound have on Spanner's operation?
+Give a specific example.
+</div>
+
+<div class="questionbox" ID="q-sundr">
+<p>
+<a href="papers/li-sundr.pdf">Secure Untrusted Data Repository (SUNDR)</a>
+In the simple straw-man, both fetch and modify operations are placed
+in the log and signed. Suppose an alternate design that only signs and
+logs modify operations. Does this allow a malicious server to break
+fetch-modify consistency or fork consistency? Why or why not?
+</div>
+
+<div class="questionbox" ID="q-ivy">
+<p>
+<a href="papers/li-dsm.pdf">Memory Coherence in Shared Virtual
+Systems</a>. Answer this question using
+<a href="notes/ivy-code.txt">ivy-code.txt</a>, which is a version of
+the code in Section 3.1 with some clarifications and bug fixes. You
+can see that the manager part of the WriteServer sends out invalidate
+messages, and waits for confirmation messages indicating that the
+invalidates have been received and processed. Suppose the manager sent
+out invalidates, but did not wait for confirmations. Describe a
+scenario in which lack of the confirmation would cause the system to
+behave incorrectly. You should assume that the network delivers all
+messages, and that none of the computers fail.
+</div>
+
+<div class="questionbox" ID="q-treadmarks">
+<p>
+<a href="papers/keleher-treadmarks.pdf">Distributed Shared Memory on
+  Standard Workstations and Operating Systems</a>
+Suppose that a simplified version of Treadmarks, called Dreadmarks,
+simply sent all modifications of variables between an acquire and a
+release to the next processor to acquire the same lock. No other
+modifications are sent. What changes does Treadmarks send that
+Dreadmarks does not?  Outline a specific simple situation in which
+Treadmarks would provide more useful or intuitive memory behavior than
+Dreadmarks.
+</div>
+
+<div class="questionbox" ID="q-munin">
+<p>
+<a href="papers/munin.pdf">Implementation and Performance of Munin</a> The SOR
+application (see Section 4.2) with the producer-consumer pattern performs
+substantial better than with the write-shared pattern (see Table 6 on page
+161). Why is the producer-consumer pattern a better fit for SOR than write-shared?
+</div>
+
+<div class="questionbox" ID="q-harp">
+<p>
+<a href="papers/bliskov-harp.pdf">Replication in the Harp File System</a>
+Figures 5-1, 5-2, and 5-3 show that Harp often finishes benchmarks
+faster than a conventional non-replicated NFS server. This may be
+surprising, since you might expect Harp to do strictly more work than a
+conventional NFS server (for example, Harp must manage the replication).
+Why is Harp often faster? Will all NFS operations be faster with Harp
+than on a conventional NFS server, or just some of them? Which?
+</div>
+
+<div class="questionbox" ID="q-fds">
+<p>
+<a href="papers/fds.pdf">Flat Datacenter Storage</a> Suppose
+tractserver T1 is temporarily unreachable due to a network problem, so
+the metadata server drops T1 from the TLT.
+Then the network problem goes away, but for a while the metadata
+server is not aware that T1's status has changed. During this time
+could T1 serve client
+requests to read and write tracts that it stores? If yes, give an
+example of how this could happen. If no, explain what mechanism(s)
+prevent this from happening.
+</div>
+
+<div class="questionbox" ID="q-paxos">
+<p>
+<a href="papers/paxos-simple.pdf">Paxos Made Simple</a>
+Suppose that the acceptors are <i>A</i>, <i>B</i>,
+and <i>C</i>. <i>A</i> and <i>B</i> are also
+proposers.
+How does Paxos
+ensure that the following sequence of events <u>can't</u> happen?
+What actually happens, and which value is ultimately chosen?
+
+<ol>
+<li> <i>A</i> sends prepare requests with proposal number 1, and gets responses
+  from <i>A</i>, <i>B</i>, and <i>C</i>.
+<li> <i>A</i> sends <tt><nobr>accept(1, "foo")</nobr></tt>
+  to <i>A</i> and <i>C</i> and gets responses from both.
+  Because a majority accepted, <i>A</i> thinks
+  that <tt>"foo"</tt> has been chosen.
+  However, <i>A</i> crashes before sending an <tt>accept</tt> to <i>B</i>.
+<li><i>B</i> sends prepare messages with proposal number 2, and gets responses
+  from <i>B</i> and <i>C</i>.
+<li><i>B</i> sends <tt><nobr>accept(2, "bar")</nobr></tt> messages
+  to <i>B</i> and <i>C</i> and gets responses
+  from both, so <i>B</i> thinks that <tt>"bar"</tt> has been chosen.
+</ol>
+</div>
+
+<div class="questionbox" ID="q-hypervisor">
+<p>
+<a href="papers/bressoud-hypervisor.pdf">Hypervisor-based
+  Fault-tolerance</a>
+Suppose that instead of connecting both the primary and backup to the
+same disk, we connected them to separate disks with identical copies
+of the data? Would this work? What else might we have to worry about,
+and what are some things that could go wrong?
+</div>
+
+<div class="questionbox" ID="q-pnuts">
+<p>
+<a href="papers/cooper-pnuts.pdf">PNUTS: Yahoo!'s Hosted Data Serving Platform</a>
+Briefly explain why it is (or isn't) okay to use relaxed consistency
+for social applications (see Section 4). Does PNUTS handle the type of
+problem presented by Example 1 in Section 1, and if so, how?
+</div>
+
+<div class="questionbox" ID="q-wormhole">
+<p><a href="papers/wormhole.pdf">Wormhole</a> stores the datamarker for
+a multi-copy reliable delivery (MCRD) flow in Zookeeper, instead of in persistent
+storage on the publisher side (as Single-Copy Reliable Delivery does).  Why does
+MCRD store the datamarker in Zookeeper?
+</div>
+
+<div class="questionbox" ID="q-fb-consistency">
+<p><a href="papers/fb-consistency.pdf">Existential Consistency</a>.
+Section 2.2 mentions that
+<a href="https://en.wikipedia.org/wiki/Causal_consistency">causal consistency</a>
+is a non-local
+consistency model, and thus can't be checked by the analysis
+in Section 3. Give a pair of examples, one legal under causal
+consistency and one illegal, that the Section 3 checker would
+not be able to distinguish. That is, show by example that the
+Section 3 approach can't check causal consistency.
+</div>
+
+<div class="questionbox" ID="q-borg">
+  <p>
+Borg's key benefit for Google is that it efficiently utilizes cluster
+resources. As part of this, it is important to avoid resources being
+wasted by sitting idle. List and describe at least <i>three</i> techniques
+that Borg uses to ensure good machine and cluster utilization. What
+potential negative consequences, if any, does each technique have for
+(a) non-production/low-priority, and (b) production/high-priority workloads?
+</p>
+</div>
+
+<div class="questionbox" ID="q-kademlia">
+<p>
+<a href="papers/kademlia.pdf">Kademlia: A Peer-to-peer Information System
+Based on the XOR Metric</a>
+Consider a Kademlia-based key-value store with a million users, with non-mutable keys: once a
+key is published, it will not be modified. The k/v store experiences a network partition into
+two roughly equal partitions A and B for 1.5 hours.
+
+<p>X is a very popular key. Would nodes in both A and B likely be able to
+access X's value (1) during the partition? (2) 10 minutes after the network is joined?
+(3) 25 hours after the network is joined?
+
+<p>(optional) Would your answer change if X was an un-popular key?
+</div>
+
+<div class="questionbox" ID="xqargus">
+<p>
+<a href="papers/liskov-argus.pdf">Guardians and Actions: Linguistic Support for Robust, Distributed Programs</a>
+In Figure 4, <tt>read_mail</tt> deletes email from the mailbox.  If
+new mail arrives just before the delete, will the email be deleted but
+not returned?  Please briefly explain your answer.
+</div>
+
+<div class="questionbox" ID="q-argus88">
+<p>
+<a href="papers/argus88.pdf">Distributed Programming in Argus</a>.
+Starting at the bottom-left of page 310, the paper mentions that
+a participant writes new versions to disk <b>twice</b>:
+once before replying to a prepare message, and once after receiving
+a commit message.
+Why are both writes necessary?
+What could go wrong if participants replied to the prepare
+without writing the disk, instead only writing the disk
+after receiving a commit message?
+</div>
+
+<div class="questionbox" ID="q-rstar">
+<p>
+<a href="papers/rstar.pdf">Transaction Management in the R* Distributed Database Management System</a>.
+The first two paragraphs of Section 2.1 say that
+a subordinate force-writes its disk <b>twice</b>:
+once before replying to a PREPARE message, and once after receiving
+a COMMIT message.
+Why are both writes necessary?
+What could go wrong if a subordinate replied to the PREPARE
+without writing its disk, and only wrote its disk
+after receiving a COMMIT message?
+</div>
+
+<div class="questionbox" ID="q-thor95">
+<p>
+<a href="papers/thor95.pdf">Efficient Optimisitic Concurrency Control
+Using Loosely Synchronized Clocks</a>. The paper mentions
+that, after a
+server commits a transaction, the server sends out invalidation
+messages to clients that are caching data written by that transaction. It
+may take a while for those invalidations to arrive; during that time,
+transactions at other clients may read stale cached data. How does Thor cope
+with this situation?
+</div>
+
+<div class="questionbox" ID="q-plan9">
+<p>
+<a href="papers/plan9.pdf">Plan 9 from Bell Labs</a>
+List three features introduced by Plan 9 that have not been adopted
+by today's common operating systems.  For each, why do you think
+the idea hasn't become popular?
+</div>
+
+<div class="questionbox" ID="q-mapreduce">
+<p>
+<a href="papers/mapreduce.pdf">MapReduce</a>
+How soon after it receives the first file of intermediate data can a
+reduce worker start calling the application's Reduce function?
+Explain your answer.
+</div>
+
+<div class="questionbox" ID="q-remus">
+<p>
+The Remus paper's Figure 6 suggests that less frequent checkpoints can lead
+to better performance. Of course, checkpointing only every X
+milliseconds means that up to X milliseconds of work are lost if the
+primary crashes. Suppose it was OK to lose an entire second of work if
+the primary crashed. Explain why checkpointing every second would lead
+to terrible performance if the application running on Remus were a Web
+server.
+</div>
+
+<div class="questionbox" ID="q-epaxos">
+<p>
+When will an EPaxos replica <b>R</b> <em>execute</em> a particular
+command <b>C</b>?  Think about when commands are committed, command
+interference, read operations, etc.
+</div>
+
+<div class="questionbox" ID="q-bft">
+<p>
+Suppose that we eliminated the pre-prepare phase from the Practical
+BFT protocol. Instead, the primary multicasts a PREPARE,v,n,m message
+to the replicas, and the replicas multicast COMMIT messages and reply
+to the client as before. What could go wrong with this protocol? Give
+a short example, e.g., ``The primary sends foo, replicas 1 and 2 reply
+with bar...''
+</div>
+
+
+<div class="questionbox" ID="q-txchains">
+<p>
+Give an example scenario where an application would behave incorrectly
+if it waited for just the first hop in a chain to commit, but would
+behave correctly by waiting for the entire chain to commit.
+</div>
+
+<div class="questionbox" ID="q-realworld">
+<p>
+Building distributed systems in the real world have both technical
+challenges (e.g., dealing with bad data) and non-technical ones (e.g.,
+how to structure a team). Which do you think is harder to get right? What
+examples can you cite from your personal experience?
+</div>
+
+<div class="questionbox" ID="q-analogic">
+<p>
+<a href="papers/katabi-analogicfs.pdf">Experiences with a Distributed,
+ Scalable, Methodological File System: AnalogicFS</a>. In many ways,
+ this experiences paper raises more questions than it answers. Please
+ answer one of the following questions, taking into consideration the
+ rich history of AnalogicFS and the spirit in which the paper was
+ written:
+
+<p>
+a) The analysis of A* search shown in Figure 1 claims to be an
+introspective visualization of the AnalogicFS methodology; however,
+not all decisions are depicted in the figure. In particular, if I
+<= P, what should be the next node explored such that all assumptions
+in Section 2 still hold? Show your work.
+
+<p>
+b) Despite the authors' claims in the introduction that AnalogicFS was
+developed to study SCSI disks (and their interaction with lambda
+calculus), the experimental setup detailed in Section 4.1 involves
+decommissioned Gameboys instead, which use cartridge-based, Flash-like
+memory. If the authors had used actual SCSI disks during the
+experiments, how exactly might have their results changed
+quantitatively?
+
+<p>
+c) AnalogicFS shows rather unstable multicast algorithm popularity
+(Figure 5), especially compared with some of the previous systems
+we've read about in 6.824. Give an example of another system that
+would have a more steady measurement of popularity pages, especially
+in the range of 0.1-0.4 decibels of bandwidth.
+
+<p>
+d) For his 6.824 project, Ben Bitdiddle chose to build a
+variant of Lab 4
+that faithfully emulates the constant expected seek time across
+LISP machines, as AnalogicFS does. Upon implementation, however, he
+immediately ran into the need to cap the value size to 400 nm, rather
+than 676 nm. Explain what assumptions made for the AnalogicFS
+implementation do not hold true for Lab 4, and why that changes the
+maximum value size.
+
+</div>
+
+</div>-->
+
+<hr>
+<p>Questions or comments regarding 6.824? Send e-mail to <a href="mailto:6824-staff@lists.csail.mit.edu"><i>6824-staff@lists.csail.mit.edu</i></a>.</p>
+
+<p><b><a href="https://pdos.csail.mit.edu/6.824/questions.html?q=q-gointro&amp;lec=2#top">Top</a></b> //
+<b><a href="https://pdos.csail.mit.edu/6.824/index.html">6.824 home</a></b> //</p>
+
+
+</div><span id="sbmarwbthv5"></span></body></html>
