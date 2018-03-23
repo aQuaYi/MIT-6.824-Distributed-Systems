@@ -35,33 +35,47 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 	var wg sync.WaitGroup
 	wg.Add(ntasks)
 
-	for i := 0; i < ntasks; i++ {
-		// 从 registerChan 获取服务器的地址
-		srv := <-registerChan
-
-		fmt.Printf("开始 %v 阶段的第 %d 个任务: %s\n", phase, i, srv)
-
-		// 为将要执行的任务准备相关参数
-		args := DoTaskArgs{
-			JobName:       jobName,
-			Phase:         phase,
-			TaskNumber:    i,
-			NumOtherPhase: nOther,
+	taskChan := make(chan int, 3)
+	go func() {
+		for i := 0; i < ntasks; i++ {
+			taskChan <- i
 		}
-		if phase == mapPhase {
-			// 只有 mapPhase 才需要设置 .File 属性
-			args.File = mapFiles[i]
-		}
+	}()
 
-		go func() {
-			// 把任务发送给 srv
-			call(srv, "Worker.DoTask", args, nil)
-			// 任务结束
-			wg.Done()
-			// 任务结束后，srv 闲置，srv 进入 registerChan 等待下一次分配任务
-			registerChan <- srv
-		}()
-	}
+	go func() {
+
+		for {
+			// 从 registerChan 获取服务器的地址
+			srv := <-registerChan
+			i := <-taskChan
+
+			fmt.Printf("开始 %v 阶段的第 %d 个任务: %s\n", phase, i, srv)
+
+			// 为将要执行的任务准备相关参数
+			args := DoTaskArgs{
+				JobName:       jobName,
+				Phase:         phase,
+				TaskNumber:    i,
+				NumOtherPhase: nOther,
+			}
+			if phase == mapPhase {
+				// 只有 mapPhase 才需要设置 .File 属性
+				args.File = mapFiles[i]
+			}
+
+			go func() {
+				// 把任务发送给 srv
+				if call(srv, "Worker.DoTask", args, nil) {
+					// 任务结束
+					wg.Done()
+					// 任务结束后，srv 闲置，srv 进入 registerChan 等待下一次分配任务
+					registerChan <- srv
+				} else {
+					taskChan <- args.TaskNumber
+				}
+			}()
+		}
+	}()
 
 	wg.Wait()
 
