@@ -30,9 +30,7 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 
 	// All ntasks tasks have to be scheduled on workers. Once all tasks
 	// have completed successfully, schedule() should return.
-	//
-	// TODO: Your code here (Part III, Part IV).
-	//
+
 	// 要等待所有的任务完成后，才能结束这个函数，所以，添加 wg
 	var wg sync.WaitGroup
 	wg.Add(ntasks)
