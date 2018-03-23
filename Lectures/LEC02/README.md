@@ -22,3 +22,7 @@
 - RPC problem: what to do about failures?
 - What does a failure look like to the client RPC library?
 - What if an at-most-once server crashes and re-starts?
+
+## 课后作业
+
+我为 [crawler](crawler/crawler.go) 和 [kv](kv/kv.go) 添加了注释，[这个压缩包](LEC02-source-code.zip) 中保存了原始的代码。

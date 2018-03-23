@@ -15,7 +15,7 @@ Most commonly-asked question: Why Go?
     threads + GC is particularly attractive!
   We like programming in Go
     relatively simple and traditional
-  After the tutorial, use https://golang.org/doc/effective_go.html
+  After the tutorial, use <https://golang.org/doc/effective_go.html>
   Russ Cox will give a guest lecture March 8th
 ```
 
@@ -62,7 +62,7 @@ How many threads in a program?
 Threading challenges:
 
 ```text
-  sharing data 
+  sharing data
     one thread reads data that another thread is changing?
     e.g. two threads do count = count + 1
     this is a "race" -- and is usually a bug
@@ -95,7 +95,7 @@ Crawler challenges
   Fetch each URL only *once*
     avoid wasting network bandwidth
     be nice to remote servers
-    => Need to remember which URLs visited 
+    => Need to remember which URLs visited
   Know when finished
 ```
 
@@ -173,7 +173,7 @@ When to use sharing and locks, versus channels?
     waiting for events -- channels
   Use Go's race detector:
     https://golang.org/doc/articles/race_detector.html
-    go test -race 
+    go test -race
 ```
 
 Remote Procedure Call (RPC)
@@ -213,7 +213,7 @@ Software structure
      net  ------------ net
 ```
 
-Go example: 
+Go example:
 
 ```text
 kv.go link on schedule page
@@ -243,7 +243,7 @@ kv.go link on schedule page
       Must lock, since RPC library creates per-request goroutines
       read args; modify reply
 ```
- 
+
 A few details:
 
 ```text
