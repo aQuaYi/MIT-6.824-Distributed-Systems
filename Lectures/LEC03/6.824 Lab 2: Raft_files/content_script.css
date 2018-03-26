@@ -1,0 +1,177 @@
+/* :root {
+     --prompt-height: 100px; 
+     --prompt-width: 200px; 
+} */
+
+#GDIndicator {
+    position: absolute;
+    z-index: 1234;
+    border: 4px dashed rgba(30, 180, 180, 0.85);
+    box-sizing: initial;
+    pointer-events: none;
+}
+
+#GDPrompt {
+    position: fixed;
+    color: black;
+    z-index: 1233;
+    box-sizing: initial;
+    border: initial;
+    border-radius: 4px;
+    background-color: rgba(30, 180, 180, 0.85);
+    line-height: initial;
+    font-weight: initial;
+    text-align: center !important;
+    left: 40%;
+    top: 40%;
+    /* height: var(--prompt-height); */
+    width: 200px;
+    padding-bottom: 10px;
+}
+
+#GDPrompt>* {
+    text-align: inherit;
+}
+
+#GDPrompt>div {
+    white-space: pre-line;
+}
+
+#GDArrow {
+    display: block;
+    font-style: normal !important;
+    font-size: 30px !important;
+    height: 60px;
+}
+
+.GDArrow-UP-R::after {
+    display: block;
+    content: "\2191";
+    transform: rotate(45deg);
+    /*
+                           ^
+                          /
+    */
+}
+
+.GDArrow-U::after {
+    display: block;
+    content: "\2191";
+    /*
+                          ^
+                          |
+    */
+}
+
+.GDArrow-UP-L::after {
+    display: block;
+    content: "\2191";
+    transform: rotate(-45deg);
+    /*
+                         ^
+                          \
+    */
+}
+
+.GDArrow-L::after {
+    display: block;
+    content: "\2190";
+    /*
+                         <--
+                          
+    */
+}
+
+.GDArrow-R::after {
+    display: block;
+    content: "\2192";
+    /*
+                        -->
+
+    */
+}
+
+.GDArrow-LOW-L::after {
+    display: block;
+    content: "\2193";
+    transform: rotate(45deg);
+    /*
+                         /
+                        v
+    */
+}
+
+.GDArrow-D::after {
+    display: block;
+    content: "\2193";
+    /*
+                        |
+                        v
+    */
+}
+
+.GDArrow-LOW-R::after {
+    display: block;
+    content: "\2193";
+    transform: rotate(-45deg);
+    /*
+                       \
+                        v
+    */
+}
+
+#GDPanel-wrapper {
+    position: absolute;
+    height: auto;
+    z-index: 9999;
+    /* background-color: rgba(135, 143, 235, 0.34); */
+    /* padding: 6px; */
+}
+
+#GDPanel {
+    background: rgba(233, 233, 233, 0.7);
+    width: 250px;
+    table-layout: fixed;
+}
+
+
+.GDPanel-content-wrapper {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.GDCell {
+    height: 70px;
+    background-color: white;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.GDCell div {
+    /* height: 100%; */
+    text-align: -moz-center !important;
+    text-align: -webkit-center !important;
+}
+
+
+/* .GDCell div::before {
+    height: 48px;
+    width: 48px;
+    display: block;
+    margin-bottom: 8px;
+    content: "";
+} */
+
+
+/* 
+.GDCell-open {} */
+
+
+/* .GDCell-open::before {
+    background-image: url("icon/open_in_browser_48px.png");
+} */
+
+#GDRow-other .GDCell {
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
