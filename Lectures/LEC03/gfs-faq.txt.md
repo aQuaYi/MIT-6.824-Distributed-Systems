@@ -1,12 +1,15 @@
-GFS FAQ
+# GFS FAQ
+
 Q: Why is atomic record append at-least-once, rather than exactly
 once?
 
-It is difficult to make the append exactly once, because a primary
+```text
+A: It is difficult to make the append exactly once, because a primary
 would then need to keep state to perform duplicate detection. That
 state must be replicated across servers so that if the primary fails,
 this information isn't lost. You will implement exactly once in lab
 3, but with more complicated protocols that GFS uses.
+```
 
 Q: How does an application know what sections of a chunk consist of
 padding and duplicate records?
