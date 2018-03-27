@@ -106,7 +106,7 @@ High-level design / Reads
     Q: why are the chunks so big?
        amortizes overheads, reduces state size in the master
   GFS master server knows directory hierarchy
-    for directory, wht files are in it
+    for directory, what files are in it
     for file, knows chunk servers for each 64 MB
     master keeps state in memory
       64 bytes of metadata per each chunk
@@ -206,7 +206,7 @@ Does GFS achieve "ideal" consistency?
     But: master not always available & scalability limit
   Files: not always
     Mutations with atomic appends
-	  record can be duplicated at two offsets
+    record can be duplicated at two offsets
     while other replicas may have a hole at one offset
     Mutations without atomic append
       data of several clients maybe intermingled
