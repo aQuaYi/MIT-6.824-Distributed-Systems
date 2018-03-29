@@ -88,7 +88,9 @@ GFS goals:
   These challenges difficult combine with "ideal" consistency
 ```
 
-High-level design / Reads
+High-level design
+
+Reads
 
 ```text
   [Figure 1 diagram, master + chunkservers]
