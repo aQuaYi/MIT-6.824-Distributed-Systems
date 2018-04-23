@@ -275,3 +275,11 @@ func (rf *Raft) heartBeat() {
 
 	return
 }
+
+type state int
+
+const (
+	follower = iota
+	candidate
+	leader
+)
