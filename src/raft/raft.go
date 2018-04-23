@@ -51,6 +51,18 @@ type Raft struct {
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
 
+	// Persistent state on call servers
+	currentTerm int           // 此 server 当前所处的 term 编号
+	votedFor    int           // 此 server 在此 term 中投票给了谁，是 peers 中的索引号
+	logs        []interface{} // 此 server 中保存的 logs
+
+	// Volatile state on all servers:
+	commitIndex int // logs 中已经 commited 的 log 的最大索引号
+	lastApplied int // logs 中最新元素的索引号
+
+	// Volatile state on leaders:
+	nextIndex  []int // 下一个要发送给 follower 的 log 的索引号
+	matchIndex []int // leader 与 follower 共有的 log 的最大的索引号
 }
 
 // GetState 可以获取 raft 对象的状态
@@ -60,6 +72,9 @@ func (rf *Raft) GetState() (int, bool) {
 	var term int
 	var isleader bool
 	// TODO: Your code here (2A).
+
+	term = rf.currentTerm
+	isleader = rf.me == rf.votedFor
 
 	return term, isleader
 }
@@ -107,7 +122,12 @@ func (rf *Raft) readPersist(data []byte) {
 // field names must start with capital letters!
 //
 type RequestVoteArgs struct {
-	// Your data here (2A, 2B).
+	// TODO: Your data here (2A, 2B).
+
+	term         int // candidate's term
+	candidateID  int // candidate requesting vote
+	lastLogIndex int // index of candidate's last log entry
+	lastLogTerm  int // term of candidate's last log entry
 }
 
 // RequestVoteReply 投票回复
@@ -115,7 +135,10 @@ type RequestVoteArgs struct {
 // field names must start with capital letters!
 //
 type RequestVoteReply struct {
-	// Your data here (2A).
+	// TODO: Your data here (2A).
+
+	term        int  // 投票人的 currentTerm
+	voteGranted bool // 返回 true，表示获得投票
 }
 
 // RequestVote 投票工作
@@ -123,6 +146,12 @@ type RequestVoteReply struct {
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// TODO: Your code here (2A, 2B).
+	reply.term = rf.currentTerm
+
+	if rf.lastApplied <= args.lastLogIndex && rf.currentTerm <= args.lastLogTerm {
+		reply.voteGranted = true
+		rf.votedFor = args.candidateID
+	}
 }
 
 //
@@ -211,6 +240,8 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.me = me
 
 	// Your initialization code here (2A, 2B, 2C).
+
+	// n := len(peers)
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
