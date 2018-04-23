@@ -188,6 +188,28 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	return ok
 }
 
+// AppendEntriesArgs 是添加 log 的参数
+type AppendEntriesArgs struct {
+	term         int // leader 的 term
+	leaderID     int // leader 的 ID
+	prevLogIndex int // index of log entry immediately preceding new ones
+	prevLogTerm  int // term of prevLogIndex entry
+
+	entries []interface{} // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
+
+	leaderCommit int // leader 的 commitIndex
+}
+
+// AppendEntriesReply 是 flower 回复 leader 的内容
+type AppendEntriesReply struct {
+	term    int  // 回复者的 term
+	success bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
+}
+
+func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
+	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
+}
+
 // Start 启动
 // the service using Raft (e.g. a k/v server) wants to start
 // agreement on the next command to be appended to Raft's log. if this
@@ -239,7 +261,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.persister = persister
 	rf.me = me
 
-	// Your initialization code here (2A, 2B, 2C).
+	// TODO: Your initialization code here (2A, 2B, 2C).
 
 	// n := len(peers)
 
@@ -247,4 +269,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.readPersist(persister.ReadRaftState())
 
 	return rf
+}
+
+func (rf *Raft) heartBeat() {
+
+	return
 }
