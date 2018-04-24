@@ -71,7 +71,7 @@ type Raft struct {
 	persister *Persister          // Object to hold this peer's persisted state
 	me        int                 // this peer's index into peers[]
 
-	// TODO: Your data here (2A, 2B, 2C).
+	// NOTICE: Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
 
@@ -104,7 +104,7 @@ type Raft struct {
 func (rf *Raft) GetState() (int, bool) {
 	var term int
 	var isleader bool
-	// TODO: Your code here (2A).
+	// NOTICE: Your code here (2A).
 
 	term = rf.currentTerm
 
@@ -130,7 +130,7 @@ func (rf *Raft) IsLeader() bool {
 // see paper's Figure 2 for a description of what should be persistent.
 //
 func (rf *Raft) persist() {
-	// TODO: Your code here (2C).
+	// NOTICE: Your code here (2C).
 	// Example:
 	// w := new(bytes.Buffer)
 	// e := labgob.NewEncoder(w)
@@ -147,7 +147,7 @@ func (rf *Raft) readPersist(data []byte) {
 	if data == nil || len(data) < 1 { // bootstrap without any state?
 		return
 	}
-	// TODO: Your code here (2C).
+	// NOTICE: Your code here (2C).
 	// Example:
 	// r := bytes.NewBuffer(data)
 	// d := labgob.NewDecoder(r)
@@ -167,7 +167,7 @@ func (rf *Raft) readPersist(data []byte) {
 // field names must start with capital letters!
 //
 type RequestVoteArgs struct {
-	// TODO: Your data here (2A, 2B).
+	// NOTICE: Your data here (2A, 2B).
 
 	Term         int // candidate's term
 	CandidateID  int // candidate requesting vote
@@ -180,21 +180,21 @@ type RequestVoteArgs struct {
 // field names must start with capital letters!
 //
 type RequestVoteReply struct {
-	// TODO: Your data here (2A).
+	// NOTICE: Your data here (2A).
 
-	term        int  // 投票人的 currentTerm
-	voteGranted bool // 返回 true，表示获得投票
+	Term        int  // 投票人的 currentTerm
+	VoteGranted bool // 返回 true，表示获得投票
 }
 
 // RequestVote 投票工作
 // example RequestVote RPC handler.
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	// TODO: Your code here (2A, 2B).
-	reply.term = rf.currentTerm
+	// NOTICE: Your code here (2A, 2B).
+	reply.Term = rf.currentTerm
 
 	if rf.lastApplied <= args.LastLogIndex && rf.currentTerm <= args.LastLogTerm {
-		reply.voteGranted = true
+		reply.VoteGranted = true
 		rf.votedFor = args.CandidateID
 	}
 }
@@ -273,7 +273,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	term := -1
 	isLeader := true
 
-	// TODO: Your code here (2B).
+	// NOTICE: Your code here (2B).
 
 	return index, term, isLeader
 }
@@ -285,7 +285,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 // turn off debug output from this instance.
 //
 func (rf *Raft) Kill() {
-	// TODO: Your code here, if desired.
+	// NOTICE: Your code here, if desired.
 }
 
 // rf 为自己拉票，以便赢得选举
@@ -306,7 +306,7 @@ func (rf *Raft) canvass() {
 				var reply RequestVoteReply
 				rf.sendRequestVote(i, &args, &reply)
 
-				// TODO: 后续如何处理
+				// NOTICE: 后续如何处理
 			}(i)
 		}
 	}
@@ -420,10 +420,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.persister = persister
 	rf.me = me
 
-	// initialize from state persisted before a crash
-	rf.readPersist(persister.ReadRaftState())
-
-	// TODO: Your initialization code here (2A, 2B, 2C).
+	// NOTICE: Your initialization code here (2A, 2B, 2C).
 
 	rf.state = FOLLOWER
 	rf.votedFor = -1
@@ -493,6 +490,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 			}
 		}
 	}()
+
+	// initialize from state persisted before a crash
+	rf.readPersist(persister.ReadRaftState())
 
 	return rf
 }
