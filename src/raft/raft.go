@@ -18,53 +18,16 @@ package raft
 //
 
 import (
-	"bytes"
-	"encoding/gob"
 	"labrpc"
 	"math/rand"
 	"sync"
 	"time"
 )
 
-type state int
-
-// 规定了 server 所需的 3 种状态
-const (
-	LEADER state = iota
-	CANDIDATE
-	FOLLOWER
-)
-
 const (
 	// HBINTERVAL is haertbeat interval
 	HBINTERVAL = 50 * time.Millisecond // 50ms
 )
-
-// ApplyMsg 是发送消息
-// as each Raft peer becomes aware that successive log entries are
-// committed, the peer should send an ApplyMsg to the service (or
-// tester) on the same server, via the applyCh passed to Make(). set
-// CommandValid to true to indicate that the ApplyMsg contains a newly
-// committed log entry.
-//
-// in Lab 3 you'll want to send other kinds of messages (e.g.,
-// snapshots) on the applyCh; at that point you can add fields to
-// ApplyMsg, but set CommandValid to false for these other uses.
-//
-type ApplyMsg struct {
-	Snapshot     []byte
-	UseSnapshot  bool
-	CommandValid bool
-	Command      interface{}
-	CommandIndex int
-}
-
-// LogEntry is log entry
-type LogEntry struct {
-	LogIndex int
-	LogTerm  int
-	LogCmd   interface{}
-}
 
 // Raft implements a single Raft peer.
 type Raft struct {
@@ -142,35 +105,6 @@ func (rf *Raft) persist() {
 	// rf.persister.SaveRaftState(data)
 }
 
-func (rf *Raft) readSnapshot(data []byte) {
-
-	rf.readPersist(rf.persister.ReadRaftState())
-
-	if len(data) == 0 {
-		return
-	}
-
-	r := bytes.NewBuffer(data)
-	d := gob.NewDecoder(r)
-
-	var LastIncludedIndex int
-	var LastIncludedTerm int
-
-	d.Decode(&LastIncludedIndex)
-	d.Decode(&LastIncludedTerm)
-
-	rf.commitIndex = LastIncludedIndex
-	rf.lastApplied = LastIncludedIndex
-
-	rf.log = truncateLog(LastIncludedIndex, LastIncludedTerm, rf.log)
-
-	msg := ApplyMsg{UseSnapshot: true, Snapshot: data}
-
-	go func() {
-		rf.chanApply <- msg
-	}()
-}
-
 //
 // restore previously persisted state.
 //
@@ -191,164 +125,6 @@ func (rf *Raft) readPersist(data []byte) {
 	//   rf.xxx = xxx
 	//   rf.yyy = yyy
 	// }
-}
-
-// AppendEntries is
-func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-	// Your code here.
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	defer rf.persist()
-
-	reply.Success = false
-	if args.Term < rf.currentTerm {
-		reply.Term = rf.currentTerm
-		reply.NextIndex = rf.getLastIndex() + 1
-		//	fmt.Printf("%v currentTerm: %v rejected %v:%v\n",rf.me,rf.currentTerm,args.LeaderId,args.Term)
-		return
-	}
-	rf.chanHeartbeat <- struct{}{}
-	//fmt.Printf("%d respond for %v\n",rf.me,args.LeaderId)
-	if args.Term > rf.currentTerm {
-		rf.currentTerm = args.Term
-		rf.state = FOLLOWER
-		rf.votedFor = -1
-	}
-	reply.Term = args.Term
-
-	if args.PrevLogIndex > rf.getLastIndex() {
-		reply.NextIndex = rf.getLastIndex() + 1
-		return
-	}
-
-	baseIndex := rf.log[0].LogIndex
-
-	if args.PrevLogIndex > baseIndex {
-		term := rf.log[args.PrevLogIndex-baseIndex].LogTerm
-		if args.PrevLogTerm != term {
-			for i := args.PrevLogIndex - 1; i >= baseIndex; i-- {
-				if rf.log[i-baseIndex].LogTerm != term {
-					reply.NextIndex = i + 1
-					break
-				}
-			}
-			return
-		}
-	}
-	/*else {
-		//fmt.Printf("????? len:%v\n",len(args.Entries))
-		last := rf.getLastIndex()
-		elen := len(args.Entries)
-		for i := 0; i < elen ;i++ {
-			if args.PrevLogIndex + i > last || rf.logs[args.PrevLogIndex + i].LogTerm != args.Entries[i].LogTerm {
-				rf.log = rf.logs[: args.PrevLogIndex+1]
-				rf.log = append(rf.log, args.Entries...)
-				app = false
-				fmt.Printf("?????\n")
-				break
-			}
-		}
-	}*/
-	if args.PrevLogIndex < baseIndex {
-
-	} else {
-		rf.log = rf.log[:args.PrevLogIndex+1-baseIndex]
-		rf.log = append(rf.log, args.Entries...)
-		reply.Success = true
-		reply.NextIndex = rf.getLastIndex() + 1
-	}
-	//println(rf.me,rf.getLastIndex(),reply.NextIndex,rf.log)
-	if args.LeaderCommit > rf.commitIndex {
-		last := rf.getLastIndex()
-		if args.LeaderCommit > last {
-			rf.commitIndex = last
-		} else {
-			rf.commitIndex = args.LeaderCommit
-		}
-		rf.chanCommit <- struct{}{}
-	}
-	return
-}
-
-//
-// example code to send a RequestVote RPC to a server.
-// server is the index of the target server in rf.peers[].
-// expects RPC arguments in args.
-// fills in *reply with RPC reply, so caller should
-// pass &reply.
-// the types of the args and reply passed to Call() must be
-// the same as the types of the arguments declared in the
-// handler function (including whether they are pointers).
-//
-// The labrpc package simulates a lossy network, in which servers
-// may be unreachable, and in which requests and replies may be lost.
-// Call() sends a request and waits for a reply. If a reply arrives
-// within a timeout interval, Call() returns true; otherwise
-// Call() returns false. Thus Call() may not return for a while.
-// A false return can be caused by a dead server, a live server that
-// can't be reached, a lost request, or a lost reply.
-//
-// Call() is guaranteed to return (perhaps after a delay) *except* if the
-// handler function on the server side does not return.  Thus there
-// is no need to implement your own timeouts around Call().
-//
-// look at the comments in ../labrpc/labrpc.go for more details.
-//
-// if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in structs passed over RPC, and
-// that the caller passes the address of the reply struct with &, not
-// the struct itself.
-//
-func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
-	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	if ok {
-		term := rf.currentTerm
-		if rf.state != CANDIDATE {
-			return ok
-		}
-		if args.Term != term {
-			return ok
-		}
-		if reply.Term > term {
-			rf.currentTerm = reply.Term
-			rf.state = FOLLOWER
-			rf.votedFor = -1
-			rf.persist()
-		}
-		if reply.VoteGranted {
-			rf.voteCount++
-			if rf.state == CANDIDATE && rf.voteCount > len(rf.peers)/2 {
-				rf.state = FOLLOWER
-				rf.chanLeader <- struct{}{}
-			}
-		}
-	}
-	return ok
-}
-
-// AppendEntriesArgs 是添加 log 的参数
-type AppendEntriesArgs struct {
-	Term         int // leader 的 term
-	LeaderID     int // leader 的 ID
-	PrevLogIndex int // index of log entry immediately preceding new ones
-	PrevLogTerm  int // term of prevLogIndex entry
-
-	Entries []LogEntry // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
-
-	LeaderCommit int // leader 的 commitIndex
-}
-
-// AppendEntriesReply 是 flower 回复 leader 的内容
-type AppendEntriesReply struct {
-	Term      int  // 回复者的 term
-	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
-	NextIndex int
-}
-
-func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
-	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
 }
 
 // Start 启动
@@ -472,50 +248,6 @@ func (rf *Raft) boatcastAppendEntries() {
 		}
 	}
 }
-func truncateLog(lastIncludedIndex int, lastIncludedTerm int, log []LogEntry) []LogEntry {
-
-	var newLogEntries []LogEntry
-	newLogEntries = append(newLogEntries, LogEntry{LogIndex: lastIncludedIndex, LogTerm: lastIncludedTerm})
-
-	for index := len(log) - 1; index >= 0; index-- {
-		if log[index].LogIndex == lastIncludedIndex && log[index].LogTerm == lastIncludedTerm {
-			newLogEntries = append(newLogEntries, log[index+1:]...)
-			break
-		}
-	}
-
-	return newLogEntries
-}
-
-// InstallSnapshotArgs is
-type InstallSnapshotArgs struct {
-	Term              int
-	LeaderID          int
-	LastIncludedIndex int
-	LastIncludedTerm  int
-	Data              []byte
-}
-
-// InstallSnapshotReply is
-type InstallSnapshotReply struct {
-	Term int
-}
-
-func (rf *Raft) sendInstallSnapshot(server int, args InstallSnapshotArgs, reply *InstallSnapshotReply) bool {
-	ok := rf.peers[server].Call("Raft.InstallSnapshot", args, reply)
-	if ok {
-		if reply.Term > rf.currentTerm {
-			rf.currentTerm = reply.Term
-			rf.state = FOLLOWER
-			rf.votedFor = -1
-			return ok
-		}
-
-		rf.nextIndex[server] = args.LastIncludedIndex + 1
-		rf.matchIndex[server] = args.LastIncludedIndex
-	}
-	return ok
-}
 
 // Make is
 // the service or tester wants to create a Raft server. the ports
@@ -611,9 +343,4 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.readPersist(persister.ReadRaftState())
 
 	return rf
-}
-
-func (rf *Raft) heartBeat() {
-
-	return
 }
