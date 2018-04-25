@@ -1,5 +1,10 @@
 package raft
 
+import (
+	"math/rand"
+	"time"
+)
+
 // AppendEntriesArgs 是添加 log 的参数
 type AppendEntriesArgs struct {
 	Term         int // leader 的 term
@@ -14,154 +19,163 @@ type AppendEntriesArgs struct {
 
 // AppendEntriesReply 是 flower 回复 leader 的内容
 type AppendEntriesReply struct {
-	Term      int  // 回复者的 term
-	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
-	NextIndex int  // TODO: 这是干什么的？
+	Term           int  // 回复者的 term
+	Success        bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
+	FirstTermIndex int  // TODO: 这是干什么的？
 }
 
 // AppendEntries is
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-	// Your code here.
+	// NOTICE: Your code here. (2A, 2B)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	defer rf.persist()
+	// defer rf.persist()
 
-	reply.Success = false
+	DPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))
+
+	// 1. replay false at once if term < currentTerm
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
-		reply.NextIndex = rf.getLastIndex() + 1
-		//	fmt.Printf("%v currentTerm: %v rejected %v:%v\n",rf.me,rf.currentTerm,args.LeaderId,args.Term)
+		reply.Success = false
 		return
 	}
 
-	// 一旦收到 AppendEntries，就算收到了一次心跳
-	rf.chanHeartbeat <- struct{}{}
+	// TODO: WHY???
+	rf.state = FOLLOWER
 
-	if args.Term > rf.currentTerm {
-		rf.currentTerm = args.Term
-		rf.state = FOLLOWER
-		rf.votedFor = -1
+	if !rf.t.Stop() {
+		DPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
+		<-rf.t.C
 	}
+	timeout := time.Duration(500 + rand.Int31n(400))
+	rf.t.Reset(timeout * time.Millisecond)
 
-	reply.Term = args.Term
-
-	if args.PrevLogIndex > rf.getLastIndex() {
-		reply.NextIndex = rf.getLastIndex() + 1
+	// 2. false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
+	if len(rf.logs) <= args.PrevLogIndex {
+		DPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
+		reply.Term = rf.currentTerm
+		reply.FirstTermIndex = len(rf.logs)
+		reply.Success = false
+		rf.currentTerm = args.Term // TODO: why
 		return
 	}
 
-	// TODO: 真的是在这里吗？
-	if len(args.Entries) == 0 {
-		return
-	}
-
-	baseIndex := rf.log[0].LogIndex
-
-	if args.PrevLogIndex > baseIndex {
-		term := rf.log[args.PrevLogIndex-baseIndex].LogTerm
-		if args.PrevLogTerm != term {
-			for i := args.PrevLogIndex - 1; i >= baseIndex; i-- {
-				if rf.log[i-baseIndex].LogTerm != term {
-					reply.NextIndex = i + 1
-					break
-				}
-			}
-			return
-		}
-	}
-	/*else {
-		//fmt.Printf("????? len:%v\n",len(args.Entries))
-		last := rf.getLastIndex()
-		elen := len(args.Entries)
-		for i := 0; i < elen ;i++ {
-			if args.PrevLogIndex + i > last || rf.logs[args.PrevLogIndex + i].LogTerm != args.Entries[i].LogTerm {
-				rf.log = rf.logs[: args.PrevLogIndex+1]
-				rf.log = append(rf.log, args.Entries...)
-				app = false
-				fmt.Printf("?????\n")
+	// 3. if an existing entry conflicts with a new one (same index but diff terms),
+	//    delete the existing entry and all that follows it
+	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
+		DPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
+		reply.FirstTermIndex = args.PrevLogIndex
+		for rf.logs[reply.FirstTermIndex].LogTerm == rf.logs[reply.FirstTermIndex-1].LogTerm {
+			if reply.FirstTermIndex > rf.commitIndex {
+				reply.FirstTermIndex--
+			} else {
+				reply.FirstTermIndex = rf.commitIndex + 1
 				break
 			}
+			DPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.FirstTermIndex)
 		}
-	}*/
-	if args.PrevLogIndex < baseIndex {
+		rf.logs = rf.logs[:reply.FirstTermIndex]
+		reply.Term = rf.currentTerm
+		reply.Success = false
+		rf.currentTerm = args.Term
+		return
+	}
 
-	} else {
-		rf.log = rf.log[:args.PrevLogIndex+1-baseIndex]
-		rf.log = append(rf.log, args.Entries...)
-		reply.Success = true
-		reply.NextIndex = rf.getLastIndex() + 1
-	}
-	//println(rf.me,rf.getLastIndex(),reply.NextIndex,rf.log)
-	if args.LeaderCommit > rf.commitIndex {
-		last := rf.getLastIndex()
-		if args.LeaderCommit > last {
-			rf.commitIndex = last
-		} else {
-			rf.commitIndex = args.LeaderCommit
+	// 4. append any new entries not already in the log
+	if len(args.Entries) == 0 {
+		DPrintf("[server: %v]received heartbeat\n", rf.me)
+	} else if len(rf.logs) == args.PrevLogIndex+1 {
+		for i, entry := range args.Entries {
+			rf.logs = append(rf.logs[:args.PrevLogIndex+i+1], entry)
 		}
-		rf.chanCommit <- struct{}{}
+		// persist only when possible committed data
+		// for leader, it's easy to determine
+		// persist follower whenever update
+		rf.persist()
+	} else if len(rf.logs)-1 > args.PrevLogIndex &&
+		len(rf.logs)-1 < args.PrevLogIndex+len(args.Entries) {
+		for i := len(rf.logs); i <= args.PrevLogIndex+len(args.Entries); i++ {
+			rf.logs = append(rf.logs[:i], args.Entries[i-args.PrevLogIndex-1])
+		}
+		// persist only when possible committed data
+		// for leader, it's easy to determine
+		// persist follower whenever update
+		rf.persist()
 	}
-	return
+
+	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
+	if args.LeaderCommit > rf.commitIndex {
+		if args.LeaderCommit < len(rf.logs)-1 {
+			rf.commitIndex = args.LeaderCommit
+		} else {
+			rf.commitIndex = len(rf.logs) - 1
+		}
+		rf.cond.Broadcast()
+	}
+
+	rf.currentTerm = args.Term
+	reply.Success = true
+	reply.Term = rf.currentTerm
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
 	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
 }
 
-func (rf *Raft) boatcastAppendEntries() {
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	N := rf.commitIndex
-	last := rf.getLastIndex()
-	baseIndex := rf.log[0].LogIndex
-	for i := rf.commitIndex + 1; i <= last; i++ {
-		num := 1
-		for j := range rf.peers {
-			if j != rf.me && rf.matchIndex[j] >= i && rf.log[i-baseIndex].LogTerm == rf.currentTerm {
-				num++
-			}
-		}
-		if 2*num > len(rf.peers) {
-			N = i
-		}
-	}
-	if N != rf.commitIndex {
-		rf.commitIndex = N
-		rf.chanCommit <- struct{}{}
-	}
+// func (rf *Raft) boatcastAppendEntries() {
+// 	rf.mu.Lock()
+// 	defer rf.mu.Unlock()
+// 	N := rf.commitIndex
+// 	last := rf.getLastIndex()
+// 	baseIndex := rf.logs[0].LogIndex
+// 	for i := rf.commitIndex + 1; i <= last; i++ {
+// 		num := 1
+// 		for j := range rf.peers {
+// 			if j != rf.me && rf.matchIndex[j] >= i && rf.logs[i-baseIndex].LogTerm == rf.currentTerm {
+// 				num++
+// 			}
+// 		}
+// 		if 2*num > len(rf.peers) {
+// 			N = i
+// 		}
+// 	}
+// 	if N != rf.commitIndex {
+// 		rf.commitIndex = N
+// 		rf.chanCommit <- struct{}{}
+// 	}
 
-	for i := range rf.peers {
-		if i != rf.me && rf.state == LEADER {
+// 	for i := range rf.peers {
+// 		if i != rf.me && rf.state == LEADER {
 
-			//copy(args.Entries, rf.logs[args.PrevLogIndex + 1:])
+// 			//copy(args.Entries, rf.logs[args.PrevLogIndex + 1:])
 
-			if rf.nextIndex[i] > baseIndex {
-				var args AppendEntriesArgs
-				args.Term = rf.currentTerm
-				args.LeaderID = rf.me
-				args.PrevLogIndex = rf.nextIndex[i] - 1
-				//	fmt.Printf("baseIndex:%d PrevLogIndex:%d\n",baseIndex,args.PrevLogIndex )
-				args.PrevLogTerm = rf.log[args.PrevLogIndex-baseIndex].LogTerm
-				//args.Entries = make([]LogEntry, len(rf.logs[args.PrevLogIndex + 1:]))
-				args.Entries = make([]LogEntry, len(rf.log[args.PrevLogIndex+1-baseIndex:]))
-				copy(args.Entries, rf.log[args.PrevLogIndex+1-baseIndex:])
-				args.LeaderCommit = rf.commitIndex
-				go func(i int, args AppendEntriesArgs) {
-					var reply AppendEntriesReply
-					rf.sendAppendEntries(i, &args, &reply)
-				}(i, args)
-			} else {
-				var args InstallSnapshotArgs
-				args.Term = rf.currentTerm
-				args.LeaderID = rf.me
-				args.LastIncludedIndex = rf.log[0].LogIndex
-				args.LastIncludedTerm = rf.log[0].LogTerm
-				args.Data = rf.persister.snapshot
-				go func(server int, args InstallSnapshotArgs) {
-					reply := &InstallSnapshotReply{}
-					rf.sendInstallSnapshot(server, args, reply)
-				}(i, args)
-			}
-		}
-	}
-}
+// 			if rf.nextIndex[i] > baseIndex {
+// 				var args AppendEntriesArgs
+// 				args.Term = rf.currentTerm
+// 				args.LeaderID = rf.me
+// 				args.PrevLogIndex = rf.nextIndex[i] - 1
+// 				//	fmt.Printf("baseIndex:%d PrevLogIndex:%d\n",baseIndex,args.PrevLogIndex )
+// 				args.PrevLogTerm = rf.logs[args.PrevLogIndex-baseIndex].LogTerm
+// 				//args.Entries = make([]LogEntry, len(rf.logs[args.PrevLogIndex + 1:]))
+// 				args.Entries = make([]LogEntry, len(rf.logs[args.PrevLogIndex+1-baseIndex:]))
+// 				copy(args.Entries, rf.logs[args.PrevLogIndex+1-baseIndex:])
+// 				args.LeaderCommit = rf.commitIndex
+// 				go func(i int, args AppendEntriesArgs) {
+// 					var reply AppendEntriesReply
+// 					rf.sendAppendEntries(i, &args, &reply)
+// 				}(i, args)
+// 			} else {
+// 				var args InstallSnapshotArgs
+// 				args.Term = rf.currentTerm
+// 				args.LeaderID = rf.me
+// 				args.LastIncludedIndex = rf.logs[0].LogIndex
+// 				args.LastIncludedTerm = rf.logs[0].LogTerm
+// 				args.Data = rf.persister.snapshot
+// 				go func(server int, args InstallSnapshotArgs) {
+// 					reply := &InstallSnapshotReply{}
+// 					rf.sendInstallSnapshot(server, args, reply)
+// 				}(i, args)
+// 			}
+// 		}
+// 	}
+// }

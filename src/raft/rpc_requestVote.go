@@ -1,5 +1,10 @@
 package raft
 
+import (
+	"math/rand"
+	"time"
+)
+
 // RequestVoteArgs 获取投票参数
 // example RequestVote RPC arguments structure.
 // field names must start with capital letters!
@@ -28,18 +33,48 @@ type RequestVoteReply struct {
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// NOTICE: Your code here (2A, 2B).
-	reply.Term = rf.currentTerm
-	reply.VoteGranted = false
 
+	// TODO: 注释这里的每一句话
+
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	DPrintf("[Enter RequestVote][server: %v]term :%v voted for:%v, log len: %v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, len(rf.logs), rf.logs, rf.commitIndex, args)
+
+	// 1. false if term < currentTerm
 	if args.Term < rf.currentTerm {
-		return
+		reply.VoteGranted = false
+		// TODO: 此处直接 return 可否
+	} else if args.Term > rf.currentTerm {
+		rf.votedFor = NULL
+		rf.state = FOLLOWER
+		// TODO: 此处直接 return 可否
 	}
+	// TODO: Term 相等的情况是什么
 
-	if (rf.votedFor == -1 || rf.state == CANDIDATE) &&
-		rf.lastApplied <= args.LastLogIndex && rf.currentTerm <= args.LastLogTerm {
+	// 2. votedFor is null or candidateId and
+	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
+	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
+	//    If the logs end with the same term, then whichever log is longer is more up-to-date
+	//
+	if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
+		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
+			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
+		DPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
+		reply.Term = rf.currentTerm
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateID
+		if !rf.t.Stop() {
+			DPrintf("[server %d] RequestVote: drain timer\n", rf.me)
+			// TODO: 这是通知到什么地方了
+			<-rf.t.C
+		}
+		timeout := time.Duration(500 + rand.Int31n(400))
+		rf.t.Reset(timeout * time.Millisecond)
+	} else {
+		reply.VoteGranted = false
 	}
+
 }
 
 //
@@ -73,29 +108,5 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 //
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	if ok {
-		term := rf.currentTerm
-		if rf.state != CANDIDATE {
-			return ok
-		}
-		if args.Term != term {
-			return ok
-		}
-		if reply.Term > term {
-			rf.currentTerm = reply.Term
-			rf.state = FOLLOWER
-			rf.votedFor = -1
-			rf.persist()
-		}
-		if reply.VoteGranted {
-			rf.voteCount++
-			if rf.state == CANDIDATE && rf.voteCount > len(rf.peers)/2 {
-				rf.state = FOLLOWER
-				rf.chanLeader <- struct{}{}
-			}
-		}
-	}
 	return ok
 }

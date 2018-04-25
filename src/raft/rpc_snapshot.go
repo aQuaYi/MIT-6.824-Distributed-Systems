@@ -28,7 +28,7 @@ func (rf *Raft) InstallSnapshot(args InstallSnapshotArgs, reply *InstallSnapshot
 		reply.Term = rf.currentTerm
 		return
 	}
-	rf.chanHeartbeat <- struct{}{}
+	// rf.chanHeartbeat <- struct{}{}
 	rf.state = FOLLOWER
 
 	// FIXME:
@@ -37,16 +37,16 @@ func (rf *Raft) InstallSnapshot(args InstallSnapshotArgs, reply *InstallSnapshot
 	// FIXME: don't have this method
 	// rf.persister.SaveSnapshot(args.Data)
 
-	rf.log = truncateLog(args.LastIncludedIndex, args.LastIncludedTerm, rf.log)
+	rf.logs = truncateLog(args.LastIncludedIndex, args.LastIncludedTerm, rf.logs)
 
-	msg := ApplyMsg{UseSnapshot: true, Snapshot: args.Data}
+	// msg := ApplyMsg{UseSnapshot: true, Snapshot: args.Data}
 
 	rf.lastApplied = args.LastIncludedIndex
 	rf.commitIndex = args.LastIncludedIndex
 
 	rf.persist()
 
-	rf.chanApply <- msg
+	// rf.chanApply <- msg
 }
 func (rf *Raft) sendInstallSnapshot(server int, args InstallSnapshotArgs, reply *InstallSnapshotReply) bool {
 	ok := rf.peers[server].Call("Raft.InstallSnapshot", args, reply)
@@ -84,11 +84,11 @@ func (rf *Raft) readSnapshot(data []byte) {
 	rf.commitIndex = LastIncludedIndex
 	rf.lastApplied = LastIncludedIndex
 
-	rf.log = truncateLog(LastIncludedIndex, LastIncludedTerm, rf.log)
+	rf.logs = truncateLog(LastIncludedIndex, LastIncludedTerm, rf.logs)
 
-	msg := ApplyMsg{UseSnapshot: true, Snapshot: data}
+	// msg := ApplyMsg{UseSnapshot: true, Snapshot: data}
 
 	go func() {
-		rf.chanApply <- msg
+		// rf.chanApply <- msg
 	}()
 }
