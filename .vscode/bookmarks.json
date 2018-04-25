@@ -4,5 +4,12 @@
 	"onDidAddBookmarkEmitter": {},
 	"onDidRemoveBookmarkEmitter": {},
 	"onDidUpdateBookmarkEmitter": {},
-	"bookmarks": []
+	"bookmarks": [
+		{
+			"fsPath": "$ROOTPATH$/src/raft/raft.go",
+			"bookmarks": [
+				262
+			]
+		}
+	]
 }

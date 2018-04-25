@@ -16,7 +16,7 @@ type AppendEntriesArgs struct {
 type AppendEntriesReply struct {
 	Term      int  // 回复者的 term
 	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
-	NextIndex int
+	NextIndex int  // TODO: 这是干什么的？
 }
 
 // AppendEntries is
@@ -33,17 +33,25 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		//	fmt.Printf("%v currentTerm: %v rejected %v:%v\n",rf.me,rf.currentTerm,args.LeaderId,args.Term)
 		return
 	}
+
+	// 一旦收到 AppendEntries，就算收到了一次心跳
 	rf.chanHeartbeat <- struct{}{}
-	//fmt.Printf("%d respond for %v\n",rf.me,args.LeaderId)
+
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
 		rf.state = FOLLOWER
 		rf.votedFor = -1
 	}
+
 	reply.Term = args.Term
 
 	if args.PrevLogIndex > rf.getLastIndex() {
 		reply.NextIndex = rf.getLastIndex() + 1
+		return
+	}
+
+	// TODO: 真的是在这里吗？
+	if len(args.Entries) == 0 {
 		return
 	}
 
