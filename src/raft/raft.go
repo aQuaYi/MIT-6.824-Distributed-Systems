@@ -24,6 +24,14 @@ import (
 	"time"
 )
 
+type state int
+
+// 规定了 server 所需的 3 种状态
+const (
+	LEADER state = iota
+	CANDIDATE
+	FOLLOWER
+)
 const (
 	// HBINTERVAL is haertbeat interval
 	HBINTERVAL = 50 * time.Millisecond // 50ms
@@ -77,9 +85,11 @@ func (rf *Raft) GetState() (int, bool) {
 
 	return term, isleader
 }
+
 func (rf *Raft) getLastIndex() int {
 	return rf.log[len(rf.log)-1].LogIndex
 }
+
 func (rf *Raft) getLastTerm() int {
 	return rf.log[len(rf.log)-1].LogTerm
 }
@@ -189,64 +199,6 @@ func (rf *Raft) canvass() {
 	}
 
 	return
-}
-
-func (rf *Raft) boatcastAppendEntries() {
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	N := rf.commitIndex
-	last := rf.getLastIndex()
-	baseIndex := rf.log[0].LogIndex
-	for i := rf.commitIndex + 1; i <= last; i++ {
-		num := 1
-		for j := range rf.peers {
-			if j != rf.me && rf.matchIndex[j] >= i && rf.log[i-baseIndex].LogTerm == rf.currentTerm {
-				num++
-			}
-		}
-		if 2*num > len(rf.peers) {
-			N = i
-		}
-	}
-	if N != rf.commitIndex {
-		rf.commitIndex = N
-		rf.chanCommit <- struct{}{}
-	}
-
-	for i := range rf.peers {
-		if i != rf.me && rf.state == LEADER {
-
-			//copy(args.Entries, rf.logs[args.PrevLogIndex + 1:])
-
-			if rf.nextIndex[i] > baseIndex {
-				var args AppendEntriesArgs
-				args.Term = rf.currentTerm
-				args.LeaderID = rf.me
-				args.PrevLogIndex = rf.nextIndex[i] - 1
-				//	fmt.Printf("baseIndex:%d PrevLogIndex:%d\n",baseIndex,args.PrevLogIndex )
-				args.PrevLogTerm = rf.log[args.PrevLogIndex-baseIndex].LogTerm
-				//args.Entries = make([]LogEntry, len(rf.logs[args.PrevLogIndex + 1:]))
-				args.Entries = make([]LogEntry, len(rf.log[args.PrevLogIndex+1-baseIndex:]))
-				copy(args.Entries, rf.log[args.PrevLogIndex+1-baseIndex:])
-				args.LeaderCommit = rf.commitIndex
-				go func(i int, args AppendEntriesArgs) {
-					var reply AppendEntriesReply
-					rf.sendAppendEntries(i, &args, &reply)
-				}(i, args)
-			} else {
-				var args InstallSnapshotArgs
-				args.Term = rf.currentTerm
-				args.LeaderID = rf.me
-				args.LastIncludedIndex = rf.log[0].LogIndex
-				args.LastIncludedTerm = rf.log[0].LogTerm
-				args.Data = rf.persister.snapshot
-				go func(server int, args InstallSnapshotArgs) {
-					reply := &InstallSnapshotReply{}
-					rf.sendInstallSnapshot(server, args, reply)
-				}(i, args)
-			}
-		}
-	}
 }
 
 // Make is
