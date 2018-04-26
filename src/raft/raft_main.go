@@ -23,9 +23,6 @@ import (
 )
 
 const (
-	// HBINTERVAL is haertbeat interval
-	HBINTERVAL = 50 * time.Millisecond // 50ms
-
 	// NULL 表示没有投票给任何人
 	NULL = -1
 )
@@ -47,6 +44,8 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 	go func(rf *Raft) {
 		for {
 			// TODO: 为什么 for 循环一开始要 lock
+			// 是为了等别的地方处理完，要不然直接进入
+			// switch case FOLLOWER → select default → 就不会有超时什么事情了
 			rf.mu.Lock()
 
 			if rf.hasShutdown() {
