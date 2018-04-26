@@ -68,6 +68,8 @@ type Raft struct {
 	t        *time.Timer
 	cond     *sync.Cond
 	shutdown chan struct{}
+	// 当 rf 接收到合格的 appendEntries rpc 时，会通过 heartbeat 发送信号
+	heartbeat chan struct{}
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int,

@@ -3,6 +3,7 @@ package raft
 import "time"
 
 func (rf *Raft) contestAnElection() {
+	debugPrintf("[server:%v]state:%s\n", rf.me, rf.state)
 
 	requestVoteReply := make([]*RequestVoteReply, len(rf.peers))
 
