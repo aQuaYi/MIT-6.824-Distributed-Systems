@@ -38,7 +38,7 @@ const (
 // for any long-running work.
 //
 func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
-	rf := newRaft(peers, me, persister, applyCh)
+	rf := newRaft(peers, me, persister)
 
 	go func(rf *Raft) {
 		for {

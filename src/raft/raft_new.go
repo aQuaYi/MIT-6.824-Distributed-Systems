@@ -73,7 +73,7 @@ type Raft struct {
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int,
-	persister *Persister, applyCh chan ApplyMsg) *Raft {
+	persister *Persister) *Raft {
 	rf := &Raft{}
 	rf.peers = peers
 	rf.persister = persister
@@ -91,9 +91,13 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 
 	rf.state = FOLLOWER
 	rf.cond = sync.NewCond(&rf.mu)
+
 	rf.shutdown = make(chan struct{})
+
+	rf.heartbeat = make(chan struct{})
 
 	timeout := time.Duration(300 + rand.Int31n(400))
 	rf.t = time.NewTimer(timeout * time.Millisecond)
+
 	return rf
 }
