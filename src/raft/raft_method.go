@@ -251,9 +251,14 @@ func (rf *Raft) Kill() {
 	rf.cond.Broadcast()
 }
 
-func (rf *Raft) HasShutdown() {
-
-	return
+func (rf *Raft) hasShutdown() bool {
+	select {
+	case <-rf.shutdown:
+		debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
+		return true
+	default:
+		return false
+	}
 }
 
 func (rf *Raft) timerReset() {
