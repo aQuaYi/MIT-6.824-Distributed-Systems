@@ -1,27 +1,16 @@
 package raft
 
-// rf 为自己拉票，以便赢得选举
-func (rf *Raft) canvass() {
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+func (rf *Raft) comeToPower() {
+	// TODO: 这里有问题吧
+	// 应该是先 Term++
+	// 再进行选举
+	rf.currentTerm++
+	rf.state = LEADER
 
-	args := RequestVoteArgs{
-		Term:         rf.currentTerm,
-		CandidateID:  rf.me,
-		LastLogTerm:  rf.getLastTerm(),
-		LastLogIndex: rf.getLastIndex(),
+	rf.nextIndex = make([]int, len(rf.peers))
+	rf.matchIndex = make([]int, len(rf.peers))
+	for i := 0; i < len(rf.peers); i++ {
+		rf.nextIndex[i] = len(rf.logs)
+		rf.matchIndex[i] = 0
 	}
-
-	for i := range rf.peers {
-		if i != rf.me && rf.state == CANDIDATE {
-			go func(i int) {
-				var reply RequestVoteReply
-				rf.sendRequestVote(i, &args, &reply)
-
-				// NOTICE: 后续如何处理
-			}(i)
-		}
-	}
-
-	return
 }

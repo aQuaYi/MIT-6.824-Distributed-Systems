@@ -92,6 +92,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 						continue
 					}
 					requestVoteReply[server] = new(RequestVoteReply)
+
 					go func(server int, args *RequestVoteArgs, reply *RequestVoteReply, replyChan chan *RequestVoteReply) {
 						ok := rf.sendRequestVote(server, args, reply)
 						rf.mu.Lock()
@@ -121,23 +122,26 @@ func Make(peers []*labrpc.ClientEnd, me int,
 						break loop
 					case reply = <-requestVoteReplyChan:
 						totalReturns++
-						if reply.VoteGranted {
-							grantedCnt++
-							if grantedCnt > len(peers)/2 {
-								// TODO: 这里有问题吧
-								// 应该是先 Term++
-								// 再进行选举
-								rf.currentTerm++
-								rf.state = LEADER
+						if !reply.VoteGranted {
+							continue
+						}
+						grantedCnt++
+						if grantedCnt > len(peers)/2 {
+							rf.comeToPower()
 
-								rf.nextIndex = make([]int, len(peers))
-								rf.matchIndex = make([]int, len(peers))
-								for i := 0; i < len(peers); i++ {
-									rf.nextIndex[i] = len(rf.logs)
-									rf.matchIndex[i] = 0
-								}
-								break loop
-							}
+							// // TODO: 这里有问题吧
+							// // 应该是先 Term++
+							// // 再进行选举
+							// rf.currentTerm++
+							// rf.state = LEADER
+							// rf.nextIndex = make([]int, len(peers))
+							// rf.matchIndex = make([]int, len(peers))
+							// for i := 0; i < len(peers); i++ {
+							// 	rf.nextIndex[i] = len(rf.logs)
+							// 	rf.matchIndex[i] = 0
+							// }
+
+							break loop
 						}
 					default:
 						rf.mu.Unlock()
