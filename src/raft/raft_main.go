@@ -52,19 +52,19 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		for {
 			rf.mu.Lock()
 			if rf.state == CANDIDATE {
-				DPrintf("[server: %v]state:%v\n", rf.me, rf.state)
+				debugPrintf("[server: %v]state:%s\n", rf.me, rf.state)
 			}
 			select {
 			case <-rf.shutdown:
 				rf.mu.Unlock()
-				DPrintf("[server: %v]Close state machine goroutine\n", rf.me)
+				debugPrintf("[server: %v]Close state machine goroutine\n", rf.me)
 				return
 			default:
 				switch rf.state {
 				case FOLLOWER:
 					select {
 					case <-rf.t.C:
-						DPrintf("[server: %v]change to candidate\n", rf.me)
+						debugPrintf("[server: %v]change to candidate\n", rf.me)
 						rf.state = CANDIDATE
 						// reset election timer
 						rf.t.Reset(timeout * time.Millisecond)
@@ -89,7 +89,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 					//requestVoteArgs.LastLogTerm  = rf.logs[rf.commitIndex].LogTerm
 					requestVoteArgs.LastLogIndex = len(rf.logs) - 1
 					requestVoteArgs.LastLogTerm = rf.logs[len(rf.logs)-1].LogTerm
-					DPrintf("[server: %v] Candidate, election timeout %v, send RequestVote: %v\n", me, timeout*time.Millisecond, requestVoteArgs)
+					debugPrintf("[server: %v] Candidate, election timeout %v, send RequestVote: %v\n", me, timeout*time.Millisecond, requestVoteArgs)
 
 					requestVoteReplyChan := make(chan *RequestVoteReply)
 					for server := range peers {
@@ -151,7 +151,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 						}
 					}
 
-					DPrintf("[server: %v]Total granted peers: %v, total peers: %v\n", rf.me, grantedCnt, len(peers))
+					debugPrintf("[server: %v]Total granted peers: %v, total peers: %v\n", rf.me, grantedCnt, len(peers))
 					rf.mu.Unlock()
 
 				case LEADER:
@@ -162,7 +162,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 					appendEntriesArgs := make([]*AppendEntriesArgs, len(peers))
 					appendEntriesReply := make([]*AppendEntriesReply, len(peers))
 
-					DPrintf("[server: %v]Leader, send heartbeat, period: %v\n", rf.me, period*time.Millisecond)
+					debugPrintf("[server: %v]Leader, send heartbeat, period: %v\n", rf.me, period*time.Millisecond)
 					for server := range peers {
 						if server != rf.me {
 							appendEntriesArgs[server] = &AppendEntriesArgs{
@@ -206,7 +206,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 										rf.nextIndex[server] = reply.FirstTermIndex
 										for {
 											//rf.nextIndex[server]--
-											DPrintf("abc:%v, server: %v reply: %v\n", rf, server, reply)
+											debugPrintf("abc:%v, server: %v reply: %v\n", rf, server, reply)
 											detectAppendEntriesArgs := &AppendEntriesArgs{
 												Term:         rf.currentTerm,
 												LeaderID:     rf.me,
@@ -219,7 +219,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 											ok1 := rf.sendAppendEntries(server, detectAppendEntriesArgs, detectReply)
 											rf.mu.Lock()
 											if !ok1 {
-												DPrintf("[server: %v]not receive from %v\n", rf.me, server)
+												debugPrintf("[server: %v]not receive from %v\n", rf.me, server)
 												rf.nextIndex[server] = len(rf.logs)
 												rf.mu.Unlock()
 												return
@@ -234,7 +234,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 												// reset timer
 												if !rf.t.Stop() {
-													DPrintf("[server: %v]Leader change to follower1: drain timer\n", rf.me)
+													debugPrintf("[server: %v]Leader change to follower1: drain timer\n", rf.me)
 													<-rf.t.C
 												}
 
@@ -249,7 +249,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 											}
 											rf.nextIndex[server] = detectReply.FirstTermIndex
 										}
-										DPrintf("[server: %v]Consistency check: server: %v, firstTermIndex: %v", rf.me, server, firstTermIndex)
+										debugPrintf("[server: %v]Consistency check: server: %v, firstTermIndex: %v", rf.me, server, firstTermIndex)
 										forceAppendEntriesArgs := &AppendEntriesArgs{
 											Term:         rf.currentTerm,
 											LeaderID:     rf.me,
@@ -273,7 +273,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 												// reset timer
 												if !rf.t.Stop() {
-													DPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
+													debugPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
 													<-rf.t.C
 												}
 
@@ -282,7 +282,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 												rf.mu.Unlock()
 												return
 											} else {
-												DPrintf("[server: %v]successfully append entries: %v\n", rf.me, forceReply)
+												debugPrintf("[server: %v]successfully append entries: %v\n", rf.me, forceReply)
 												rf.nextIndex[server] = len(rf.logs)
 												rf.matchIndex[server] = forceAppendEntriesArgs.PrevLogIndex + len(forceAppendEntriesArgs.Entries)
 												rf.mu.Unlock()
@@ -290,7 +290,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 												return
 											}
 										} else {
-											DPrintf("[server: %v]no reponse from %v\n", rf.me, server)
+											debugPrintf("[server: %v]no reponse from %v\n", rf.me, server)
 											rf.nextIndex[server] = len(rf.logs)
 										}
 									} else {
@@ -299,7 +299,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 										// reset timer
 										if !rf.t.Stop() {
-											DPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
+											debugPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
 											<-rf.t.C
 										}
 
@@ -323,7 +323,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		for {
 			select {
 			case <-rf.shutdown:
-				DPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
+				debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
 				//rf.mu.Unlock()
 				return
 			default:
@@ -351,18 +351,18 @@ func Make(peers []*labrpc.ClientEnd, me int,
 							rf.commitIndex = index
 						}
 					}
-					DPrintf("[server: %v]matchIndex: %v, cntr: %v, rf.commitIndex: %v\n", rf.me, rf.matchIndex, matchIndexCntr, rf.commitIndex)
+					debugPrintf("[server: %v]matchIndex: %v, cntr: %v, rf.commitIndex: %v\n", rf.me, rf.matchIndex, matchIndexCntr, rf.commitIndex)
 				}
 
 				if rf.lastApplied < rf.commitIndex {
-					DPrintf("[server: %v]lastApplied: %v, commitIndex: %v\n", rf.me, rf.lastApplied, rf.commitIndex)
+					debugPrintf("[server: %v]lastApplied: %v, commitIndex: %v\n", rf.me, rf.lastApplied, rf.commitIndex)
 					for rf.lastApplied < rf.commitIndex {
 						rf.lastApplied++
 						applyMsg := ApplyMsg{
 							CommandValid: true,
 							Command:      rf.logs[rf.lastApplied].Command,
 							CommandIndex: rf.lastApplied}
-						DPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
+						debugPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
 						rf.mu.Unlock()
 						applyCh <- applyMsg
 						rf.mu.Lock()

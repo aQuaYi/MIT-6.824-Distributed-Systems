@@ -66,7 +66,7 @@ func (rf *Raft) persist() {
 		e.Encode(&b.Command)
 	}
 	data := buffer.Bytes()
-	DPrintf("[server: %v]Encode: rf currentTerm: %v, votedFor: %v, log:%v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs)
+	debugPrintf("[server: %v]Encode: rf currentTerm: %v, votedFor: %v, log:%v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs)
 	rf.persister.SaveRaftState(data)
 }
 
@@ -107,7 +107,7 @@ func (rf *Raft) readPersist(data []byte) {
 	var votedFor int
 	if d.Decode(&currentTerm) != nil ||
 		d.Decode(&votedFor) != nil {
-		DPrintf("error in decode currentTerm and votedFor, err: %v\n", d.Decode(&currentTerm))
+		debugPrintf("error in decode currentTerm and votedFor, err: %v\n", d.Decode(&currentTerm))
 	} else {
 		rf.currentTerm = currentTerm
 		rf.votedFor = votedFor
@@ -118,7 +118,7 @@ func (rf *Raft) readPersist(data []byte) {
 			if err == io.EOF {
 				break
 			} else {
-				DPrintf("error when decode log, err: %v\n", err)
+				debugPrintf("error when decode log, err: %v\n", err)
 			}
 		}
 
@@ -129,7 +129,7 @@ func (rf *Raft) readPersist(data []byte) {
 	}
 	//rf.commitIndex = len(rf.logs) - 1
 	//rf.lastApplied = len(rf.logs) - 1
-	DPrintf("[server: %v]Decode: rf currentTerm: %v, votedFor: %v, log:%v, persist data: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, data)
+	debugPrintf("[server: %v]Decode: rf currentTerm: %v, votedFor: %v, log:%v, persist data: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, data)
 
 }
 
@@ -170,7 +170,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 
 		rf.logs = append(rf.logs, *logEntry)
 
-		DPrintf("[server: %v]appendEntriesArgs entry: %v\n", rf.me, *logEntry)
+		debugPrintf("[server: %v]appendEntriesArgs entry: %v\n", rf.me, *logEntry)
 
 		appendEntriesArgs := make([]*AppendEntriesArgs, len(rf.peers))
 		appendEntriesReply := make([]*AppendEntriesReply, len(rf.peers))
@@ -186,7 +186,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 					LeaderCommit: rf.commitIndex}
 
 				rf.nextIndex[server] += len(appendEntriesArgs[server].Entries)
-				DPrintf("leader:%v, nextIndex:%v\n", rf.me, rf.nextIndex)
+				debugPrintf("leader:%v, nextIndex:%v\n", rf.me, rf.nextIndex)
 
 				appendEntriesReply[server] = new(AppendEntriesReply)
 
@@ -232,7 +232,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		isLeader = false
 	}
 
-	DPrintf("[server: %v] return value: log index:%v, term:%v, isLeader:%v\n", rf.me, index, term, isLeader)
+	debugPrintf("[server: %v] return value: log index:%v, term:%v, isLeader:%v\n", rf.me, index, term, isLeader)
 	return index, term, isLeader
 }
 

@@ -3,12 +3,11 @@ package raft
 import "log"
 
 // needDebug for Debugging
-const needDebug = false
+const needDebug = true
 
-// DPrintf 根据设置打印输出
-func DPrintf(format string, a ...interface{}) (n int, err error) {
+// debugPrintf 根据设置打印输出
+func debugPrintf(format string, a ...interface{}) {
 	if needDebug {
 		log.Printf(format, a...)
 	}
-	return
 }

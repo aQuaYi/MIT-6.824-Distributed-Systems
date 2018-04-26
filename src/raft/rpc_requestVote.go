@@ -39,7 +39,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
-	DPrintf("[Enter RequestVote][server: %v]term :%v voted for:%v, log len: %v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, len(rf.logs), rf.logs, rf.commitIndex, args)
+	debugPrintf("[Enter RequestVote][server: %v]term :%v voted for:%v, log len: %v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, len(rf.logs), rf.logs, rf.commitIndex, args)
 
 	// 1. false if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -60,12 +60,12 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
 		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
 			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
-		DPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
+		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
 		reply.Term = rf.currentTerm
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateID
 		if !rf.t.Stop() {
-			DPrintf("[server %d] RequestVote: drain timer\n", rf.me)
+			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
 			// TODO: 这是通知到什么地方了
 			<-rf.t.C
 		}

@@ -31,7 +31,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	defer rf.mu.Unlock()
 	// defer rf.persist()
 
-	DPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))
+	debugPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))
 
 	// 1. replay false at once if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -44,7 +44,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	rf.state = FOLLOWER
 
 	if !rf.t.Stop() {
-		DPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
+		debugPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
 		<-rf.t.C
 	}
 	timeout := time.Duration(500 + rand.Int31n(400))
@@ -52,7 +52,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 2. false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
-		DPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
+		debugPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
 		reply.Term = rf.currentTerm
 		reply.FirstTermIndex = len(rf.logs)
 		reply.Success = false
@@ -63,7 +63,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 3. if an existing entry conflicts with a new one (same index but diff terms),
 	//    delete the existing entry and all that follows it
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
-		DPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
+		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
 		reply.FirstTermIndex = args.PrevLogIndex
 		for rf.logs[reply.FirstTermIndex].LogTerm == rf.logs[reply.FirstTermIndex-1].LogTerm {
 			if reply.FirstTermIndex > rf.commitIndex {
@@ -72,7 +72,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 				reply.FirstTermIndex = rf.commitIndex + 1
 				break
 			}
-			DPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.FirstTermIndex)
+			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.FirstTermIndex)
 		}
 		rf.logs = rf.logs[:reply.FirstTermIndex]
 		reply.Term = rf.currentTerm
@@ -83,7 +83,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 4. append any new entries not already in the log
 	if len(args.Entries) == 0 {
-		DPrintf("[server: %v]received heartbeat\n", rf.me)
+		debugPrintf("[server: %v]received heartbeat\n", rf.me)
 	} else if len(rf.logs) == args.PrevLogIndex+1 {
 		for i, entry := range args.Entries {
 			rf.logs = append(rf.logs[:args.PrevLogIndex+i+1], entry)
