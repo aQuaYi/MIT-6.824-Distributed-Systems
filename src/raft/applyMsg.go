@@ -12,8 +12,6 @@ package raft
 // ApplyMsg, but set CommandValid to false for these other uses.
 //
 type ApplyMsg struct {
-	Snapshot     []byte
-	UseSnapshot  bool
 	CommandValid bool
 	Command      interface{}
 	CommandIndex int

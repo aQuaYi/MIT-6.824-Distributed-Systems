@@ -24,28 +24,30 @@ func (s state) String() string {
 	case FOLLOWER:
 		return "Follower"
 	default:
-		panic("出现了第4种状态")
+		panic("出现了第4种 server state")
 	}
 }
 
-const (
-	// HBINTERVAL is haertbeat interval
-	HBINTERVAL = 50 * time.Millisecond // 50ms
-
-	// NULL 表示没有投票给任何人
-	NULL = -1
-)
-
 // Raft implements a single Raft peer.
 type Raft struct {
-	mu        sync.Mutex          // Lock to protect shared access to this peer's state
-	peers     []*labrpc.ClientEnd // RPC end points of all peers
-	persister *Persister          // Object to hold this peer's persisted state
-	me        int                 // this peer's index into peers[]
+	mu    sync.Mutex          // Lock to protect shared access to this peer's state
+	peers []*labrpc.ClientEnd // RPC end points of all peers
+
+	// Persistent state on all servers
+	// (Updated on stable storage before responding to RPCs)
+	// This implementation doesn't use disk; ti will save and restore
+	// persistent state from a Persister object
+	// Raft should initialize its state from Persister,
+	// and should use it to save its persistent state each tiem the state changes
+	// Use ReadRaftState() and SaveRaftState
+	persister *Persister // Object to hold this peer's persisted state
+	me        int        // this peer's index into peers[]
 
 	// NOTICE: Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
+
+	// from Figure 2
 
 	// Persistent state on call servers
 	currentTerm int        // 此 server 当前所处的 term 编号
@@ -60,20 +62,11 @@ type Raft struct {
 	nextIndex  []int // 下一个要发送给 follower 的 log 的索引号
 	matchIndex []int // leader 与 follower 共有的 log 的最大的索引号
 
+	// extra
 	state    state
 	t        *time.Timer
 	cond     *sync.Cond
 	shutdown chan struct{}
-
-	// state     state
-	// voteCount int
-
-	// 	chanCommit    chan struct{}
-	// 	chanHeartbeat chan struct{}
-	// 	chanGrantVote chan struct{}
-	// 	chanLeader    chan struct{}
-	// 	chanApply     chan ApplyMsg
-
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int,

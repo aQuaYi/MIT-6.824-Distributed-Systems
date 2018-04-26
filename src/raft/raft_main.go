@@ -23,6 +23,14 @@ import (
 	"time"
 )
 
+const (
+	// HBINTERVAL is haertbeat interval
+	HBINTERVAL = 50 * time.Millisecond // 50ms
+
+	// NULL 表示没有投票给任何人
+	NULL = -1
+)
+
 // Make is
 // the service or tester wants to create a Raft server. the ports
 // of all the Raft servers (including this one) are in peers[]. this
@@ -352,7 +360,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 						rf.lastApplied++
 						applyMsg := ApplyMsg{
 							CommandValid: true,
-							Command:      rf.logs[rf.lastApplied].LogCmd,
+							Command:      rf.logs[rf.lastApplied].Command,
 							CommandIndex: rf.lastApplied}
 						DPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
 						rf.mu.Unlock()

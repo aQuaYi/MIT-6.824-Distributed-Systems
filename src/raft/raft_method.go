@@ -1,5 +1,11 @@
 package raft
 
+import (
+	"bytes"
+	"io"
+	"labgob"
+)
+
 // GetState 可以获取 raft 对象的状态
 // return currentTerm and whether this server
 // believes it is the leader.
@@ -40,16 +46,44 @@ func (rf *Raft) persist() {
 	// e.Encode(rf.yyy)
 	// data := w.Bytes()
 	// rf.persister.SaveRaftState(data)
+	//
+
+	buffer := new(bytes.Buffer)
+	e := labgob.NewEncoder(buffer)
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	for i, b := range rf.logs {
+		if i == 0 {
+			continue
+		}
+		//if i > rf.commitIndex {
+		//    break
+		//}
+		//DPrintf("[server: %v]Encode log: %v", rf.me, b)
+		e.Encode(b.LogTerm)
+		e.Encode(&b.Command)
+	}
+	data := buffer.Bytes()
+	DPrintf("[server: %v]Encode: rf currentTerm: %v, votedFor: %v, log:%v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs)
+	rf.persister.SaveRaftState(data)
 }
 
 //
 // restore previously persisted state.
+// func (*Deocder) Decode(e interface{}) error
+//     Decode reads the next value from the input stream and stores it in
+//     the data represented by the empty interface value. If e is nil, the
+//     value will be discarded.
+//     Otherwise, the value underlying e must be a pointer to the correct
+//     type for the next data item received. If the input is at EOF,
+//     Decode returns io.EOF and does not modify e
 //
 func (rf *Raft) readPersist(data []byte) {
+	//DPrintf("[server: %v]read persist data: %v, len of data: %v\n", rf.me, data, len(data));
 	if data == nil || len(data) < 1 { // bootstrap without any state?
 		return
 	}
-	// NOTICE: Your code here (2C).
+	// Your code here (2C).
 	// Example:
 	// r := bytes.NewBuffer(data)
 	// d := labgob.NewDecoder(r)
@@ -62,6 +96,39 @@ func (rf *Raft) readPersist(data []byte) {
 	//   rf.xxx = xxx
 	//   rf.yyy = yyy
 	// }
+
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	buffer := bytes.NewBuffer(data)
+	d := labgob.NewDecoder(buffer)
+	var currentTerm int
+	var votedFor int
+	if d.Decode(&currentTerm) != nil ||
+		d.Decode(&votedFor) != nil {
+		DPrintf("error in decode currentTerm and votedFor, err: %v\n", d.Decode(&currentTerm))
+	} else {
+		rf.currentTerm = currentTerm
+		rf.votedFor = votedFor
+	}
+	for {
+		var log LogEntry
+		if err := d.Decode(&log.LogTerm); err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				DPrintf("error when decode log, err: %v\n", err)
+			}
+		}
+
+		if err := d.Decode(&log.Command); err != nil {
+			panic(err)
+		}
+		rf.logs = append(rf.logs, log)
+	}
+	//rf.commitIndex = len(rf.logs) - 1
+	//rf.lastApplied = len(rf.logs) - 1
+	DPrintf("[server: %v]Decode: rf currentTerm: %v, votedFor: %v, log:%v, persist data: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, data)
+
 }
 
 // Start 启动
@@ -77,18 +144,93 @@ func (rf *Raft) readPersist(data []byte) {
 // term. the third return value is true if this server believes it is
 // the leader.
 //
+//
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
+	index := -1
+	term := -1
+	isLeader := true
+
+	// Your code here (2B).
+	// if command received from client:
+	// append entry to local log, respond after entry applied to state machine
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	index := -1
-	term := rf.currentTerm
-	isLeader := rf.state == LEADER
-	if isLeader {
-		index = rf.getLastIndex() + 1
-		//fmt.Printf("raft:%d start\n",rf.me)
-		rf.logs = append(rf.logs, LogEntry{LogTerm: term, LogCmd: command, LogIndex: index}) // append new entry from client
-		rf.persist()
+
+	switch rf.state {
+	case LEADER:
+		index = len(rf.logs)
+		term = rf.currentTerm
+		isLeader = true
+
+		logEntry := new(LogEntry)
+		logEntry.LogTerm = rf.currentTerm
+		logEntry.Command = command
+
+		rf.logs = append(rf.logs, *logEntry)
+
+		DPrintf("[server: %v]appendEntriesArgs entry: %v\n", rf.me, *logEntry)
+
+		appendEntriesArgs := make([]*AppendEntriesArgs, len(rf.peers))
+		appendEntriesReply := make([]*AppendEntriesReply, len(rf.peers))
+
+		for server := range rf.peers {
+			if server != rf.me {
+				appendEntriesArgs[server] = &AppendEntriesArgs{
+					Term:         rf.currentTerm,
+					LeaderID:     rf.me,
+					PrevLogIndex: rf.nextIndex[server] - 1,
+					PrevLogTerm:  rf.logs[rf.nextIndex[server]-1].LogTerm,
+					Entries:      []LogEntry{*logEntry},
+					LeaderCommit: rf.commitIndex}
+
+				rf.nextIndex[server] += len(appendEntriesArgs[server].Entries)
+				DPrintf("leader:%v, nextIndex:%v\n", rf.me, rf.nextIndex)
+
+				appendEntriesReply[server] = new(AppendEntriesReply)
+
+				//go func(rf *Raft, server int, args *AppendEntriesArgs, reply *AppendEntriesReply) {
+				//    for {
+				//        DPrintf("[server: %v]qwe: %v\n", rf.me, args.Entries[0].Command)
+				//        trialReply := new(AppendEntriesReply)
+				//        ok := rf.sendAppendEntries(server, args, trialReply)
+				//        rf.mu.Lock()
+				//        if rf.state != "Leader" {
+				//            rf.mu.Unlock()
+				//            return
+				//        }
+				//        if args.Term != rf.currentTerm {
+				//            rf.mu.Unlock()
+				//            return
+				//        }
+				//        if ok && trialReply.Success {
+				//            reply.Term    = trialReply.Term
+				//            reply.Success = trialReply.Success
+				//            rf.matchIndex[server] = appendEntriesArgs[server].PrevLogIndex + len(appendEntriesArgs[server].Entries)
+				//            DPrintf("leader:%v, matchIndex:%v\n", rf.me, rf.matchIndex)
+				//            rf.mu.Unlock()
+				//            break
+				//        }
+				//        if ok && trialReply.Term > rf.currentTerm {
+				//            rf.state = "Follower"
+				//            rf.currentTerm = trialReply.Term
+				//            rf.mu.Unlock()
+				//            return
+				//        }
+				//        rf.mu.Unlock()
+				//        time.Sleep(500 * time.Millisecond)
+				//    }
+				//    DPrintf("[server: %v]AppendEntries reply of %v from follower %v, reply:%v\n", rf.me, args, server, reply);
+				//    rf.cond.Broadcast()
+				//
+				//}(rf, server, appendEntriesArgs[server], appendEntriesReply[server])
+			}
+		}
+
+	default:
+		isLeader = false
 	}
+
+	DPrintf("[server: %v] return value: log index:%v, term:%v, isLeader:%v\n", rf.me, index, term, isLeader)
 	return index, term, isLeader
 }
 
@@ -98,6 +240,11 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 // in Kill(), but it might be convenient to (for example)
 // turn off debug output from this instance.
 //
+//
 func (rf *Raft) Kill() {
-	// NOTICE: Your code here, if desired.
+	// Your code here, if desired.
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	close(rf.shutdown)
+	rf.cond.Broadcast()
 }
