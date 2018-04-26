@@ -10,6 +10,7 @@ func (rf *Raft) contestAnElection() {
 	// TODO: 为什么不在这里 ++
 	//rf.currentTerm++
 	// vote for itself
+
 	rf.votedFor = rf.me
 	grantedCnt := 1
 
