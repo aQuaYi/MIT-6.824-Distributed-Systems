@@ -41,8 +41,7 @@ const (
 // Make() must return quickly, so it should start goroutines
 // for any long-running work.
 //
-func Make(peers []*labrpc.ClientEnd, me int,
-	persister *Persister, applyCh chan ApplyMsg) *Raft {
+func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := newRaft(peers, me, persister, applyCh)
 
 	go func(rf *Raft) {
@@ -81,66 +80,64 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		}
 	}(rf)
 
+	// TODO: 这个函数是干什么用的
 	go func(rf *Raft, applyCh chan ApplyMsg) {
 		for {
-			select {
-			case <-rf.shutdown:
+			if rf.hasShutdown() {
 				debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
 				//rf.mu.Unlock()
 				return
-			default:
-				matchIndexCntr := make(map[int]int)
-				rf.mu.Lock()
-				// update rf.commitIndex based on matchIndex[]
-				// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N
-				// and log[N].term == currentTerm:
-				// set commitIndex = N
-				if rf.state == LEADER {
-					rf.matchIndex[rf.me] = len(rf.logs) - 1
-					for _, logIndex := range rf.matchIndex {
-						if _, ok := matchIndexCntr[logIndex]; !ok {
-							for _, logIndex2 := range rf.matchIndex {
-								if logIndex <= logIndex2 {
-									matchIndexCntr[logIndex]++
-								}
+			}
+			matchIndexCntr := make(map[int]int)
+			rf.mu.Lock()
+			// update rf.commitIndex based on matchIndex[]
+			// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N
+			// and log[N].term == currentTerm:
+			// set commitIndex = N
+			if rf.state == LEADER {
+				rf.matchIndex[rf.me] = len(rf.logs) - 1
+				for _, logIndex := range rf.matchIndex {
+					if _, ok := matchIndexCntr[logIndex]; !ok {
+						for _, logIndex2 := range rf.matchIndex {
+							if logIndex <= logIndex2 {
+								matchIndexCntr[logIndex]++
 							}
 						}
 					}
-					// find the max matchIndex committed
-					// paper 5.4.2, only log entries from the leader's current term are committed by counting replicas
-					for index, matchNum := range matchIndexCntr {
-						if matchNum > len(rf.peers)/2 && index > rf.commitIndex && rf.logs[index].LogTerm == rf.currentTerm {
-							rf.commitIndex = index
-						}
-					}
-					debugPrintf("[server: %v]matchIndex: %v, cntr: %v, rf.commitIndex: %v\n", rf.me, rf.matchIndex, matchIndexCntr, rf.commitIndex)
 				}
-
-				if rf.lastApplied < rf.commitIndex {
-					debugPrintf("[server: %v]lastApplied: %v, commitIndex: %v\n", rf.me, rf.lastApplied, rf.commitIndex)
-					for rf.lastApplied < rf.commitIndex {
-						rf.lastApplied++
-						applyMsg := ApplyMsg{
-							CommandValid: true,
-							Command:      rf.logs[rf.lastApplied].Command,
-							CommandIndex: rf.lastApplied}
-						debugPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
-						rf.mu.Unlock()
-						applyCh <- applyMsg
-						rf.mu.Lock()
-					}
-					// persist only when possible committed data
-					// for leader, it's easy to determine
-					// persist leader during commit
-					if rf.state == LEADER {
-						rf.persist()
+				// find the max matchIndex committed
+				// paper 5.4.2, only log entries from the leader's current term are committed by counting replicas
+				for index, matchNum := range matchIndexCntr {
+					if matchNum > len(rf.peers)/2 && index > rf.commitIndex && rf.logs[index].LogTerm == rf.currentTerm {
+						rf.commitIndex = index
 					}
 				}
-				rf.cond.Wait()
-				rf.mu.Unlock()
+				debugPrintf("[server: %v]matchIndex: %v, cntr: %v, rf.commitIndex: %v\n", rf.me, rf.matchIndex, matchIndexCntr, rf.commitIndex)
 			}
-		}
 
+			if rf.lastApplied < rf.commitIndex {
+				debugPrintf("[server: %v]lastApplied: %v, commitIndex: %v\n", rf.me, rf.lastApplied, rf.commitIndex)
+				for rf.lastApplied < rf.commitIndex {
+					rf.lastApplied++
+					applyMsg := ApplyMsg{
+						CommandValid: true,
+						Command:      rf.logs[rf.lastApplied].Command,
+						CommandIndex: rf.lastApplied}
+					debugPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
+					rf.mu.Unlock()
+					applyCh <- applyMsg
+					rf.mu.Lock()
+				}
+				// persist only when possible committed data
+				// for leader, it's easy to determine
+				// persist leader during commit
+				if rf.state == LEADER {
+					rf.persist()
+				}
+			}
+			rf.cond.Wait()
+			rf.mu.Unlock()
+		}
 	}(rf, applyCh)
 
 	// initialize from state persisted before a crash
