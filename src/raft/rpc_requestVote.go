@@ -110,3 +110,14 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	return ok
 }
+
+func newRequestVoteArgs(rf *Raft) *RequestVoteArgs {
+	args := &RequestVoteArgs{
+		Term:         rf.currentTerm + 1,
+		CandidateID:  rf.me,
+		LastLogIndex: len(rf.logs) - 1,
+		LastLogTerm:  rf.logs[len(rf.logs)-1].LogTerm,
+	}
+	debugPrintf("[server: %v] Candidate,  send RequestVote: %v\n", rf.me, args)
+	return args
+}

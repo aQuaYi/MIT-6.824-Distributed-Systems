@@ -50,10 +50,8 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.t = time.NewTimer(timeout * time.Millisecond)
 	go func(rf *Raft) {
 		for {
+			// TODO: 为什么 for 循环一开始要 lock
 			rf.mu.Lock()
-			if rf.state == CANDIDATE {
-				debugPrintf("[server: %v]state:%s\n", rf.me, rf.state)
-			}
 			select {
 			case <-rf.shutdown:
 				rf.mu.Unlock()
@@ -74,7 +72,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 					time.Sleep(1 * time.Millisecond)
 
 				case CANDIDATE:
-					requestVoteArgs := new(RequestVoteArgs)
+					debugPrintf("[server: %v]state:%s\n", rf.me, rf.state)
 					requestVoteReply := make([]*RequestVoteReply, len(peers))
 
 					// increment currentTerm
@@ -82,15 +80,10 @@ func Make(peers []*labrpc.ClientEnd, me int,
 					// vote for itself
 					rf.votedFor = rf.me
 					grantedCnt := 1
-					// send RequestVote to all other servers
-					requestVoteArgs.Term = rf.currentTerm + 1
-					requestVoteArgs.CandidateID = rf.me
-					//requestVoteArgs.LastLogIndex = rf.commitIndex
-					//requestVoteArgs.LastLogTerm  = rf.logs[rf.commitIndex].LogTerm
-					requestVoteArgs.LastLogIndex = len(rf.logs) - 1
-					requestVoteArgs.LastLogTerm = rf.logs[len(rf.logs)-1].LogTerm
-					debugPrintf("[server: %v] Candidate, election timeout %v, send RequestVote: %v\n", me, timeout*time.Millisecond, requestVoteArgs)
 
+					requestVoteArgs := newRequestVoteArgs(rf)
+
+					// send RequestVote to all other servers
 					requestVoteReplyChan := make(chan *RequestVoteReply)
 					for server := range peers {
 						if server == me {
@@ -129,6 +122,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 							if reply.VoteGranted {
 								grantedCnt++
 								if grantedCnt > len(peers)/2 {
+									// TODO: 这里有问题吧
+									// 应该是先 Term++
+									// 再进行选举
 									rf.currentTerm++
 									rf.state = LEADER
 
