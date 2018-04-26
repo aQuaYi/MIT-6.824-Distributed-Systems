@@ -2,6 +2,7 @@ package raft
 
 import (
 	"labrpc"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -90,5 +91,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 	rf.cond = sync.NewCond(&rf.mu)
 	rf.shutdown = make(chan struct{})
 
+	timeout := time.Duration(300 + rand.Int31n(400))
+	rf.t = time.NewTimer(timeout * time.Millisecond)
 	return rf
 }

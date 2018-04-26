@@ -19,7 +19,6 @@ package raft
 
 import (
 	"labrpc"
-	"math/rand"
 	"time"
 )
 
@@ -46,8 +45,6 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := newRaft(peers, me, persister, applyCh)
 
-	timeout := time.Duration(300 + rand.Int31n(400))
-	rf.t = time.NewTimer(timeout * time.Millisecond)
 	go func(rf *Raft) {
 		for {
 			// TODO: 为什么 for 循环一开始要 lock
@@ -65,7 +62,11 @@ func Make(peers []*labrpc.ClientEnd, me int,
 						debugPrintf("[server: %v]change to candidate\n", rf.me)
 						rf.state = CANDIDATE
 						// reset election timer
-						rf.t.Reset(timeout * time.Millisecond)
+						//
+						// TODO: 删除此处内容
+						// rf.t.Reset(timeout * time.Millisecond)
+						//
+						rf.timerReset()
 					default:
 					}
 					rf.mu.Unlock()

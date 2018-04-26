@@ -251,6 +251,11 @@ func (rf *Raft) Kill() {
 	rf.cond.Broadcast()
 }
 
+func (rf *Raft) HasShutdown() {
+
+	return
+}
+
 func (rf *Raft) timerReset() {
 	timeout := time.Duration(500 + rand.Int31n(400))
 	rf.t.Reset(timeout * time.Millisecond)
