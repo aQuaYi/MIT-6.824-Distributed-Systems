@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io"
 	"labgob"
+	"math/rand"
+	"time"
 )
 
 // GetState 可以获取 raft 对象的状态
@@ -247,4 +249,9 @@ func (rf *Raft) Kill() {
 	defer rf.mu.Unlock()
 	close(rf.shutdown)
 	rf.cond.Broadcast()
+}
+
+func (rf *Raft) timerReset() {
+	timeout := time.Duration(500 + rand.Int31n(400))
+	rf.t.Reset(timeout * time.Millisecond)
 }
