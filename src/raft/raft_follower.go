@@ -1,7 +1,5 @@
 package raft
 
-import "time"
-
 func (rf *Raft) standingBy() {
 	select {
 	case <-rf.t.C:
@@ -16,5 +14,5 @@ func (rf *Raft) standingBy() {
 	default:
 	}
 	rf.mu.Unlock()
-	time.Sleep(1 * time.Millisecond)
+
 }

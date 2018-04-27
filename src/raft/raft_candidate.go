@@ -1,7 +1,5 @@
 package raft
 
-import "time"
-
 func (rf *Raft) contestAnElection() {
 	debugPrintf("[server:%v]state:%s\n, 开始给自己拉票精选", rf.me, rf.state)
 
@@ -67,7 +65,7 @@ loop:
 		default:
 			// TODO: 为什么会有这个呢：
 			rf.mu.Unlock()
-			time.Sleep(1 * time.Millisecond)
+
 			rf.mu.Lock()
 			if rf.state == FOLLOWER {
 				break loop
