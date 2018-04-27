@@ -16,14 +16,18 @@ func (rf *Raft) GetState() (int, bool) {
 	var isleader bool
 	// NOTICE: Your code here (2A).
 
-	// TODO: 这里为什么要上锁呢
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	// // TODO: 这里为什么要上锁呢
+	// rf.mu.Lock()
+	// defer rf.mu.Unlock()
 
 	term = rf.currentTerm
 	isleader = rf.state == LEADER
 
 	return term, isleader
+}
+
+func (rf *Raft) isLeader() bool {
+	return rf.state == LEADER
 }
 
 func (rf *Raft) getLastIndex() int {

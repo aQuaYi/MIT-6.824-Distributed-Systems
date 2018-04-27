@@ -71,6 +71,7 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 				//rf.mu.Unlock()
 				return
 			}
+
 			matchIndexCntr := make(map[int]int)
 			rf.mu.Lock()
 			// update rf.commitIndex based on matchIndex[]
@@ -107,9 +108,9 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 						Command:      rf.logs[rf.lastApplied].Command,
 						CommandIndex: rf.lastApplied}
 					debugPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
-					rf.mu.Unlock()
+					// rf.mu.Unlock()
 					applyCh <- applyMsg
-					rf.mu.Lock()
+					// rf.mu.Lock()
 				}
 				// persist only when possible committed data
 				// for leader, it's easy to determine
