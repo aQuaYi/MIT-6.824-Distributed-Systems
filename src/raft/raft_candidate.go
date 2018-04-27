@@ -4,7 +4,7 @@ import "time"
 
 // 发起一场竞选
 func (rf *Raft) contestAnElection() {
-	debugPrintf("[server: %v]state:%s\n, 开始给自己拉票竞选", rf.me, rf.state)
+	debugPrintf("[server: %v]state:%s, 开始给自己拉票竞选", rf.me, rf.state)
 
 	// increment currentTerm
 	// TODO: 为什么不在这里 ++
