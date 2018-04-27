@@ -111,7 +111,7 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	return ok
 }
 
-func newRequestVoteArgs(rf *Raft) *RequestVoteArgs {
+func (rf *Raft) newRequestVoteArgs() *RequestVoteArgs {
 	args := &RequestVoteArgs{
 		Term:         rf.currentTerm + 1,
 		CandidateID:  rf.me,

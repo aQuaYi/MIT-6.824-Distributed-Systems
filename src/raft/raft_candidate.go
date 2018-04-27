@@ -12,13 +12,17 @@ func (rf *Raft) contestAnElection() {
 
 	// 先给自己投一票
 	rf.votedFor = rf.me
+	// 现在总的投票人数为 1，就是自己投给自己的那一票
 	grantedCnt := 1
 
-	requestVoteArgs := newRequestVoteArgs(rf)
+	// 根据自己的参数，生成新的 requestVoteArgs
+	// 发给所有人的都是一样的，所以只用生成一份
+	requestVoteArgs := rf.newRequestVoteArgs()
 
-	// send RequestVote to all other servers
+	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
 	requestVoteReplyChan := make(chan *RequestVoteReply)
 
+	// 保存每个 peer 回复的结果
 	requestVoteReply := make([]*RequestVoteReply, len(rf.peers))
 
 	for server := range rf.peers {
