@@ -43,12 +43,12 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// TODO: WHY???
 	rf.state = FOLLOWER
 
-	if !rf.t.Stop() {
+	if !rf.electionTimer.Stop() {
 		debugPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
-		<-rf.t.C
+		<-rf.electionTimer.C
 	}
 	timeout := time.Duration(500 + rand.Int31n(400))
-	rf.t.Reset(timeout * time.Millisecond)
+	rf.electionTimer.Reset(timeout * time.Millisecond)
 
 	// 2. false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {

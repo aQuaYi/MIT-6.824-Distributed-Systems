@@ -64,13 +64,13 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.Term = rf.currentTerm
 		reply.VoteGranted = true
 		rf.votedFor = args.CandidateID
-		if !rf.t.Stop() {
+		if !rf.electionTimer.Stop() {
 			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
 			// TODO: 这是通知到什么地方了
-			<-rf.t.C
+			<-rf.electionTimer.C
 		}
 		timeout := time.Duration(500 + rand.Int31n(400))
-		rf.t.Reset(timeout * time.Millisecond)
+		rf.electionTimer.Reset(timeout * time.Millisecond)
 	} else {
 		reply.VoteGranted = false
 	}

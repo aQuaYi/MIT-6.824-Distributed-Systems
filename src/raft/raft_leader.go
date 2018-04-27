@@ -70,9 +70,9 @@ func (rf *Raft) exercisePower() {
 							rf.currentTerm = detectReply.Term
 
 							// reset timer
-							if !rf.t.Stop() {
+							if !rf.electionTimer.Stop() {
 								debugPrintf("[server: %v]Leader change to follower1: drain timer\n", rf.me)
-								<-rf.t.C
+								<-rf.electionTimer.C
 							}
 
 							rf.timerReset()
@@ -103,9 +103,9 @@ func (rf *Raft) exercisePower() {
 							rf.currentTerm = forceReply.Term
 
 							// reset timer
-							if !rf.t.Stop() {
+							if !rf.electionTimer.Stop() {
 								debugPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
-								<-rf.t.C
+								<-rf.electionTimer.C
 							}
 
 							rf.timerReset()
@@ -127,9 +127,9 @@ func (rf *Raft) exercisePower() {
 					rf.currentTerm = reply.Term
 
 					// reset timer
-					if !rf.t.Stop() {
+					if !rf.electionTimer.Stop() {
 						debugPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
-						<-rf.t.C
+						<-rf.electionTimer.C
 					}
 
 					rf.timerReset()

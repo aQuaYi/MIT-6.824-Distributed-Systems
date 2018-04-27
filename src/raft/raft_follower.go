@@ -4,7 +4,7 @@ import "time"
 
 func (rf *Raft) standingBy() {
 	select {
-	case <-rf.t.C:
+	case <-rf.electionTimer.C:
 		debugPrintf("[server: %v]change to candidate\n", rf.me)
 		rf.state = CANDIDATE
 		// reset election timer

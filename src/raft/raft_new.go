@@ -7,16 +7,16 @@ import (
 	"time"
 )
 
-type state int
+type stateValue int
 
 // 规定了 server 所需的 3 种状态
 const (
-	LEADER state = iota
+	LEADER stateValue = iota
 	CANDIDATE
 	FOLLOWER
 )
 
-func (s state) String() string {
+func (s stateValue) String() string {
 	switch s {
 	case LEADER:
 		return "Leader"
@@ -64,12 +64,12 @@ type Raft struct {
 	matchIndex []int // leader 与 follower 共有的 log 的最大的索引号
 
 	// extra
-	state    state
-	t        *time.Timer
-	cond     *sync.Cond
-	shutdown chan struct{}
+	state         stateValue
+	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
+	cond          *sync.Cond
+	shutdown      chan struct{}
 	// 当 rf 接收到合格的 appendEntries rpc 时，会通过 heartbeat 发送信号
-	heartbeat chan struct{}
+	// heartbeat chan struct{}
 
 	// election 相关的参数
 	votesForMe int // 投票给我的选票总数
@@ -86,7 +86,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 	rf.currentTerm = 0
 	// votedFor
 	rf.votedFor = NULL
-	//log
+	// logs
 	rf.logs = make([]LogEntry, 1)
 
 	rf.commitIndex = 0
@@ -97,10 +97,10 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 
 	rf.shutdown = make(chan struct{})
 
-	rf.heartbeat = make(chan struct{})
+	// rf.heartbeat = make(chan struct{})
 
 	timeout := time.Duration(300 + rand.Int31n(400))
-	rf.t = time.NewTimer(timeout * time.Millisecond)
+	rf.electionTimer = time.NewTimer(timeout * time.Millisecond)
 
 	return rf
 }

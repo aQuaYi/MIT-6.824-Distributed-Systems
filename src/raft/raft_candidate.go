@@ -50,7 +50,7 @@ loop:
 	for {
 		select {
 		// election timout elapses: start new election
-		case <-rf.t.C:
+		case <-rf.electionTimer.C:
 			//rf.t.Stop()
 			rf.timerReset()
 			break loop
