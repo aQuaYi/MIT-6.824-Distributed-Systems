@@ -6,16 +6,17 @@ func (rf *Raft) exercisePower() {
 	// Upon election: send initial hearbeat to each server
 	// repeat during idle period to preven election timeout
 	period := time.Duration(100)
-	appendEntriesArgs := make([]*AppendEntriesArgs, len(rf.peers))
-	appendEntriesReply := make([]*AppendEntriesReply, len(rf.peers))
+
+	// appendEntriesArgs := make([]*AppendEntriesArgs, len(rf.peers))
+	// appendEntriesReply := make([]*AppendEntriesReply, len(rf.peers))
 
 	debugPrintf("[server: %v]Leader, send heartbeat, period: %v\n", rf.me, period*time.Millisecond)
 	for server := range rf.peers {
 		if server == rf.me {
 			continue
 		}
-		appendEntriesArgs[server] = newAppendEntriesArgs(rf, server)
-		appendEntriesReply[server] = new(AppendEntriesReply)
+		// appendEntriesArgs[server] = newAppendEntriesArgs(rf, server)
+		// appendEntriesReply[server] = new(AppendEntriesReply)
 
 		go func(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) {
 			ok := rf.sendAppendEntries(server, args, reply)
@@ -136,7 +137,7 @@ func (rf *Raft) exercisePower() {
 				}
 			}
 			rf.mu.Unlock()
-		}(server, appendEntriesArgs[server], appendEntriesReply[server])
+		}(server, newAppendEntriesArgs(rf, server), new(AppendEntriesReply))
 	}
 
 	rf.mu.Unlock()
