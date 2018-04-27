@@ -70,6 +70,9 @@ type Raft struct {
 	shutdown chan struct{}
 	// 当 rf 接收到合格的 appendEntries rpc 时，会通过 heartbeat 发送信号
 	heartbeat chan struct{}
+
+	// election 相关的参数
+	votesForMe int // 投票给我的选票总数
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int,
