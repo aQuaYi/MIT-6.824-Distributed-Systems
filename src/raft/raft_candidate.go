@@ -3,15 +3,14 @@ package raft
 import "time"
 
 func (rf *Raft) contestAnElection() {
-	debugPrintf("[server:%v]state:%s\n", rf.me, rf.state)
-
-	requestVoteReply := make([]*RequestVoteReply, len(rf.peers))
+	debugPrintf("[server:%v]state:%s\n, 开始给自己拉票精选", rf.me, rf.state)
 
 	// increment currentTerm
 	// TODO: 为什么不在这里 ++
 	//rf.currentTerm++
 	// vote for itself
 
+	// 先给自己投一票
 	rf.votedFor = rf.me
 	grantedCnt := 1
 
@@ -19,26 +18,36 @@ func (rf *Raft) contestAnElection() {
 
 	// send RequestVote to all other servers
 	requestVoteReplyChan := make(chan *RequestVoteReply)
+
+	requestVoteReply := make([]*RequestVoteReply, len(rf.peers))
+
 	for server := range rf.peers {
+		// 跳过自己
 		if server == rf.me {
 			continue
 		}
+
 		requestVoteReply[server] = new(RequestVoteReply)
 
 		go func(server int, args *RequestVoteArgs, reply *RequestVoteReply, replyChan chan *RequestVoteReply) {
-			ok := rf.sendRequestVote(server, args, reply)
+			// ok := rf.sendRequestVote(server, args, reply)
+			rf.sendRequestVote(server, args, reply)
 			rf.mu.Lock()
 			if rf.state != CANDIDATE {
 				rf.mu.Unlock()
 				return
 			}
 			rf.mu.Unlock()
-			if ok && reply.VoteGranted {
-				replyChan <- reply
-			} else {
-				reply.VoteGranted = false
-				replyChan <- reply
-			}
+
+			replyChan <- reply
+
+			// if ok && reply.VoteGranted {
+			// 	replyChan <- reply
+			// } else {
+			// 	reply.VoteGranted = false
+			// 	replyChan <- reply
+			// }
+
 		}(server, requestVoteArgs, requestVoteReply[server], requestVoteReplyChan)
 	}
 
@@ -77,10 +86,12 @@ loop:
 }
 
 func (rf *Raft) comeToPower() {
+
 	// TODO: 这里有问题吧
 	// 应该是先 Term++
 	// 再进行选举
 	rf.currentTerm++
+
 	rf.state = LEADER
 
 	rf.nextIndex = make([]int, len(rf.peers))
