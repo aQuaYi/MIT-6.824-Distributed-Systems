@@ -2,8 +2,9 @@ package raft
 
 import "time"
 
+// 发起一场竞选
 func (rf *Raft) contestAnElection() {
-	debugPrintf("[server:%v]state:%s\n, 开始给自己拉票精选", rf.me, rf.state)
+	debugPrintf("[server: %v]state:%s\n, 开始给自己拉票竞选", rf.me, rf.state)
 
 	// increment currentTerm
 	// TODO: 为什么不在这里 ++
@@ -22,6 +23,7 @@ func (rf *Raft) contestAnElection() {
 	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
 	requestVoteReplyChan := make(chan *RequestVoteReply)
 
+	// 向每个 server 拉票
 	for server := range rf.peers {
 		// 跳过自己
 		if server == rf.me {
@@ -29,23 +31,27 @@ func (rf *Raft) contestAnElection() {
 		}
 
 		go func(server int, args *RequestVoteArgs, replyChan chan *RequestVoteReply) {
-			// ok := rf.sendRequestVote(server, args, reply)
+			// 生成投票结果变量
 			reply := new(RequestVoteReply)
+			// 拉票
 			rf.sendRequestVote(server, args, reply)
+
 			rf.mu.Lock()
+			// 如果 rf 已经不是 CANDIDATE 了
+			// 可以提前结束，不用反馈投票结果
 			if rf.state != CANDIDATE {
 				rf.mu.Unlock()
 				return
 			}
 			rf.mu.Unlock()
 
+			// 返回投票结果
 			replyChan <- reply
 
 		}(server, requestVoteArgs, requestVoteReplyChan)
 	}
 
 	reply := new(RequestVoteReply)
-	totalReturns := 0
 loop:
 	for {
 		select {
@@ -55,7 +61,6 @@ loop:
 			rf.timerReset()
 			break loop
 		case reply = <-requestVoteReplyChan:
-			totalReturns++
 			if !reply.VoteGranted {
 				continue
 			}

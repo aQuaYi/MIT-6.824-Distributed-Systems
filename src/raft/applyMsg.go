@@ -11,7 +11,7 @@ package raft
 // snapshots) on the applyCh; at that point you can add fields to
 // ApplyMsg, but set CommandValid to false for these other uses.
 //
-type ApplyMsg struct {
+type ApplyMsg struct { // TODO: 注释 applyMsg 中每个属性的含义
 	CommandValid bool
 	Command      interface{}
 	CommandIndex int

@@ -2,11 +2,12 @@ package raft
 
 // LogEntry is log entry
 type LogEntry struct {
-	LogIndex int
-	LogTerm  int
-	Command  interface{}
+	LogIndex int         // 此 log 在 LEADER.logs 中的索引号
+	LogTerm  int         // LEADER 在生成此 log 时的 LEADER.currentTerm
+	Command  interface{} // 具体的命令内容
 }
 
+// TODO: 注释 truncateLog
 func truncateLog(lastIncludedIndex int, lastIncludedTerm int, log []LogEntry) []LogEntry {
 
 	var newLogEntries []LogEntry
