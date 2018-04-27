@@ -55,16 +55,22 @@ func (rf *Raft) contestAnElection() {
 loop:
 	for {
 		select {
-		// election timout elapses: start new election
+		// 选举时间结束，需要开始新的选举
 		case <-rf.electionTimer.C:
 			//rf.t.Stop()
-			rf.timerReset()
+			rf.electionTimerReset()
+			// 结束 loop 循环
 			break loop
+			// 收到新的选票
 		case reply = <-requestVoteReplyChan:
+			// 不是投票给我的，就不用继续了
 			if !reply.VoteGranted {
 				continue
 			}
+
+			// 投票给我的人数 +1
 			rf.votesForMe++
+			// 如果投票任务过半，那我就是新的 LEADER 了
 			if rf.votesForMe > len(rf.peers)/2 {
 				rf.comeToPower()
 				break loop
@@ -75,6 +81,8 @@ loop:
 			time.Sleep(1 * time.Millisecond)
 			rf.mu.Lock()
 			if rf.state == FOLLOWER {
+				// rf 已经由于其他原因，转换成 FOLLOWER 了
+				// 也可以直接结束 loop 循环了
 				break loop
 			}
 		}
@@ -100,3 +108,5 @@ func (rf *Raft) comeToPower() {
 		rf.matchIndex[i] = 0
 	}
 }
+
+// TODO: 如果有 5 个 server，1,2 投票给 3， 3 成为 leader， 4 投票给 5， 5 没有赢得选举，但是，5 会 5.currentTerm++ 然后，开始新的 election，由于 只有 5.currentTerm 增加了，5 会成为新的 Leader。怎么破？

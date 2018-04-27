@@ -75,7 +75,7 @@ func (rf *Raft) exercisePower() {
 								<-rf.electionTimer.C
 							}
 
-							rf.timerReset()
+							rf.electionTimerReset()
 
 							rf.mu.Unlock()
 							return
@@ -108,7 +108,7 @@ func (rf *Raft) exercisePower() {
 								<-rf.electionTimer.C
 							}
 
-							rf.timerReset()
+							rf.electionTimerReset()
 
 							rf.mu.Unlock()
 							return
@@ -132,7 +132,7 @@ func (rf *Raft) exercisePower() {
 						<-rf.electionTimer.C
 					}
 
-					rf.timerReset()
+					rf.electionTimerReset()
 				}
 			}
 			rf.mu.Unlock()

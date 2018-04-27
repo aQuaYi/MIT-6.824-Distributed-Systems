@@ -8,8 +8,7 @@
 		{
 			"fsPath": "$ROOTPATH$/src/raft/raft_candidate.go",
 			"bookmarks": [
-				45,
-				76
+				45
 			]
 		}
 	]

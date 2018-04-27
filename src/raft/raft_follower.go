@@ -10,7 +10,7 @@ func (rf *Raft) standingBy() {
 		// reset election timer
 		//
 		// TODO: 需要在这里重置 timer 吗？
-		rf.timerReset()
+		rf.electionTimerReset()
 	default:
 	}
 	rf.mu.Unlock()
