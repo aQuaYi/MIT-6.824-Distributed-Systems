@@ -65,6 +65,7 @@ loop:
 				break loop
 			}
 		default:
+			// TODO: 为什么会有这个呢：
 			rf.mu.Unlock()
 			time.Sleep(1 * time.Millisecond)
 			rf.mu.Lock()
