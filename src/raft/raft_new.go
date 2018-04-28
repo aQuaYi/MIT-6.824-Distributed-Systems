@@ -7,28 +7,6 @@ import (
 	"time"
 )
 
-type stateValue int
-
-// 规定了 server 所需的 3 种状态
-const (
-	LEADER stateValue = iota
-	CANDIDATE
-	FOLLOWER
-)
-
-func (s stateValue) String() string {
-	switch s {
-	case LEADER:
-		return "Leader"
-	case CANDIDATE:
-		return "Candidate"
-	case FOLLOWER:
-		return "Follower"
-	default:
-		panic("出现了第4种 server state")
-	}
-}
-
 // Raft implements a single Raft peer.
 type Raft struct {
 	mu    sync.Mutex          // Lock to protect shared access to this peer's state
@@ -63,8 +41,11 @@ type Raft struct {
 	nextIndex  []int // 下一个要发送给 follower 的 log 的索引号
 	matchIndex []int // leader 与 follower 共有的 log 的最大的索引号
 
-	// extra
-	state         stateValue
+	// Raft 作为 FSM 管理自身状态所需的属性
+	state    fsmState
+	handlers map[fsmState]map[fsmEvent]fsmHandler
+
+	//
 	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
 	cond          *sync.Cond
 	shutdown      chan struct{}
@@ -93,6 +74,8 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 	rf.lastApplied = 0
 
 	rf.state = FOLLOWER
+	rf.handlers = make(map[fsmState]map[fsmEvent]fsmHandler, 3)
+
 	rf.cond = sync.NewCond(&rf.mu)
 
 	rf.shutdown = make(chan struct{})
