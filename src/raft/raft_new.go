@@ -2,7 +2,6 @@ package raft
 
 import (
 	"labrpc"
-	"math/rand"
 	"sync"
 	"time"
 )
@@ -50,41 +49,93 @@ type Raft struct {
 	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
 	cond          *sync.Cond
 	shutdown      chan struct{}
-	// 当 rf 接收到合格的 appendEntries rpc 时，会通过 heartbeat 发送信号
-	// heartbeat chan struct{}
+	// 当 rf 接收到合格的 rpc 信号时，会通过 receiveValidRPC 发送信号
+	receiveValidRPC chan struct{}
 
 	// election 相关的参数
 	votesForMe int // 投票给我的选票总数
 }
 
+// func newRaft(peers []*labrpc.ClientEnd, me int,
+// 	persister *Persister) *Raft {
+// 	rf := &Raft{}
+// 	rf.peers = peers
+// 	rf.persister = persister
+// 	rf.me = me
+// 	// currentTerm
+// 	rf.currentTerm = 0
+// 	// votedFor
+// 	rf.votedFor = NULL
+// 	// logs
+// 	rf.logs = make([]LogEntry, 1)
+// 	rf.commitIndex = 0
+// 	rf.lastApplied = 0
+// 	rf.state = FOLLOWER
+// 	rf.handlers = make(map[fsmState]map[fsmEvent]fsmHandler, 3)
+// 	rf.cond = sync.NewCond(&rf.rwmu)
+// 	rf.shutdown = make(chan struct{})
+// 	// rf.heartbeat = make(chan struct{})
+// 	timeout := time.Duration(150 + rand.Int31n(150))
+// 	rf.electionTimer = time.NewTimer(timeout * time.Millisecond)
+// 	return rf
+// }
+
 func newRaft(peers []*labrpc.ClientEnd, me int,
 	persister *Persister) *Raft {
-	rf := &Raft{}
-	rf.peers = peers
-	rf.persister = persister
-	rf.me = me
-
-	// currentTerm
-	rf.currentTerm = 0
-	// votedFor
-	rf.votedFor = NULL
-	// logs
-	rf.logs = make([]LogEntry, 1)
-
-	rf.commitIndex = 0
-	rf.lastApplied = 0
-
-	rf.state = FOLLOWER
-	rf.handlers = make(map[fsmState]map[fsmEvent]fsmHandler, 3)
-
+	rf := &Raft{
+		peers:         peers,
+		persister:     persister,
+		me:            me,
+		currentTerm:   0,
+		votedFor:      NULL,
+		logs:          make([]LogEntry, 1),
+		commitIndex:   0,
+		lastApplied:   0,
+		state:         FOLLOWER,
+		handlers:      make(map[fsmState]map[fsmEvent]fsmHandler, 3),
+		shutdown:      make(chan struct{}),
+		electionTimer: time.NewTimer(time.Second),
+	}
 	rf.cond = sync.NewCond(&rf.rwmu)
+	rf.electionTimerReset()
+	return rf
+}
 
-	rf.shutdown = make(chan struct{})
+func newRaft2(peers []*labrpc.ClientEnd, me int,
+	persister *Persister) *Raft {
+	rf := &Raft{
+		peers:         peers,
+		persister:     persister,
+		me:            me,
+		currentTerm:   0,
+		votedFor:      NULL,
+		logs:          make([]LogEntry, 1),
+		commitIndex:   0,
+		lastApplied:   0,
+		state:         FOLLOWER,
+		handlers:      make(map[fsmState]map[fsmEvent]fsmHandler, 3),
+		shutdown:      make(chan struct{}),
+		electionTimer: time.NewTimer(time.Second),
+	}
+	rf.electionTimerReset()
 
-	// rf.heartbeat = make(chan struct{})
-
-	timeout := time.Duration(300 + rand.Int31n(400))
-	rf.electionTimer = time.NewTimer(timeout * time.Millisecond)
+	go electionTimeOutLoop(rf)
 
 	return rf
+}
+
+//
+func electionTimeOutLoop(rf *Raft) {
+	for {
+		if rf.hasShutdown() {
+			return
+		}
+
+		select {
+		case <-rf.electionTimer.C:
+			rf.call(electionTimeOutEvent)
+		case <-rf.receiveValidRPC:
+			rf.electionTimerReset()
+		}
+	}
 }

@@ -100,6 +100,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		// persist only when possible committed data
 		// for leader, it's easy to determine
 		// persist follower whenever update
+		// NOTICE: 记得进行持久化工作
 		rf.persist()
 	}
 
