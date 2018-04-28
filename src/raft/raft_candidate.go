@@ -64,7 +64,7 @@ loop:
 			// 收到新的选票
 		case reply = <-requestVoteReplyChan:
 			// 不是投票给我的，就不用继续了
-			if !reply.isVoteGranted {
+			if !reply.IsVoteGranted {
 				continue
 			}
 

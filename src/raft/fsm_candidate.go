@@ -12,7 +12,7 @@ var (
 // 添加 CANDIDATE 状态下的处理函数
 func (rf *Raft) addCandidateHandler() {
 	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, anotherServerWinEvent, fsmHandler(fallToFollower))
+	rf.addHandler(CANDIDATE, anotherServerWinEvent, fsmHandler(convertToFollower))
 	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
 
 }

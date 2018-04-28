@@ -31,7 +31,7 @@ func (a RequestVoteArgs) String() string {
 type RequestVoteReply struct {
 	// NOTICE: Your data here (2A).
 	Term          int  // 投票人的 currentTerm
-	isVoteGranted bool // 返回 true，表示获得投票
+	IsVoteGranted bool // 返回 true，表示获得投票
 }
 
 // RequestVote 投票工作
@@ -49,7 +49,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// 1. false if term < currentTerm
 	if args.Term < rf.currentTerm {
-		reply.isVoteGranted = false
+		reply.IsVoteGranted = false
 		// TODO: 此处直接 return 可否
 	} else if args.Term > rf.currentTerm {
 		rf.votedFor = NULL
@@ -63,12 +63,13 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
 	//    If the logs end with the same term, then whichever log is longer is more up-to-date
 	//
-	if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
-		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
-			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
+	// if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
+	// 	((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
+	// 		((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
+	if isValidArgs(rf, args) {
 		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
 		reply.Term = rf.currentTerm
-		reply.isVoteGranted = true
+		reply.IsVoteGranted = true
 		rf.votedFor = args.CandidateID
 		if !rf.electionTimer.Stop() {
 			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
@@ -78,7 +79,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		timeout := time.Duration(500 + rand.Int31n(400))
 		rf.electionTimer.Reset(timeout * time.Millisecond)
 	} else {
-		reply.isVoteGranted = false
+		reply.IsVoteGranted = false
 	}
 
 }
@@ -95,7 +96,7 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// 1. false if term < currentTerm
 	if args.Term < rf.currentTerm {
-		reply.isVoteGranted = false
+		reply.IsVoteGranted = false
 		// TODO: 此处直接 return 可否
 	} else if args.Term > rf.currentTerm {
 		rf.votedFor = NULL
@@ -114,7 +115,7 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
 		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
 		reply.Term = rf.currentTerm
-		reply.isVoteGranted = true
+		reply.IsVoteGranted = true
 		rf.votedFor = args.CandidateID
 		if !rf.electionTimer.Stop() {
 			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
@@ -124,9 +125,15 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 		timeout := time.Duration(500 + rand.Int31n(400))
 		rf.electionTimer.Reset(timeout * time.Millisecond)
 	} else {
-		reply.isVoteGranted = false
+		reply.IsVoteGranted = false
 	}
 
+}
+
+func isValidArgs(rf *Raft, args *RequestVoteArgs) bool {
+	return (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
+		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
+			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1))
 }
 
 //
