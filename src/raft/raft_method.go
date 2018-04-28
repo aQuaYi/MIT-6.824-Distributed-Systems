@@ -268,6 +268,6 @@ func (rf *Raft) hasShutdown() bool {
 }
 
 func (rf *Raft) electionTimerReset() {
-	timeout := time.Duration(500 + rand.Int31n(400))
+	timeout := time.Duration(150 + rand.Int31n(150))
 	rf.electionTimer.Reset(timeout * time.Millisecond)
 }
