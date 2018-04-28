@@ -110,13 +110,18 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
 	//    If the logs end with the same term, then whichever log is longer is more up-to-date
 	//
-	if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
-		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
-			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
+	// if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
+	// 	((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
+	// 		((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
+	if isValidArgs(rf, args) {
 		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
 		reply.Term = rf.currentTerm
+
 		reply.IsVoteGranted = true
+
 		rf.votedFor = args.CandidateID
+		// TODO: 为什么要等待结束呀？
+		//
 		if !rf.electionTimer.Stop() {
 			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
 			// TODO: 这是通知到什么地方了

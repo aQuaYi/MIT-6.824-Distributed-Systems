@@ -10,5 +10,6 @@ func (rf *Raft) addLeaderHandler() {
 }
 
 func convertToFollower(rf *Raft) fsmState {
+	rf.votedFor = NULL
 	return FOLLOWER
 }
