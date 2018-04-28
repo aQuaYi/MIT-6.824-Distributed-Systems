@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"fmt"
 	"labrpc"
 	"sync"
 	"time"
@@ -54,6 +55,11 @@ type Raft struct {
 
 	// election 相关的参数
 	votesForMe int // 投票给我的选票总数
+}
+
+func (rf *Raft) String() string {
+	return fmt.Sprintf("server %d in term %d with commitIndex(%d) and lastApplied(%d)",
+		rf.me, rf.currentTerm, rf.commitIndex, rf.lastApplied)
 }
 
 // func newRaft(peers []*labrpc.ClientEnd, me int,

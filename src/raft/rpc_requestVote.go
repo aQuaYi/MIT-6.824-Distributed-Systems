@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -16,6 +17,11 @@ type RequestVoteArgs struct {
 	CandidateID  int // candidate requesting vote
 	LastLogIndex int // index of candidate's last log entry
 	LastLogTerm  int // term of candidate's last log entry
+}
+
+func (a RequestVoteArgs) String() string {
+	return fmt.Sprintf("Candidate %d in Term %d with LastLogIndex(%d) and LastLogTerm:(%d)",
+		a.CandidateID, a.Term, a.LastLogIndex, a.LastLogTerm)
 }
 
 // RequestVoteReply 投票回复
@@ -40,6 +46,52 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	defer rf.rwmu.Unlock()
 
 	debugPrintf("[Enter RequestVote][server: %v]term :%v voted for:%v, log len: %v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, len(rf.logs), rf.logs, rf.commitIndex, args)
+
+	// 1. false if term < currentTerm
+	if args.Term < rf.currentTerm {
+		reply.isVoteGranted = false
+		// TODO: 此处直接 return 可否
+	} else if args.Term > rf.currentTerm {
+		rf.votedFor = NULL
+		rf.state = FOLLOWER
+		// TODO: 此处直接 return 可否
+	}
+	// TODO: Term 相等的情况是什么
+
+	// 2. votedFor is null or candidateId and
+	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
+	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
+	//    If the logs end with the same term, then whichever log is longer is more up-to-date
+	//
+	if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
+		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
+			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
+		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
+		reply.Term = rf.currentTerm
+		reply.isVoteGranted = true
+		rf.votedFor = args.CandidateID
+		if !rf.electionTimer.Stop() {
+			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
+			// TODO: 这是通知到什么地方了
+			<-rf.electionTimer.C
+		}
+		timeout := time.Duration(500 + rand.Int31n(400))
+		rf.electionTimer.Reset(timeout * time.Millisecond)
+	} else {
+		reply.isVoteGranted = false
+	}
+
+}
+
+// RequestVote2 投票工作
+// example RequestVote RPC handler.
+//
+func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
+	// NOTICE: Your code here (2A, 2B).
+
+	// TODO: 注释这里的每一句话
+
+	debugPrintf("[%s] request vote by [%s]", rf, args)
 
 	// 1. false if term < currentTerm
 	if args.Term < rf.currentTerm {
