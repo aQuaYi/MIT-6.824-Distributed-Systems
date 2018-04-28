@@ -27,6 +27,8 @@ func (rf *Raft) GetState() (int, bool) {
 }
 
 func (rf *Raft) isLeader() bool {
+	rf.rwmu.RLock()
+	defer rf.rwmu.RUnlock()
 	return rf.state == LEADER
 }
 
@@ -103,8 +105,8 @@ func (rf *Raft) readPersist(data []byte) {
 	//   rf.yyy = yyy
 	// }
 
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 	buffer := bytes.NewBuffer(data)
 	d := labgob.NewDecoder(buffer)
 	var currentTerm int
@@ -159,8 +161,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	// if command received from client:
 	// append entry to local log, respond after entry applied to state machine
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 
 	switch rf.state {
 	case LEADER:
@@ -249,8 +251,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 //
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 	close(rf.shutdown)
 	rf.cond.Broadcast()
 }

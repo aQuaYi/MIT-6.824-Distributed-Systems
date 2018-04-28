@@ -13,7 +13,7 @@ func (rf *Raft) standingBy() {
 		rf.electionTimerReset()
 	default:
 	}
-	rf.mu.Unlock()
+	rf.rwmu.Unlock()
 
 	time.Sleep(1 * time.Millisecond)
 }

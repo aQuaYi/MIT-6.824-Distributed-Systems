@@ -45,10 +45,10 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 			// TODO: 为什么 for 循环一开始要 lock
 			// 是为了等别的地方处理完，要不然直接进入
 			// switch case FOLLOWER → select default → 就不会有超时什么事情了
-			rf.mu.Lock()
+			rf.rwmu.Lock()
 
 			if rf.hasShutdown() {
-				rf.mu.Unlock()
+				rf.rwmu.Unlock()
 				return
 			}
 
@@ -73,7 +73,7 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 			}
 
 			matchIndexCntr := make(map[int]int)
-			rf.mu.Lock()
+			rf.rwmu.Lock()
 			// update rf.commitIndex based on matchIndex[]
 			// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N
 			// and log[N].term == currentTerm:
@@ -120,7 +120,7 @@ func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan 
 				}
 			}
 			rf.cond.Wait()
-			rf.mu.Unlock()
+			rf.rwmu.Unlock()
 		}
 	}(rf, applyCh)
 

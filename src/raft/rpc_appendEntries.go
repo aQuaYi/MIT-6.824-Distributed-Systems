@@ -27,8 +27,8 @@ type AppendEntriesReply struct {
 // AppendEntries is
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// NOTICE: Your code here. (2A, 2B)
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 	// defer rf.persist()
 
 	debugPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))

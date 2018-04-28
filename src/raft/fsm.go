@@ -28,14 +28,6 @@ func (s fsmState) String() string {
 	}
 }
 
-func (rf *Raft) setState(newState fsmState) {
-	rf.state = newState
-}
-
-func (rf *Raft) getState() fsmState {
-	return rf.state
-}
-
 func (rf *Raft) addHandler(state fsmState, event fsmEvent, handler fsmHandler) {
 	if _, ok := rf.handlers[state]; !ok {
 		rf.handlers[state] = make(map[fsmEvent]fsmHandler, 10)
@@ -47,18 +39,23 @@ func (rf *Raft) addHandler(state fsmState, event fsmEvent, handler fsmHandler) {
 }
 
 func (rf *Raft) call(event fsmEvent) {
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 
-	oldState := rf.getState()
+	oldState := rf.state
 
 	if rf.handlers[oldState] == nil ||
 		rf.handlers[oldState][event] == nil {
-		log.Fatalf("[错误] FSM 的状态 (%s) 没有转换事件", rf.getState())
+		log.Fatalf("[错误] FSM 的状态 (%s) 没有转换 handler", oldState)
 	}
 
-	newState := rf.handlers[oldState][event](rf)
-	rf.setState(newState)
+	rf.state = rf.handlers[oldState][event](rf)
 
-	debugPrintf("[server: %d] [%s] 事件导致 server 从 [%s] 转变成 [%s]", rf.me, event, oldState, newState)
+	debugPrintf("[server: %d] [%s] 事件导致 server 从 [%s] 转变成 [%s]", rf.me, event, oldState, rf.state)
+}
+
+func (rf *Raft) addAllHandler() {
+	rf.addFollowerHandler()
+	rf.addCandidateHandler()
+	rf.addLeaderHandler()
 }

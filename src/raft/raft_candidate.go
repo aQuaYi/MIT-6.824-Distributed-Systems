@@ -36,14 +36,14 @@ func (rf *Raft) contestAnElection() {
 			// 拉票
 			rf.sendRequestVote(server, args, reply)
 
-			rf.mu.Lock()
+			rf.rwmu.Lock()
 			// 如果 rf 已经不是 CANDIDATE 了
 			// 可以提前结束，不用反馈投票结果
 			if rf.state != CANDIDATE {
-				rf.mu.Unlock()
+				rf.rwmu.Unlock()
 				return
 			}
-			rf.mu.Unlock()
+			rf.rwmu.Unlock()
 
 			// 返回投票结果
 			replyChan <- reply
@@ -77,9 +77,9 @@ loop:
 			}
 		default:
 			// TODO: 为什么会有这个呢：
-			rf.mu.Unlock()
+			rf.rwmu.Unlock()
 			time.Sleep(1 * time.Millisecond)
-			rf.mu.Lock()
+			rf.rwmu.Lock()
 			if rf.state == FOLLOWER {
 				// rf 已经由于其他原因，转换成 FOLLOWER 了
 				// 也可以直接结束 loop 循环了
@@ -89,7 +89,7 @@ loop:
 	}
 
 	debugPrintf("[server: %v]Total granted peers: %v, total peers: %v\n", rf.me, rf.votesForMe, len(rf.peers))
-	rf.mu.Unlock()
+	rf.rwmu.Unlock()
 }
 
 func (rf *Raft) comeToPower() {

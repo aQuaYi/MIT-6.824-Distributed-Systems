@@ -9,7 +9,7 @@ import (
 
 // Raft implements a single Raft peer.
 type Raft struct {
-	mu    sync.Mutex          // Lock to protect shared access to this peer's state
+	rwmu  sync.RWMutex        // Lock to protect shared access to this peer's state
 	peers []*labrpc.ClientEnd // RPC end points of all peers
 
 	// Persistent state on all servers
@@ -31,6 +31,7 @@ type Raft struct {
 	// Persistent state on call servers
 	currentTerm int        // 此 server 当前所处的 term 编号
 	votedFor    int        // 此 server 在此 term 中投票给了谁，是 peers 中的索引号
+	votedTerm   int        // 此 server 投票时所在的 term
 	logs        []LogEntry // 此 server 中保存的 logs
 
 	// Volatile state on all servers:
@@ -76,7 +77,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 	rf.state = FOLLOWER
 	rf.handlers = make(map[fsmState]map[fsmEvent]fsmHandler, 3)
 
-	rf.cond = sync.NewCond(&rf.mu)
+	rf.cond = sync.NewCond(&rf.rwmu)
 
 	rf.shutdown = make(chan struct{})
 

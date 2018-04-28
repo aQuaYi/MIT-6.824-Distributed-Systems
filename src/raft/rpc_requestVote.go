@@ -36,8 +36,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// TODO: 注释这里的每一句话
 
-	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 
 	debugPrintf("[Enter RequestVote][server: %v]term :%v voted for:%v, log len: %v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, len(rf.logs), rf.logs, rf.commitIndex, args)
 
