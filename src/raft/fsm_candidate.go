@@ -60,11 +60,8 @@ func candidateToFollower(rf *Raft, term interface{}) fsmState {
 	newTerm, _ := term.(int)
 	rf.currentTerm = max(rf.currentTerm, newTerm)
 
-	// 关闭 rf.convertToFollowerChan 来发送通知
-	close(rf.convertToFollowerChan)
-	// 因为关闭了的 channel 可以无限接收信号，
-	// 为了安全设置 rf.convertToFollowerChan 为 nil
-	rf.convertToFollowerChan = nil
+	// 这很重要
+	rf.votedFor = NULL
 
 	return FOLLOWER
 }

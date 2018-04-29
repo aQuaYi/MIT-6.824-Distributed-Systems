@@ -98,6 +98,7 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// 1. false if term < currentTerm
 	if args.Term < rf.currentTerm {
+		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = false
 		// TODO: 此处直接 return 可否
 	} else if args.Term > rf.currentTerm {

@@ -14,7 +14,7 @@ func (rf *Raft) contestAnElection() {
 	// 先给自己投一票
 	rf.votedFor = rf.me
 	// 现在总的投票人数为 1，就是自己投给自己的那一票
-	rf.votesForMe = 1
+	votesForMe := 1
 
 	// 根据自己的参数，生成新的 requestVoteArgs
 	// 发给所有人的都是一样的，所以只用生成一份
@@ -69,9 +69,9 @@ loop:
 			}
 
 			// 投票给我的人数 +1
-			rf.votesForMe++
+			votesForMe++
 			// 如果投票任务过半，那我就是新的 LEADER 了
-			if rf.votesForMe > len(rf.peers)/2 {
+			if votesForMe > len(rf.peers)/2 {
 				rf.comeToPower()
 				break loop
 			}
@@ -89,7 +89,7 @@ loop:
 		}
 	}
 
-	debugPrintf("[server: %v]Total granted peers: %v, total peers: %v\n", rf.me, rf.votesForMe, len(rf.peers))
+	debugPrintf("[server: %v]Total granted peers: %v, total peers: %v\n", rf.me, votesForMe, len(rf.peers))
 	rf.rwmu.Unlock()
 }
 
