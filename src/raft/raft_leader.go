@@ -18,7 +18,8 @@ func (rf *Raft) exercisePower() {
 		// appendEntriesArgs[server] = newAppendEntriesArgs(rf, server)
 		// appendEntriesReply[server] = new(AppendEntriesReply)
 
-		go func(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) {
+		go func(server int) {
+			args, reply := newAppendEntriesArgs(rf, server), new(AppendEntriesReply)
 			ok := rf.sendAppendEntries(server, args, reply)
 
 			// if last log index >= nextIndex for a follower:
@@ -29,6 +30,8 @@ func (rf *Raft) exercisePower() {
 			rf.rwmu.Lock()
 			var firstTermIndex int
 			// if get an old RPC reply
+			// TODO: 为什么接收到一个 old rpc reply
+
 			if args.Term != rf.currentTerm {
 				rf.rwmu.Unlock()
 				return
@@ -137,7 +140,7 @@ func (rf *Raft) exercisePower() {
 				}
 			}
 			rf.rwmu.Unlock()
-		}(server, newAppendEntriesArgs(rf, server), new(AppendEntriesReply))
+		}(server)
 	}
 
 	rf.rwmu.Unlock()

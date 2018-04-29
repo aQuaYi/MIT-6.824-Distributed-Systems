@@ -6,7 +6,7 @@ import (
 
 type fsmState int
 type fsmEvent string
-type fsmHandler func(*Raft) fsmState
+type fsmHandler func(*Raft, interface{}) fsmState
 
 // 规定了 server 所需的 3 种状态
 const (
@@ -38,7 +38,7 @@ func (rf *Raft) addHandler(state fsmState, event fsmEvent, handler fsmHandler) {
 	rf.handlers[state][event] = handler
 }
 
-func (rf *Raft) call(event fsmEvent) {
+func (rf *Raft) call(event fsmEvent, args interface{}) {
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
 
@@ -49,7 +49,7 @@ func (rf *Raft) call(event fsmEvent) {
 		log.Fatalf("[错误] FSM 的状态 (%s) 没有转换 handler", oldState)
 	}
 
-	rf.state = rf.handlers[oldState][event](rf)
+	rf.state = rf.handlers[oldState][event](rf, args)
 
 	debugPrintf("[server: %d] [%s] 事件导致 server 从 [%s] 转变成 [%s]", rf.me, event, oldState, rf.state)
 }

@@ -5,19 +5,20 @@ import (
 )
 
 var (
-	winThisTermElectionEvent = fsmEvent("win this term election")
-	anotherServerWinEvent    = fsmEvent("another server win in this (or after) term")
+	winThisTermElectionEvent            = fsmEvent("win this term election")
+	discoverCurrentLeaderOrNewTermEvent = fsmEvent("discovers current leader or new term")
 )
 
 // 添加 CANDIDATE 状态下的处理函数
 func (rf *Raft) addCandidateHandler() {
 	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, anotherServerWinEvent, fsmHandler(convertToFollower))
+	rf.addHandler(CANDIDATE, discoverCurrentLeaderOrNewTermEvent, fsmHandler(candidateToFollower))
 	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
 
 }
 
-func comeToPower(rf *Raft) fsmState {
+// 引用时 args 为 nil
+func comeToPower(rf *Raft, args interface{}) fsmState {
 	// 新当选的 Leader 需要重置以下两个属性
 	rf.nextIndex = make([]int, len(rf.peers))
 	rf.matchIndex = make([]int, len(rf.peers))
@@ -49,4 +50,21 @@ func sendHeartbeat(rf *Raft) {
 		// 等待一段时间
 		<-hbtimer.C
 	}
+}
+
+// candidate to follower 有两个原因
+// 	1. 发现了同 term 的leader
+// 	2. 看见了更大的 term
+// 所以，args 是一个 term，用于更新 rf.currentTerm
+func candidateToFollower(rf *Raft, term interface{}) fsmState {
+	newTerm, _ := term.(int)
+	rf.currentTerm = max(rf.currentTerm, newTerm)
+
+	// 关闭 rf.convertToFollowerChan 来发送通知
+	close(rf.convertToFollowerChan)
+	// 因为关闭了的 channel 可以无限接收信号，
+	// 为了安全设置 rf.convertToFollowerChan 为 nil
+	rf.convertToFollowerChan = nil
+
+	return FOLLOWER
 }

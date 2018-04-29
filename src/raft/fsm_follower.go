@@ -12,12 +12,14 @@ func (rf *Raft) addFollowerHandler() {
 // election time out 意味着，
 // 进入新的 term
 // 并开始新一轮的选举
-func startNewElection(rf *Raft) fsmState {
+func startNewElection(rf *Raft, args interface{}) fsmState {
 	// 先进入下一个 Term
 	rf.currentTerm++
 	// 先给自己投一票
 	rf.votedFor = rf.me
 	rf.votedTerm = rf.currentTerm
+
+	rf.convertToFollowerChan = make(chan struct{})
 	// TODO: 添加完需要修改的属性
 	// TODO: 开个 goroutine 继续竞选
 	return CANDIDATE

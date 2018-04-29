@@ -55,6 +55,9 @@ type Raft struct {
 
 	// election 相关的参数
 	votesForMe int // 投票给我的选票总数
+
+	// candidate 中途转变为 follower 的话，就关闭这个 channel 来发送信号
+	convertToFollowerChan chan struct{}
 }
 
 func (rf *Raft) String() string {
@@ -139,7 +142,7 @@ func electionTimeOutLoop(rf *Raft) {
 
 		select {
 		case <-rf.electionTimer.C:
-			rf.call(electionTimeOutEvent)
+			rf.call(electionTimeOutEvent, nil)
 		case <-rf.receiveValidRPC:
 			rf.electionTimerReset()
 		}

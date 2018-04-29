@@ -9,7 +9,8 @@ func (rf *Raft) addLeaderHandler() {
 	rf.addHandler(LEADER, meetHigherTermLeaderEvent, fsmHandler(convertToFollower))
 }
 
-func convertToFollower(rf *Raft) fsmState {
+func convertToFollower(rf *Raft, args interface{}) fsmState {
+
 	rf.votedFor = NULL
 	return FOLLOWER
 }

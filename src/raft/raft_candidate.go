@@ -76,7 +76,8 @@ loop:
 				break loop
 			}
 		default:
-			// TODO: 为什么会有这个呢：
+			// 没有收到 投票回复，又没有超时的话
+			// 就检查一下自己还是不是 candidate
 			rf.rwmu.Unlock()
 			time.Sleep(1 * time.Millisecond)
 			rf.rwmu.Lock()

@@ -71,11 +71,13 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = true
 		rf.votedFor = args.CandidateID
+
+		// TODO: 遇见了合格的候选人，为什么要等到 rf.electionTimer.Stop 才返回 requestVote
 		if !rf.electionTimer.Stop() {
 			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
-			// TODO: 这是通知到什么地方了
 			<-rf.electionTimer.C
 		}
+
 		timeout := time.Duration(500 + rand.Int31n(400))
 		rf.electionTimer.Reset(timeout * time.Millisecond)
 	} else {
