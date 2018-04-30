@@ -100,13 +100,14 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = false
-		// TODO: 此处直接 return 可否
-	} else if args.Term > rf.currentTerm {
-		rf.votedFor = NULL
-		rf.state = FOLLOWER
-		// TODO: 此处直接 return 可否
+		return
 	}
-	// TODO: Term 相等的情况是什么
+
+	// 如果 args.Term > rf.currentTerm 的话
+	// 更新选民的 currentTerm
+	if args.Term > rf.currentTerm {
+		rf.call(meetHigherTermLeaderEvent, args.Term)
+	}
 
 	// 2. votedFor is null or candidateId and
 	//    candidate's log is at least as up-to-date as receiver's log, then grant vote

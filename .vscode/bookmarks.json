@@ -10,6 +10,12 @@
 			"bookmarks": [
 				45
 			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/rpc_requestVote.go",
+			"bookmarks": [
+				110
+			]
 		}
 	]
 }

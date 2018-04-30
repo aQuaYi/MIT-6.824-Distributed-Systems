@@ -1,18 +1,20 @@
 package raft
 
 var (
-	electionTimeOutEvent = fsmEvent("election time out")
+	electionTimeOutEvent  = fsmEvent("election time out")
+	discoversNewTermEvent = fsmEvent("discover new term")
 )
 
 // 添加 FOLLOWER 状态下的处理函数
 func (rf *Raft) addFollowerHandler() {
 	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
+	rf.addHandler(FOLLOWER, discoversNewTermEvent, fsmHandler(convertToFollower))
 }
 
 // election time out 意味着，
 // 进入新的 term
 // 并开始新一轮的选举
-func startNewElection(rf *Raft, args interface{}) fsmState {
+func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 先进入下一个 Term
 	rf.currentTerm++
 	// 先给自己投一票
@@ -43,8 +45,7 @@ func startNewElection(rf *Raft, args interface{}) fsmState {
 
 			rf.rwmu.RLock()
 			// 如果 rf 已经不是 CANDIDATE 了，不用反馈投票结果
-			if ok &&
-				rf.state == CANDIDATE {
+			if ok && rf.state == CANDIDATE {
 				// 返回投票结果
 				replyChan <- reply
 			}
@@ -59,9 +60,9 @@ func startNewElection(rf *Raft, args interface{}) fsmState {
 				rf.call(electionTimeOutEvent, nil)
 				return
 			case reply := <-requestVoteReplyChan: // 收到新的选票
-if reply.Term > rf.currentTerm {
-	rf.call(, args interface{})
-}
+				if reply.Term > rf.currentTerm {
+					rf.call(winThisTermElectionEvent, nil)
+				}
 				if reply.IsVoteGranted {
 					// 投票给我的人数 +1
 					votesForMe++
@@ -76,4 +77,20 @@ if reply.Term > rf.currentTerm {
 	}(requestVoteReplyChan)
 
 	return CANDIDATE
+}
+
+func convertToFollower(rf *Raft, term interface{}) fsmState {
+	newTerm, _ := term.(int)
+	rf.currentTerm = newTerm
+	rf.votedFor = NULL
+
+	// rf.convertToFollowerChan != nil
+	// 说明，rf 是 candidate 或 leader
+	if rf.convertToFollowerChan != nil {
+		close(rf.convertToFollowerChan)
+		rf.convertToFollowerChan = nil
+	}
+
+	return FOLLOWER
+
 }

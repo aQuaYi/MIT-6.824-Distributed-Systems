@@ -38,17 +38,18 @@ func sendHeartbeat(rf *Raft) {
 	hbtimer := time.NewTicker(hbPeriod * time.Millisecond)
 
 	for {
-		if !rf.isLeader() {
-			return
-		}
-
 		// 先把自己的 timer 重置了，免得自己又开始新的 election
 		rf.electionTimerReset()
 
 		// TODO: 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
 
-		// 等待一段时间
-		<-hbtimer.C
+		select {
+		// 要么 leader 变成了 follower，就只能结束这个循环
+		case <-rf.convertToFollowerChan:
+			return
+		// 要么此次 heartbeat 结束
+		case <-hbtimer.C:
+		}
 	}
 }
 

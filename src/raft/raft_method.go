@@ -26,16 +26,12 @@ func (rf *Raft) GetState() (int, bool) {
 	return term, isleader
 }
 
-func (rf *Raft) isLeader() bool {
-	rf.rwmu.RLock()
-	defer rf.rwmu.RUnlock()
-	return rf.state == LEADER
-}
-
+// TODO: 这个是有必要的吗
 func (rf *Raft) getLastIndex() int {
 	return rf.logs[len(rf.logs)-1].LogIndex
 }
 
+// TODO: 这个是有必要的吗
 func (rf *Raft) getLastTerm() int {
 	return rf.logs[len(rf.logs)-1].LogTerm
 }

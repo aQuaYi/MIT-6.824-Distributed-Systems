@@ -53,11 +53,12 @@ type Raft struct {
 	// 当 rf 接收到合格的 rpc 信号时，会通过 receiveValidRPC 发送信号
 	receiveValidRPC chan struct{}
 
-	// election 相关的参数
-	// votesForMe int // 投票给我的选票总数
+	// candidate 或 leader 中途转变为 follower 的话，就关闭这个 channel 来发送信号
+	// 因为，同一个 rf 不可能既是 candidate 又是 leader
+	// 所以，用来通知的 channel 只要有一个就好了
+	convertToFollowerChan chan struct{}
 
-	// candidate 中途转变为 follower 的话，就关闭这个 channel 来发送信号
-	// candidateToFollowerChan chan struct{}
+	//
 }
 
 func (rf *Raft) String() string {
