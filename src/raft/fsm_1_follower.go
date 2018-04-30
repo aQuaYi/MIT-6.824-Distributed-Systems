@@ -24,7 +24,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 
 	// 根据自己的参数，生成新的 requestVoteArgs
 	// 发给所有人的都是一样的，所以只用生成一份
-	requestVoteArgs := rf.newRequestVoteArgs()
+	requestVoteArgs := rf.newRequestVoteArgs2()
 
 	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
 	requestVoteReplyChan := make(chan *RequestVoteReply, len(rf.peers))
@@ -39,15 +39,9 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			// 生成投票结果变量
 			reply := new(RequestVoteReply)
 			// 拉票
-			ok := rf.sendRequestVote(server, args, reply)
-
-			rf.rwmu.RLock()
-			// 如果 rf 已经不是 CANDIDATE 了，不用反馈投票结果
-			if ok && rf.state == CANDIDATE {
-				// 返回投票结果
-				replyChan <- reply
-			}
-			rf.rwmu.RUnlock()
+			rf.sendRequestVote(server, args, reply)
+			// 返回投票结果
+			replyChan <- reply
 		}(server, requestVoteArgs, requestVoteReplyChan)
 	}
 
@@ -88,7 +82,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 
 func convertToFollower(rf *Raft, term interface{}) fsmState {
 	newTerm, _ := term.(int)
-	rf.currentTerm = newTerm
+	rf.currentTerm = max(rf.currentTerm, newTerm)
 	rf.votedFor = NULL
 
 	// rf.convertToFollowerChan != nil

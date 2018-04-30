@@ -189,3 +189,13 @@ func (rf *Raft) newRequestVoteArgs() *RequestVoteArgs {
 	debugPrintf("[server: %v] Candidate,  send RequestVote: %v\n", rf.me, args)
 	return args
 }
+func (rf *Raft) newRequestVoteArgs2() *RequestVoteArgs {
+	args := &RequestVoteArgs{
+		Term:         rf.currentTerm,
+		CandidateID:  rf.me,
+		LastLogIndex: len(rf.logs) - 1,
+		LastLogTerm:  rf.logs[len(rf.logs)-1].LogTerm,
+	}
+	debugPrintf("[server: %v] Candidate,  send RequestVote: %v\n", rf.me, args)
+	return args
+}
