@@ -96,7 +96,7 @@ func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	debugPrintf("[%s] request vote by [%s]", rf, args)
 
-	// 1. false if term < currentTerm
+	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = false

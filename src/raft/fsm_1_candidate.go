@@ -5,16 +5,16 @@ import (
 )
 
 var (
-	winThisTermElectionEvent            = fsmEvent("win this term election")
-	discoverCurrentLeaderOrNewTermEvent = fsmEvent("discovers current leader or new term")
+	winThisTermElectionEvent   = fsmEvent("win this term election")
+	discoverCurrentLeaderEvent = fsmEvent("discovers current leader")
 )
 
 // 添加 CANDIDATE 状态下的处理函数
 func (rf *Raft) addCandidateHandler() {
 	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, discoverCurrentLeaderOrNewTermEvent, fsmHandler(candidateToFollower))
+	rf.addHandler(CANDIDATE, discoverCurrentLeaderEvent, fsmHandler(candidateToFollower))
+	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(convertToFollower))
 	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
-
 }
 
 // 引用时 args 为 nil
@@ -53,16 +53,23 @@ func sendHeartbeat(rf *Raft) {
 	}
 }
 
-// candidate to follower 有两个原因
-// 	1. 发现了同 term 的leader
-// 	2. 看见了更大的 term
-// 所以，args 是一个 term，用于更新 rf.currentTerm
-func candidateToFollower(rf *Raft, term interface{}) fsmState {
-	newTerm, _ := term.(int)
-	rf.currentTerm = max(rf.currentTerm, newTerm)
+type candidateToFollowerArgs struct {
+	term     int
+	votedFor int
+}
 
-	// 这很重要
-	rf.votedFor = NULL
+// candidate 发现了真正的 leader
+func candidateToFollower(rf *Raft, args interface{}) fsmState {
+	a, _ := args.(candidateToFollowerArgs)
+	rf.currentTerm = max(rf.currentTerm, a.term)
+	rf.votedFor = a.votedFor
+
+	// rf.convertToFollowerChan != nil 就一定是 open 的
+	// 这是靠锁保证的
+	if rf.convertToFollowerChan != nil {
+		close(rf.convertToFollowerChan)
+		rf.convertToFollowerChan = nil
+	}
 
 	return FOLLOWER
 }
