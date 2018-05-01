@@ -50,8 +50,9 @@ type Raft struct {
 	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
 	cond          *sync.Cond
 	shutdown      chan struct{}
-	// 当 rf 接收到合格的 rpc 信号时，会通过 receiveValidRPC 发送信号
-	receiveValidRPC chan struct{}
+
+	// 当 rf 接收到合格的 rpc 信号时，会通过 resetElectionTimerChan 发送信号
+	resetElectionTimerChan chan struct{}
 
 	// candidate 或 leader 中途转变为 follower 的话，就关闭这个 channel 来发送信号
 	// 因为，同一个 rf 不可能既是 candidate 又是 leader
@@ -144,7 +145,7 @@ func electionTimeOutLoop(rf *Raft) {
 		select {
 		case <-rf.electionTimer.C:
 			rf.call(electionTimeOutEvent, nil)
-		case <-rf.receiveValidRPC:
+		case <-rf.resetElectionTimerChan:
 			rf.electionTimerReset()
 		}
 	}
