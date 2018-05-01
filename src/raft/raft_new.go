@@ -62,8 +62,8 @@ type Raft struct {
 }
 
 func (rf *Raft) String() string {
-	return fmt.Sprintf("server %d (%s) in term %d with commitIndex(%d) and lastApplied(%d)",
-		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied)
+	return fmt.Sprintf("server:%d, state:%s, term:%d, commitIndex:%d, lastApplied:%d, logs:%v",
+		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
 // func newRaft(peers []*labrpc.ClientEnd, me int,

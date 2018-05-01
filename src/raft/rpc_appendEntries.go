@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -15,6 +16,11 @@ type AppendEntriesArgs struct {
 	Entries []LogEntry // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
 
 	LeaderCommit int // leader 的 commitIndex
+}
+
+func (a AppendEntriesArgs) String() string {
+	return fmt.Sprintf("server:%d, term:%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v",
+		a.LeaderID, a.Term, a.PrevLogIndex, a.PrevLogTerm, a.LeaderCommit, a.Entries)
 }
 
 // AppendEntriesReply 是 flower 回复 leader 的内容
@@ -148,36 +154,30 @@ func newForceAppendEntriesArgs(rf *Raft, firstTermIndex int) *AppendEntriesArgs 
 // AppendEntries2 is
 func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// NOTICE: Your code here. (2A, 2B)
-	rf.rwmu.Lock()
-	defer rf.rwmu.Unlock()
-	// defer rf.persist()
 
-	debugPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))
+	debugPrintf("[%s] receive appendEntriesArgs [%s]", rf, args)
 
-	// 1. replay false at once if term < currentTerm
+	reply.Term = rf.currentTerm
+
+	// 1. Replay false at once if term < currentTerm
 	if args.Term < rf.currentTerm {
-		reply.Term = rf.currentTerm
 		reply.Success = false
 		return
 	}
 
-	// TODO: WHY???
-	rf.state = FOLLOWER
-
-	if !rf.electionTimer.Stop() {
-		debugPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
-		<-rf.electionTimer.C
+	if args.Term > rf.currentTerm {
+		rf.call(discoverNewTermEvent, args.Term)
 	}
-	timeout := time.Duration(500 + rand.Int31n(400))
-	rf.electionTimer.Reset(timeout * time.Millisecond)
+	// 把 lock 移动到 rf.call 的下面，避免死锁
 
-	// 2. false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
+
+	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
-		debugPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
-		reply.Term = rf.currentTerm
+		debugPrintf("[%s] log doesn't contain PrevLogIndex\n", rf)
 		reply.FirstTermIndex = len(rf.logs)
 		reply.Success = false
-		rf.currentTerm = args.Term // TODO: why
 		return
 	}
 
@@ -186,6 +186,7 @@ func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesRepl
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
 		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
 		reply.FirstTermIndex = args.PrevLogIndex
+		// TODO: 简化这里的逻辑
 		for rf.logs[reply.FirstTermIndex].LogTerm == rf.logs[reply.FirstTermIndex-1].LogTerm {
 			if reply.FirstTermIndex > rf.commitIndex {
 				reply.FirstTermIndex--
@@ -195,47 +196,30 @@ func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesRepl
 			}
 			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.FirstTermIndex)
 		}
+
+		// 删除失效的 log
 		rf.logs = rf.logs[:reply.FirstTermIndex]
-		reply.Term = rf.currentTerm
 		reply.Success = false
-		rf.currentTerm = args.Term
 		return
 	}
 
+	// 运行到这里，说明 rf.logs[args.PrevLogIndex].LogTerm == args.PrevLogTerm
+
 	// 4. append any new entries not already in the log
+
 	if len(args.Entries) == 0 {
-		debugPrintf("[server: %v]received heartbeat\n", rf.me)
-	} else if len(rf.logs) == args.PrevLogIndex+1 {
-		for i, entry := range args.Entries {
-			rf.logs = append(rf.logs[:args.PrevLogIndex+i+1], entry)
-		}
-		// persist only when possible committed data
-		// for leader, it's easy to determine
-		// persist follower whenever update
-		rf.persist()
-	} else if len(rf.logs)-1 > args.PrevLogIndex &&
-		len(rf.logs)-1 < args.PrevLogIndex+len(args.Entries) {
-		for i := len(rf.logs); i <= args.PrevLogIndex+len(args.Entries); i++ {
-			rf.logs = append(rf.logs[:i], args.Entries[i-args.PrevLogIndex-1])
-		}
-		// persist only when possible committed data
-		// for leader, it's easy to determine
-		// persist follower whenever update
-		// NOTICE: 记得进行持久化工作
+		debugPrintf("[%s] received heartbeat\n", rf)
+	} else {
+		rf.logs = rf.logs[:args.PrevLogIndex+1]
+		rf.logs = append(rf.logs, args.Entries...)
 		rf.persist()
 	}
 
 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	if args.LeaderCommit > rf.commitIndex {
-		if args.LeaderCommit < len(rf.logs)-1 {
-			rf.commitIndex = args.LeaderCommit
-		} else {
-			rf.commitIndex = len(rf.logs) - 1
-		}
-		rf.cond.Broadcast()
+		rf.commitIndex = min(args.LeaderCommit, len(rf.logs)-1)
+		// TODO: 发送通知到 检查 apply 的 groutine
 	}
 
-	rf.currentTerm = args.Term
 	reply.Success = true
-	reply.Term = rf.currentTerm
 }
