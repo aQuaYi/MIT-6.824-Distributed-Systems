@@ -74,7 +74,7 @@ func (rf *Raft) exercisePower() {
 			}
 
 			var firstTermIndex int
-			rf.nextIndex[server] = reply.FirstTermIndex
+			rf.nextIndex[server] = reply.nextIndex
 			for {
 				debugPrintf("abc:%v, server: %v reply: %v\n", rf, server, reply)
 				detectAppendEntriesArgs := newAppendEntriesArgs(rf, server)
@@ -111,7 +111,7 @@ func (rf *Raft) exercisePower() {
 					break
 				}
 
-				rf.nextIndex[server] = detectReply.FirstTermIndex
+				rf.nextIndex[server] = detectReply.nextIndex
 			}
 
 			debugPrintf("[server: %v]Consistency check: server: %v, firstTermIndex: %v", rf.me, server, firstTermIndex)

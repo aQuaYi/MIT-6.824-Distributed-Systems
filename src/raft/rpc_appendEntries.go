@@ -25,9 +25,9 @@ func (a AppendEntriesArgs) String() string {
 
 // AppendEntriesReply 是 flower 回复 leader 的内容
 type AppendEntriesReply struct {
-	Term           int  // 回复者的 term
-	Success        bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
-	FirstTermIndex int  // TODO: 这是干什么的？
+	Term      int  // 回复者的 term
+	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
+	nextIndex int  // 下一次发送的 AppendEntriesArgs.Entries[0] 在 Leader.logs 中的索引号
 }
 
 // AppendEntries is
@@ -60,7 +60,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if len(rf.logs) <= args.PrevLogIndex {
 		debugPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
 		reply.Term = rf.currentTerm
-		reply.FirstTermIndex = len(rf.logs)
+		reply.nextIndex = len(rf.logs)
 		reply.Success = false
 		rf.currentTerm = args.Term // TODO: why
 		return
@@ -70,17 +70,17 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	//    delete the existing entry and all that follows it
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
 		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
-		reply.FirstTermIndex = args.PrevLogIndex
-		for rf.logs[reply.FirstTermIndex].LogTerm == rf.logs[reply.FirstTermIndex-1].LogTerm {
-			if reply.FirstTermIndex > rf.commitIndex {
-				reply.FirstTermIndex--
+		reply.nextIndex = args.PrevLogIndex
+		for rf.logs[reply.nextIndex].LogTerm == rf.logs[reply.nextIndex-1].LogTerm {
+			if reply.nextIndex > rf.commitIndex {
+				reply.nextIndex--
 			} else {
-				reply.FirstTermIndex = rf.commitIndex + 1
+				reply.nextIndex = rf.commitIndex + 1
 				break
 			}
-			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.FirstTermIndex)
+			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.nextIndex)
 		}
-		rf.logs = rf.logs[:reply.FirstTermIndex]
+		rf.logs = rf.logs[:reply.nextIndex]
 		reply.Term = rf.currentTerm
 		reply.Success = false
 		rf.currentTerm = args.Term
@@ -176,7 +176,7 @@ func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesRepl
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
 		debugPrintf("[%s] log doesn't contain PrevLogIndex\n", rf)
-		reply.FirstTermIndex = len(rf.logs)
+		reply.nextIndex = len(rf.logs)
 		reply.Success = false
 		return
 	}
@@ -185,20 +185,20 @@ func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesRepl
 	//    delete the existing entry and all that follows it
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
 		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
-		reply.FirstTermIndex = args.PrevLogIndex
+		reply.nextIndex = args.PrevLogIndex
 		// TODO: 简化这里的逻辑
-		for rf.logs[reply.FirstTermIndex].LogTerm == rf.logs[reply.FirstTermIndex-1].LogTerm {
-			if reply.FirstTermIndex > rf.commitIndex {
-				reply.FirstTermIndex--
+		for rf.logs[reply.nextIndex].LogTerm == rf.logs[reply.nextIndex-1].LogTerm {
+			if reply.nextIndex > rf.commitIndex {
+				reply.nextIndex--
 			} else {
-				reply.FirstTermIndex = rf.commitIndex + 1
+				reply.nextIndex = rf.commitIndex + 1
 				break
 			}
-			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.FirstTermIndex)
+			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.nextIndex)
 		}
 
 		// 删除失效的 log
-		rf.logs = rf.logs[:reply.FirstTermIndex]
+		rf.logs = rf.logs[:reply.nextIndex]
 		reply.Success = false
 		return
 	}
@@ -212,8 +212,9 @@ func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesRepl
 	} else {
 		rf.logs = rf.logs[:args.PrevLogIndex+1]
 		rf.logs = append(rf.logs, args.Entries...)
-		rf.persist()
+		go rf.persist()
 	}
+	reply.nextIndex = len(rf.logs)
 
 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	if args.LeaderCommit > rf.commitIndex {
