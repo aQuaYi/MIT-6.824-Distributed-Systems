@@ -26,15 +26,15 @@ func (rf *Raft) exercisePower() {
 				return
 			}
 
+			rf.rwmu.Lock()
+			defer rf.rwmu.Unlock()
+
 			// if last log index >= nextIndex for a follower:
 			// send AppendEntries RPC with log entries starting at nextIndex
 			// 1) if successful: update nextIndex and matchIndex for follower
 			// 2) if AppendEntries fails because of log inconsistency:
 			//    decrement nextIndex and retry
-			rf.rwmu.Lock()
-			defer rf.rwmu.Unlock()
 
-			var firstTermIndex int
 			// if get an old RPC reply
 			// TODO: 为什么接收到一个 old rpc reply
 
@@ -73,6 +73,7 @@ func (rf *Raft) exercisePower() {
 				return
 			}
 
+			var firstTermIndex int
 			rf.nextIndex[server] = reply.FirstTermIndex
 			for {
 				debugPrintf("abc:%v, server: %v reply: %v\n", rf, server, reply)
