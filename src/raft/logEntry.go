@@ -9,7 +9,6 @@ type LogEntry struct {
 
 // TODO: 注释 truncateLog
 func truncateLog(lastIncludedIndex int, lastIncludedTerm int, log []LogEntry) []LogEntry {
-
 	var newLogEntries []LogEntry
 	newLogEntries = append(newLogEntries, LogEntry{LogIndex: lastIncludedIndex, LogTerm: lastIncludedTerm})
 
