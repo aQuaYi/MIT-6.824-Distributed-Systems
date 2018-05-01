@@ -92,6 +92,8 @@ func convertToFollower(rf *Raft, term interface{}) fsmState {
 		rf.convertToFollowerChan = nil
 	}
 
+	// TODO: 这里需要重置 election timer 吗
+
 	return FOLLOWER
 
 }
