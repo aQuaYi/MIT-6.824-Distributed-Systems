@@ -250,7 +250,7 @@ func (rf *Raft) Kill() {
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
 	close(rf.shutdownChan)
-	rf.cond.Broadcast()
+	rf.appendedNewEntriesChan <- struct{}{}
 }
 
 func (rf *Raft) hasShutdown() bool {

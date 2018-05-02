@@ -2,6 +2,10 @@ package raft
 
 import "log"
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+}
+
 // needDebug for Debugging
 const needDebug = true
 

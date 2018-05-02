@@ -48,7 +48,6 @@ type Raft struct {
 
 	//
 	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
-	cond          *sync.Cond
 
 	// 用于通知 raft 已经关闭的信息
 	shutdownChan chan struct{}
@@ -61,11 +60,12 @@ type Raft struct {
 	// 所以，用来通知的 channel 只要有一个就好了
 	convertToFollowerChan chan struct{}
 
-	//
+	// logs 中添加了新的 entries 以后，会通过这个发送信号
+	appendedNewEntriesChan chan struct{}
 }
 
 func (rf *Raft) String() string {
-	return fmt.Sprintf("server:%d, state:%s, term:%d, commitIndex:%d, lastApplied:%d, logs:%v",
+	return fmt.Sprintf("%d:%s:%d, commitIndex:%d, lastApplied:%d, logs:%v",
 		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
@@ -86,7 +86,10 @@ func newRaft(peers []*labrpc.ClientEnd, me int,
 		shutdownChan:           make(chan struct{}),
 		convertToFollowerChan:  make(chan struct{}),
 		resetElectionTimerChan: make(chan struct{}),
+		appendedNewEntriesChan: make(chan struct{}),
 	}
+
+	rf.addAllHandler()
 
 	rf.electionTimerReset()
 

@@ -48,7 +48,7 @@ func (rf *Raft) exercisePower() {
 			if reply.Success {
 				if rf.matchIndex[server] < args.PrevLogIndex {
 					rf.matchIndex[server] = args.PrevLogIndex
-					rf.cond.Broadcast()
+					rf.appendedNewEntriesChan <- struct{}{}
 				}
 				return
 			}
@@ -153,7 +153,7 @@ func (rf *Raft) exercisePower() {
 			rf.nextIndex[server] = len(rf.logs)
 			rf.matchIndex[server] = forceAppendEntriesArgs.PrevLogIndex + len(forceAppendEntriesArgs.Entries)
 			// rf.rwmu.Unlock()
-			rf.cond.Broadcast()
+			rf.appendedNewEntriesChan <- struct{}{}
 			return
 
 			// rf.rwmu.Unlock()

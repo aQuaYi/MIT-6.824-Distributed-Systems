@@ -24,7 +24,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 
 	// 根据自己的参数，生成新的 requestVoteArgs
 	// 发给所有人的都是一样的，所以只用生成一份
-	requestVoteArgs := rf.newRequestVoteArgs2()
+	requestVoteArgs := rf.newRequestVoteArgs()
 
 	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
 	requestVoteReplyChan := make(chan *RequestVoteReply, len(rf.peers))

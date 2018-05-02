@@ -117,7 +117,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		} else {
 			rf.commitIndex = len(rf.logs) - 1
 		}
-		rf.cond.Broadcast()
+		rf.appendedNewEntriesChan <- struct{}{}
 	}
 
 	rf.currentTerm = args.Term
