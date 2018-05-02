@@ -2,8 +2,6 @@ package raft
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 )
 
 // AppendEntriesArgs 是添加 log 的参数
@@ -30,100 +28,100 @@ type AppendEntriesReply struct {
 	nextIndex int  // 下一次发送的 AppendEntriesArgs.Entries[0] 在 Leader.logs 中的索引号
 }
 
-// AppendEntries is
-func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-	// NOTICE: Your code here. (2A, 2B)
-	rf.rwmu.Lock()
-	defer rf.rwmu.Unlock()
-	// defer rf.persist()
+// // AppendEntries is
+// func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+// 	// NOTICE: Your code here. (2A, 2B)
+// 	rf.rwmu.Lock()
+// 	defer rf.rwmu.Unlock()
+// 	// defer rf.persist()
 
-	debugPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))
+// 	debugPrintf("[server: %v]Term:%v, server log:%v lastApplied %v, commitIndex: %v, received AppendEntries, %v, arg term: %v, arg log len:%v", rf.me, rf.currentTerm, rf.logs, rf.lastApplied, rf.commitIndex, args, args.Term, len(args.Entries))
 
-	// 1. replay false at once if term < currentTerm
-	if args.Term < rf.currentTerm {
-		reply.Term = rf.currentTerm
-		reply.Success = false
-		return
-	}
+// 	// 1. replay false at once if term < currentTerm
+// 	if args.Term < rf.currentTerm {
+// 		reply.Term = rf.currentTerm
+// 		reply.Success = false
+// 		return
+// 	}
 
-	// TODO: WHY???
-	rf.state = FOLLOWER
+// 	// TODO: WHY???
+// 	rf.state = FOLLOWER
 
-	if !rf.electionTimer.Stop() {
-		debugPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
-		<-rf.electionTimer.C
-	}
-	timeout := time.Duration(500 + rand.Int31n(400))
-	rf.electionTimer.Reset(timeout * time.Millisecond)
+// 	if !rf.electionTimer.Stop() {
+// 		debugPrintf("[server: %v]AppendEntries: drain timer\n", rf.me)
+// 		<-rf.electionTimer.C
+// 	}
+// 	timeout := time.Duration(500 + rand.Int31n(400))
+// 	rf.electionTimer.Reset(timeout * time.Millisecond)
 
-	// 2. false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
-	if len(rf.logs) <= args.PrevLogIndex {
-		debugPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
-		reply.Term = rf.currentTerm
-		reply.nextIndex = len(rf.logs)
-		reply.Success = false
-		rf.currentTerm = args.Term // TODO: why
-		return
-	}
+// 	// 2. false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
+// 	if len(rf.logs) <= args.PrevLogIndex {
+// 		debugPrintf("[server: %v] log doesn't contain PrevLogIndex\n", rf.me)
+// 		reply.Term = rf.currentTerm
+// 		reply.nextIndex = len(rf.logs)
+// 		reply.Success = false
+// 		rf.currentTerm = args.Term // TODO: why
+// 		return
+// 	}
 
-	// 3. if an existing entry conflicts with a new one (same index but diff terms),
-	//    delete the existing entry and all that follows it
-	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
-		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
-		reply.nextIndex = args.PrevLogIndex
-		for rf.logs[reply.nextIndex].LogTerm == rf.logs[reply.nextIndex-1].LogTerm {
-			if reply.nextIndex > rf.commitIndex {
-				reply.nextIndex--
-			} else {
-				reply.nextIndex = rf.commitIndex + 1
-				break
-			}
-			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.nextIndex)
-		}
-		rf.logs = rf.logs[:reply.nextIndex]
-		reply.Term = rf.currentTerm
-		reply.Success = false
-		rf.currentTerm = args.Term
-		return
-	}
+// 	// 3. if an existing entry conflicts with a new one (same index but diff terms),
+// 	//    delete the existing entry and all that follows it
+// 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
+// 		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
+// 		reply.nextIndex = args.PrevLogIndex
+// 		for rf.logs[reply.nextIndex].LogTerm == rf.logs[reply.nextIndex-1].LogTerm {
+// 			if reply.nextIndex > rf.commitIndex {
+// 				reply.nextIndex--
+// 			} else {
+// 				reply.nextIndex = rf.commitIndex + 1
+// 				break
+// 			}
+// 			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.nextIndex)
+// 		}
+// 		rf.logs = rf.logs[:reply.nextIndex]
+// 		reply.Term = rf.currentTerm
+// 		reply.Success = false
+// 		rf.currentTerm = args.Term
+// 		return
+// 	}
 
-	// 4. append any new entries not already in the log
-	if len(args.Entries) == 0 {
-		debugPrintf("[server: %v]received heartbeat\n", rf.me)
-	} else if len(rf.logs) == args.PrevLogIndex+1 {
-		for i, entry := range args.Entries {
-			rf.logs = append(rf.logs[:args.PrevLogIndex+i+1], entry)
-		}
-		// persist only when possible committed data
-		// for leader, it's easy to determine
-		// persist follower whenever update
-		rf.persist()
-	} else if len(rf.logs)-1 > args.PrevLogIndex &&
-		len(rf.logs)-1 < args.PrevLogIndex+len(args.Entries) {
-		for i := len(rf.logs); i <= args.PrevLogIndex+len(args.Entries); i++ {
-			rf.logs = append(rf.logs[:i], args.Entries[i-args.PrevLogIndex-1])
-		}
-		// persist only when possible committed data
-		// for leader, it's easy to determine
-		// persist follower whenever update
-		// NOTICE: 记得进行持久化工作
-		rf.persist()
-	}
+// 	// 4. append any new entries not already in the log
+// 	if len(args.Entries) == 0 {
+// 		debugPrintf("[server: %v]received heartbeat\n", rf.me)
+// 	} else if len(rf.logs) == args.PrevLogIndex+1 {
+// 		for i, entry := range args.Entries {
+// 			rf.logs = append(rf.logs[:args.PrevLogIndex+i+1], entry)
+// 		}
+// 		// persist only when possible committed data
+// 		// for leader, it's easy to determine
+// 		// persist follower whenever update
+// 		rf.persist()
+// 	} else if len(rf.logs)-1 > args.PrevLogIndex &&
+// 		len(rf.logs)-1 < args.PrevLogIndex+len(args.Entries) {
+// 		for i := len(rf.logs); i <= args.PrevLogIndex+len(args.Entries); i++ {
+// 			rf.logs = append(rf.logs[:i], args.Entries[i-args.PrevLogIndex-1])
+// 		}
+// 		// persist only when possible committed data
+// 		// for leader, it's easy to determine
+// 		// persist follower whenever update
+// 		// NOTICE: 记得进行持久化工作
+// 		rf.persist()
+// 	}
 
-	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
-	if args.LeaderCommit > rf.commitIndex {
-		if args.LeaderCommit < len(rf.logs)-1 {
-			rf.commitIndex = args.LeaderCommit
-		} else {
-			rf.commitIndex = len(rf.logs) - 1
-		}
-		rf.appendedNewEntriesChan <- struct{}{}
-	}
+// 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
+// 	if args.LeaderCommit > rf.commitIndex {
+// 		if args.LeaderCommit < len(rf.logs)-1 {
+// 			rf.commitIndex = args.LeaderCommit
+// 		} else {
+// 			rf.commitIndex = len(rf.logs) - 1
+// 		}
+// 		rf.appendedNewEntriesChan <- struct{}{}
+// 	}
 
-	rf.currentTerm = args.Term
-	reply.Success = true
-	reply.Term = rf.currentTerm
-}
+// 	rf.currentTerm = args.Term
+// 	reply.Success = true
+// 	reply.Term = rf.currentTerm
+// }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
 	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
@@ -151,8 +149,8 @@ func newForceAppendEntriesArgs(rf *Raft, firstTermIndex int) *AppendEntriesArgs 
 	}
 }
 
-// AppendEntries2 is
-func (rf *Raft) AppendEntries2(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+// AppendEntries is
+func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// NOTICE: Your code here. (2A, 2B)
 
 	debugPrintf("[%s] receive appendEntriesArgs [%s]", rf, args)

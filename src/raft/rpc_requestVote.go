@@ -86,10 +86,10 @@ type RequestVoteReply struct {
 
 // }
 
-// RequestVote2 投票工作
+// RequestVote 投票工作
 // example RequestVote RPC handler.
 //
-func (rf *Raft) RequestVote2(args *RequestVoteArgs, reply *RequestVoteReply) {
+func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// NOTICE: Your code here (2A, 2B).
 
 	// TODO: 注释这里的每一句话
