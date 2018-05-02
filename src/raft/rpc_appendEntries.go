@@ -164,7 +164,10 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 
 	if args.Term > rf.currentTerm {
-		rf.call(discoverNewTermEvent, args.Term)
+		rf.call(discoverHigherTermLeaderEvent, candidateToFollowerArgs{
+			term:     args.Term,
+			votedFor: args.LeaderID,
+		})
 	}
 	// 把 lock 移动到 rf.call 的下面，避免死锁
 

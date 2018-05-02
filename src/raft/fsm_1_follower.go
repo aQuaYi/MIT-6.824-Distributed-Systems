@@ -1,17 +1,5 @@
 package raft
 
-var (
-	electionTimeOutEvent = fsmEvent("election time out")
-	discoverNewTermEvent = fsmEvent("discover new term")
-)
-
-// 添加 FOLLOWER 状态下的处理函数
-func (rf *Raft) addFollowerHandler() {
-	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
-	rf.addHandler(FOLLOWER, discoverNewTermEvent, fsmHandler(convertToFollower))
-	rf.addHandler(FOLLOWER, discoverHigherTermLeaderEvent, fsmHandler(becomeFollower))
-}
-
 // election time out 意味着，
 // 进入新的 term
 // 并开始新一轮的选举

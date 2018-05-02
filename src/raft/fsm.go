@@ -53,9 +53,3 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	debugPrintf("[server: %d] [%s] 事件导致 server 从 [%s] 转变成 [%s]", rf.me, event, oldState, rf.state)
 }
-
-func (rf *Raft) addAllHandler() {
-	rf.addFollowerHandler()
-	rf.addCandidateHandler()
-	rf.addLeaderHandler()
-}

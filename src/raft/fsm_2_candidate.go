@@ -4,19 +4,6 @@ import (
 	"time"
 )
 
-var (
-	winThisTermElectionEvent   = fsmEvent("win this term election")
-	discoverCurrentLeaderEvent = fsmEvent("discovers current leader")
-)
-
-// 添加 CANDIDATE 状态下的处理函数
-func (rf *Raft) addCandidateHandler() {
-	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, discoverCurrentLeaderEvent, fsmHandler(becomeFollower))
-	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(convertToFollower))
-	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
-}
-
 // 引用时 args 为 nil
 func comeToPower(rf *Raft, args interface{}) fsmState {
 	// 新当选的 Leader 需要重置以下两个属性
