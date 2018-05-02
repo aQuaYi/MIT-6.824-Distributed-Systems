@@ -32,6 +32,10 @@ type RequestVoteReply struct {
 	IsVoteGranted bool // 返回 true，表示获得投票
 }
 
+func (reply RequestVoteReply) String() string {
+	return fmt.Sprintf("term(%d);granted(%t)", reply.Term, reply.IsVoteGranted)
+}
+
 // // RequestVote 投票工作
 // // example RequestVote RPC handler.
 // //

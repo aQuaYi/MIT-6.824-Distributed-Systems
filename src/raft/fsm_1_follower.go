@@ -36,7 +36,9 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			// 拉票
 			rf.sendRequestVote(server, args, reply)
 			// 返回投票结果
+			debugPrintf("# %s # 已经获取了 %s 的结果为 S%d %s", rf, args, server, reply)
 			replyChan <- reply
+			debugPrintf("# %s # 已经发送了 %s 的结果为 S%d %s", rf, args, server, reply)
 		}(server, requestVoteReplyChan)
 	}
 

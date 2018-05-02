@@ -70,8 +70,8 @@ type Raft struct {
 }
 
 func (rf *Raft) String() string {
-	return fmt.Sprintf("S%d:%s:%d, commitIndex:%d, lastApplied:%d, logs:%v",
-		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
+	return fmt.Sprintf("S%d:%2d:%s:%d, commitIndex:%d, lastApplied:%d, logs:%v",
+		rf.me, rf.votedFor, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
