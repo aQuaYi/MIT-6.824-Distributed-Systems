@@ -111,9 +111,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 			})
 	}
 
-	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
-	rf.resetElectionTimerChan <- struct{}{}
-
 	// 2. votedFor is null or candidateId and
 	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
 	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
@@ -127,6 +124,12 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = true
 		rf.votedFor = args.CandidateID
+
+		// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
+		debugPrintf("# %s # 准备发送重置 election timer 信号", rf)
+		rf.resetElectionTimerChan <- struct{}{}
+	} else {
+		debugPrintf("# %s # 拒绝投票给 < %s >", rf, args)
 	}
 
 }

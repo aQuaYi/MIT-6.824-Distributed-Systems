@@ -105,10 +105,10 @@ func electionTimeOutLoop(rf *Raft) {
 
 		select {
 		case <-rf.electionTimer.C:
-			debugPrintf("# %s #  将要进入 term(%d) 的 election", rf, rf.currentTerm+1)
+			debugPrintf("# %s #  election timeout, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
 			rf.call(electionTimeOutEvent, nil)
 		case <-rf.resetElectionTimerChan:
-			debugPrintf("# %s # 收到重置 election timer 的信号", rf)
+			debugPrintf("# %s # 已经收到重置 election timer 信号", rf)
 			rf.electionTimerReset()
 		}
 	}

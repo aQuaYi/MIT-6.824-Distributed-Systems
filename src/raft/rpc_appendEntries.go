@@ -171,7 +171,8 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 			})
 	}
 
-	// 现在可以认为接受到了一个合格的 rpc，可以重置 election timer
+	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
+	debugPrintf("# %s # 准备发送重置 election timer 信号", rf)
 	rf.resetElectionTimerChan <- struct{}{}
 
 	// 把 lock 移动到 rf.call 的下面，避免死锁
