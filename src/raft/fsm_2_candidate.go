@@ -92,6 +92,7 @@ func makeHeartbeat(rf *Raft) {
 			ok := rf.sendAppendEntries(server, args, reply)
 
 			if !ok {
+				debugPrintf("# %s # 无法获取 S%d 对 %s 的回复", rf, server, args)
 				return
 			}
 

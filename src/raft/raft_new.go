@@ -94,8 +94,6 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 	rf.addAllHandler()
 
-	rf.electionTimerReset()
-
 	go electionTimeOutLoop(rf)
 
 	return rf
@@ -104,6 +102,9 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 //
 func electionTimeOutLoop(rf *Raft) {
 	for {
+
+		rf.electionTimerReset()
+
 		if rf.hasShutdown() {
 			return
 		}
@@ -114,7 +115,6 @@ func electionTimeOutLoop(rf *Raft) {
 			rf.call(electionTimeOutEvent, nil)
 		case <-rf.resetElectionTimerChan:
 			debugPrintf("# %s # 已经收到重置 election timer 信号", rf)
-			rf.electionTimerReset()
 		}
 	}
 }
