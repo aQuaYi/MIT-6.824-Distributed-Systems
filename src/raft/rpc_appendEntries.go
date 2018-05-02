@@ -25,7 +25,7 @@ func (a AppendEntriesArgs) String() string {
 type AppendEntriesReply struct {
 	Term      int  // 回复者的 term
 	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
-	nextIndex int  // 下一次发送的 AppendEntriesArgs.Entries[0] 在 Leader.logs 中的索引号
+	NextIndex int  // 下一次发送的 AppendEntriesArgs.Entries[0] 在 Leader.logs 中的索引号
 }
 
 // // AppendEntries is
@@ -182,7 +182,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
 		debugPrintf("# %s # log doesn't contain PrevLogIndex\n", rf)
-		reply.nextIndex = len(rf.logs)
+		reply.NextIndex = len(rf.logs)
 		reply.Success = false
 		return
 	}
@@ -191,20 +191,20 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	//    delete the existing entry and all that follows it
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
 		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
-		reply.nextIndex = args.PrevLogIndex
+		reply.NextIndex = args.PrevLogIndex
 		// TODO: 简化这里的逻辑
-		for rf.logs[reply.nextIndex].LogTerm == rf.logs[reply.nextIndex-1].LogTerm {
-			if reply.nextIndex > rf.commitIndex {
-				reply.nextIndex--
+		for rf.logs[reply.NextIndex].LogTerm == rf.logs[reply.NextIndex-1].LogTerm {
+			if reply.NextIndex > rf.commitIndex {
+				reply.NextIndex--
 			} else {
-				reply.nextIndex = rf.commitIndex + 1
+				reply.NextIndex = rf.commitIndex + 1
 				break
 			}
-			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.nextIndex)
+			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.NextIndex)
 		}
 
 		// 删除失效的 log
-		rf.logs = rf.logs[:reply.nextIndex]
+		rf.logs = rf.logs[:reply.NextIndex]
 		reply.Success = false
 		return
 	}
@@ -220,7 +220,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.logs = append(rf.logs, args.Entries...)
 		go rf.persist()
 	}
-	reply.nextIndex = len(rf.logs)
+	reply.NextIndex = len(rf.logs)
 
 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	if args.LeaderCommit > rf.commitIndex {

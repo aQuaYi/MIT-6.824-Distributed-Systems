@@ -50,5 +50,5 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	rf.state = rf.handlers[oldState][event](rf, args)
 
-	debugPrintf("# %s # 事件 (%s) 发生，已从 [%s] → [%s]", rf, event, oldState, rf.state)
+	debugPrintf("# %s # 发生事件 (%s) ，已从 (%s) → (%s)", rf, event, oldState, rf.state)
 }
