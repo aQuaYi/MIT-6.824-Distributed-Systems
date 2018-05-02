@@ -173,7 +173,7 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 
 func (rf *Raft) newRequestVoteArgs() *RequestVoteArgs {
 	args := &RequestVoteArgs{
-		Term:         rf.currentTerm + 1,
+		Term:         rf.currentTerm,
 		CandidateID:  rf.me,
 		LastLogIndex: len(rf.logs) - 1,
 		LastLogTerm:  rf.logs[len(rf.logs)-1].LogTerm,

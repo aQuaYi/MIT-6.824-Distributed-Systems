@@ -28,7 +28,7 @@ func (rf *Raft) addCandidateHandler() {
 // 添加 LEADER 状态下的处理函数
 func (rf *Raft) addLeaderHandler() {
 	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(followTo))
-	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(convertToFollower))
+	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(followTo))
 }
 
 func (rf *Raft) addAllHandler() {

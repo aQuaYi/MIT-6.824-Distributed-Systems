@@ -6,7 +6,7 @@ package raft
 func startNewElection(rf *Raft, null interface{}) fsmState {
 
 	// 先进入下一个 Term
-	// rf.currentTerm++
+	rf.currentTerm++
 
 	// 先给自己投一票
 	rf.votedFor = rf.me

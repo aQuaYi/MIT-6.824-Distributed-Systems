@@ -50,5 +50,5 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	rf.state = rf.handlers[oldState][event](rf, args)
 
-	debugPrintf("[server: %d] [%s] 事件导致 server 从 [%s] 转变成 [%s]", rf.me, event, oldState, rf.state)
+	debugPrintf("[%s] 事件 (%s) 发生，已从 [%s] → [%s]", rf, event, oldState, rf.state)
 }
