@@ -52,7 +52,11 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				return
 			case reply := <-requestVoteReplyChan: // 收到新的选票
 				if reply.Term > rf.currentTerm {
-					rf.call(discoverNewTermEvent, reply.Term)
+					rf.call(discoverNewTermEvent,
+						followToArgs{
+							term:     reply.Term,
+							votedFor: NULL,
+						})
 					// TODO: 这个 return 应该是 写不写都行
 					return
 				}

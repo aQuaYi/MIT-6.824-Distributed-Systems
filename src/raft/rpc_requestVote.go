@@ -104,7 +104,11 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 如果 args.Term > rf.currentTerm 的话
 	// 更新选民的 currentTerm
 	if args.Term > rf.currentTerm {
-		rf.call(discoverNewTermEvent, args.Term)
+		rf.call(discoverNewTermEvent,
+			followToArgs{
+				term:     args.Term,
+				votedFor: NULL,
+			})
 	}
 
 	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
