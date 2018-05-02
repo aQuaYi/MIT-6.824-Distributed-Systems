@@ -2,8 +2,6 @@ package raft
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 )
 
 // RequestVoteArgs 获取投票参数
@@ -106,8 +104,11 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 如果 args.Term > rf.currentTerm 的话
 	// 更新选民的 currentTerm
 	if args.Term > rf.currentTerm {
-		rf.call(discoverHigherTermLeaderEvent, args.Term)
+		rf.call(discoverNewTermEvent, args.Term)
 	}
+
+	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
+	rf.resetElectionTimerChan <- struct{}{}
 
 	// 2. votedFor is null or candidateId and
 	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
@@ -120,21 +121,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if isValidArgs(rf, args) {
 		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
 		reply.Term = rf.currentTerm
-
 		reply.IsVoteGranted = true
-
 		rf.votedFor = args.CandidateID
-		// TODO: 为什么要等待结束呀？
-		//
-		if !rf.electionTimer.Stop() {
-			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
-			// TODO: 这是通知到什么地方了
-			<-rf.electionTimer.C
-		}
-		timeout := time.Duration(500 + rand.Int31n(400))
-		rf.electionTimer.Reset(timeout * time.Millisecond)
-	} else {
-		reply.IsVoteGranted = false
 	}
 
 }
@@ -181,7 +169,7 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 
 func (rf *Raft) newRequestVoteArgs() *RequestVoteArgs {
 	args := &RequestVoteArgs{
-		Term:         rf.currentTerm,
+		Term:         rf.currentTerm + 1,
 		CandidateID:  rf.me,
 		LastLogIndex: len(rf.logs) - 1,
 		LastLogTerm:  rf.logs[len(rf.logs)-1].LogTerm,

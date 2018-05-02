@@ -4,8 +4,10 @@ package raft
 // 进入新的 term
 // 并开始新一轮的选举
 func startNewElection(rf *Raft, null interface{}) fsmState {
+
 	// 先进入下一个 Term
-	rf.currentTerm++
+	// rf.currentTerm++
+
 	// 先给自己投一票
 	rf.votedFor = rf.me
 
@@ -35,11 +37,12 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	}
 
 	go func(replyChan chan *RequestVoteReply) {
+		convertToFollowerChan := rf.convertToFollowerChan
 		// 现在总的投票人数为 1，就是自己投给自己的那一票
 		votesForMe := 1
 		for {
 			select {
-			case <-rf.convertToFollowerChan:
+			case <-convertToFollowerChan:
 				// rf 不再是 candidate 状态
 				// 没有必要再统计投票结果了
 				return
@@ -70,7 +73,10 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 }
 
 func convertToFollower(rf *Raft, term interface{}) fsmState {
-	newTerm, _ := term.(int)
+	newTerm, ok := term.(int)
+	if !ok {
+		panic("convertToFollower 需要正确的参数")
+	}
 	rf.currentTerm = max(rf.currentTerm, newTerm)
 	rf.votedFor = NULL
 
@@ -84,5 +90,4 @@ func convertToFollower(rf *Raft, term interface{}) fsmState {
 	// TODO: 这里需要重置 election timer 吗
 
 	return FOLLOWER
-
 }

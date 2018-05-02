@@ -164,13 +164,17 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 
 	if args.Term > rf.currentTerm {
-		rf.call(discoverHigherTermLeaderEvent, followToArgs{
-			term:     args.Term,
-			votedFor: args.LeaderID,
-		})
+		rf.call(discoverHigherTermLeaderEvent,
+			followToArgs{
+				term:     args.Term,
+				votedFor: args.LeaderID,
+			})
 	}
-	// 把 lock 移动到 rf.call 的下面，避免死锁
 
+	// 现在可以认为接受到了一个合格的 rpc，可以重置 election timer
+	rf.resetElectionTimerChan <- struct{}{}
+
+	// 把 lock 移动到 rf.call 的下面，避免死锁
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
 

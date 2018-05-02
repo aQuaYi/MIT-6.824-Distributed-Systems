@@ -1,8 +1,6 @@
 package raft
 
-import (
-	"log"
-)
+import "fmt"
 
 type fsmState int
 type fsmEvent string
@@ -46,7 +44,8 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	if rf.handlers[oldState] == nil ||
 		rf.handlers[oldState][event] == nil {
-		log.Fatalf("[%s] 的状态 (%s) 没有事件 (%s) 的转换 handler", rf, oldState, event)
+		msg := fmt.Sprintf("[%s] 的状态 (%s) 没有事件 (%s) 的转换 handler", rf, oldState, event)
+		panic(msg)
 	}
 
 	rf.state = rf.handlers[oldState][event](rf, args)
