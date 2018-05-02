@@ -37,43 +37,38 @@ const (
 // Make() must return quickly, so it should start goroutines
 // for any long-running work.
 //
+
+// func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
+// 	rf := newRaft(peers, me, persister)
+// 	go func(rf *Raft) {
+// 		for {
+// 			// TODO: 为什么 for 循环一开始要 lock
+// 			// 是为了等别的地方处理完，要不然直接进入
+// 			// switch case FOLLOWER → select default → 就不会有超时什么事情了
+// 			rf.rwmu.Lock()
+// 			if rf.hasShutdown() {
+// 				rf.rwmu.Unlock()
+// 				return
+// 			}
+// 			switch rf.state {
+// 			case FOLLOWER:
+// 				rf.standingBy()
+// 			case CANDIDATE:
+// 				rf.contestAnElection()
+// 			case LEADER:
+// 				rf.exercisePower()
+// 			}
+// 		}
+// 	}(rf)
+// 	go reportApplyMsg(rf, applyCh)
+// 	// initialize from state persisted before a crash
+// 	rf.readPersist(persister.ReadRaftState())
+// 	return rf
+// }
+
+// Make is
 func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := newRaft(peers, me, persister)
-
-	go func(rf *Raft) {
-		for {
-			// TODO: 为什么 for 循环一开始要 lock
-			// 是为了等别的地方处理完，要不然直接进入
-			// switch case FOLLOWER → select default → 就不会有超时什么事情了
-			rf.rwmu.Lock()
-
-			if rf.hasShutdown() {
-				rf.rwmu.Unlock()
-				return
-			}
-
-			switch rf.state {
-			case FOLLOWER:
-				rf.standingBy()
-			case CANDIDATE:
-				rf.contestAnElection()
-			case LEADER:
-				rf.exercisePower()
-			}
-		}
-	}(rf)
-
-	go reportApplyMsg(rf, applyCh)
-
-	// initialize from state persisted before a crash
-	rf.readPersist(persister.ReadRaftState())
-
-	return rf
-}
-
-// Make2 is
-func Make2(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
-	rf := newRaft2(peers, me, persister)
 
 	go reportApplyMsg2(rf, applyCh)
 

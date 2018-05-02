@@ -49,7 +49,9 @@ type Raft struct {
 	//
 	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
 	cond          *sync.Cond
-	shutdown      chan struct{}
+
+	// 用于通知 raft 已经关闭的信息
+	shutdownChan chan struct{}
 
 	// 当 rf 接收到合格的 rpc 信号时，会通过 resetElectionTimerChan 发送信号
 	resetElectionTimerChan chan struct{}
@@ -67,67 +69,25 @@ func (rf *Raft) String() string {
 		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
-// func newRaft(peers []*labrpc.ClientEnd, me int,
-// 	persister *Persister) *Raft {
-// 	rf := &Raft{}
-// 	rf.peers = peers
-// 	rf.persister = persister
-// 	rf.me = me
-// 	// currentTerm
-// 	rf.currentTerm = 0
-// 	// votedFor
-// 	rf.votedFor = NULL
-// 	// logs
-// 	rf.logs = make([]LogEntry, 1)
-// 	rf.commitIndex = 0
-// 	rf.lastApplied = 0
-// 	rf.state = FOLLOWER
-// 	rf.handlers = make(map[fsmState]map[fsmEvent]fsmHandler, 3)
-// 	rf.cond = sync.NewCond(&rf.rwmu)
-// 	rf.shutdown = make(chan struct{})
-// 	// rf.heartbeat = make(chan struct{})
-// 	timeout := time.Duration(150 + rand.Int31n(150))
-// 	rf.electionTimer = time.NewTimer(timeout * time.Millisecond)
-// 	return rf
-// }
-
 func newRaft(peers []*labrpc.ClientEnd, me int,
 	persister *Persister) *Raft {
 	rf := &Raft{
-		peers:         peers,
-		persister:     persister,
-		me:            me,
-		currentTerm:   0,
-		votedFor:      NULL,
-		logs:          make([]LogEntry, 1),
-		commitIndex:   0,
-		lastApplied:   0,
-		state:         FOLLOWER,
-		handlers:      make(map[fsmState]map[fsmEvent]fsmHandler, 3),
-		shutdown:      make(chan struct{}),
-		electionTimer: time.NewTimer(time.Second),
+		peers:                  peers,
+		persister:              persister,
+		me:                     me,
+		currentTerm:            0,
+		votedFor:               NULL,
+		logs:                   make([]LogEntry, 1),
+		commitIndex:            0,
+		lastApplied:            0,
+		state:                  FOLLOWER,
+		handlers:               make(map[fsmState]map[fsmEvent]fsmHandler, 3),
+		electionTimer:          time.NewTimer(time.Second),
+		shutdownChan:           make(chan struct{}),
+		convertToFollowerChan:  make(chan struct{}),
+		resetElectionTimerChan: make(chan struct{}),
 	}
-	rf.cond = sync.NewCond(&rf.rwmu)
-	rf.electionTimerReset()
-	return rf
-}
 
-func newRaft2(peers []*labrpc.ClientEnd, me int,
-	persister *Persister) *Raft {
-	rf := &Raft{
-		peers:         peers,
-		persister:     persister,
-		me:            me,
-		currentTerm:   0,
-		votedFor:      NULL,
-		logs:          make([]LogEntry, 1),
-		commitIndex:   0,
-		lastApplied:   0,
-		state:         FOLLOWER,
-		handlers:      make(map[fsmState]map[fsmEvent]fsmHandler, 3),
-		shutdown:      make(chan struct{}),
-		electionTimer: time.NewTimer(time.Second),
-	}
 	rf.electionTimerReset()
 
 	go electionTimeOutLoop(rf)

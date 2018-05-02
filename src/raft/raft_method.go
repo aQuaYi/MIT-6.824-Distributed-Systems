@@ -249,13 +249,13 @@ func (rf *Raft) Kill() {
 	// Your code here, if desired.
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
-	close(rf.shutdown)
+	close(rf.shutdownChan)
 	rf.cond.Broadcast()
 }
 
 func (rf *Raft) hasShutdown() bool {
 	select {
-	case <-rf.shutdown:
+	case <-rf.shutdownChan:
 		debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
 		return true
 	default:
