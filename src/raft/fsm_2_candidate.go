@@ -40,14 +40,14 @@ func sendHeartbeat(rf *Raft) {
 	}
 }
 
-type candidateToFollowerArgs struct {
+type followToArgs struct {
 	term     int
 	votedFor int
 }
 
-// candidate 发现了真正的 leader
-func becomeFollower(rf *Raft, args interface{}) fsmState {
-	a, ok := args.(candidateToFollowerArgs)
+// 发现了 leader with new term
+func followTo(rf *Raft, args interface{}) fsmState {
+	a, ok := args.(followToArgs)
 	if !ok {
 		panic("becomeFollower 需要正确的参数")
 	}

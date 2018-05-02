@@ -164,7 +164,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 
 	if args.Term > rf.currentTerm {
-		rf.call(discoverHigherTermLeaderEvent, candidateToFollowerArgs{
+		rf.call(discoverHigherTermLeaderEvent, followToArgs{
 			term:     args.Term,
 			votedFor: args.LeaderID,
 		})
