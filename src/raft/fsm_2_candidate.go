@@ -12,7 +12,7 @@ var (
 // 添加 CANDIDATE 状态下的处理函数
 func (rf *Raft) addCandidateHandler() {
 	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, discoverCurrentLeaderEvent, fsmHandler(candidateBecomeFollower))
+	rf.addHandler(CANDIDATE, discoverCurrentLeaderEvent, fsmHandler(becomeFollower))
 	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(convertToFollower))
 	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
 }
@@ -59,8 +59,11 @@ type candidateToFollowerArgs struct {
 }
 
 // candidate 发现了真正的 leader
-func candidateBecomeFollower(rf *Raft, args interface{}) fsmState {
-	a, _ := args.(candidateToFollowerArgs)
+func becomeFollower(rf *Raft, args interface{}) fsmState {
+	a, ok := args.(candidateToFollowerArgs)
+	if !ok {
+		panic("becomeFollower 需要正确的参数")
+	}
 	rf.currentTerm = max(rf.currentTerm, a.term)
 	rf.votedFor = a.votedFor
 

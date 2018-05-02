@@ -69,8 +69,7 @@ func (rf *Raft) String() string {
 		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
-func newRaft(peers []*labrpc.ClientEnd, me int,
-	persister *Persister) *Raft {
+func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 	rf := &Raft{
 		peers:                  peers,
 		persister:              persister,

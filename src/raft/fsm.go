@@ -46,7 +46,7 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	if rf.handlers[oldState] == nil ||
 		rf.handlers[oldState][event] == nil {
-		log.Fatalf("[错误] FSM 的状态 (%s) 没有转换 handler", oldState)
+		log.Fatalf("[%s] 的状态 (%s) 没有事件 (%s) 的转换 handler", rf, oldState, event)
 	}
 
 	rf.state = rf.handlers[oldState][event](rf, args)

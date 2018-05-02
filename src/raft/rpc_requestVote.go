@@ -106,7 +106,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 如果 args.Term > rf.currentTerm 的话
 	// 更新选民的 currentTerm
 	if args.Term > rf.currentTerm {
-		rf.call(meetHigherTermLeaderEvent, args.Term)
+		rf.call(discoverHigherTermLeaderEvent, args.Term)
 	}
 
 	// 2. votedFor is null or candidateId and

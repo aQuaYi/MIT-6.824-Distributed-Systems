@@ -9,6 +9,7 @@ var (
 func (rf *Raft) addFollowerHandler() {
 	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
 	rf.addHandler(FOLLOWER, discoverNewTermEvent, fsmHandler(convertToFollower))
+	rf.addHandler(FOLLOWER, discoverHigherTermLeaderEvent, fsmHandler(becomeFollower))
 }
 
 // election time out 意味着，
