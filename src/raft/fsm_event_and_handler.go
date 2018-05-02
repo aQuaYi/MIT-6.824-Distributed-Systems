@@ -3,11 +3,11 @@ package raft
 // for all servers
 var (
 	//
-	electionTimeOutEvent       = fsmEvent("election time out")
-	discoverNewTermEvent       = fsmEvent("discover new term")
-	winThisTermElectionEvent   = fsmEvent("win this term election")
-	discoverCurrentLeaderEvent = fsmEvent("discovers current leader")
-	discoverNewLeaderEvent     = fsmEvent("meet a leader with higher term")
+	electionTimeOutEvent     = fsmEvent("election time out")
+	discoverNewTermEvent     = fsmEvent("discover new term")
+	winThisTermElectionEvent = fsmEvent("win this term election")
+	// discoverCurrentLeaderEvent = fsmEvent("discovers current leader")
+	discoverNewLeaderEvent = fsmEvent("meet a leader with higher term")
 )
 
 // 添加 FOLLOWER 状态下的处理函数

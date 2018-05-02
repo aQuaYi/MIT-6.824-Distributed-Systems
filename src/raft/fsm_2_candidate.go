@@ -119,17 +119,10 @@ func makeHeartbeat(rf *Raft) {
 			}
 
 			if reply.Term > rf.currentTerm {
-				rf.state = FOLLOWER
-				rf.currentTerm = reply.Term
-
-				// reset timer
-				if !rf.electionTimer.Stop() {
-					debugPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
-					<-rf.electionTimer.C
-				}
-
-				rf.electionTimerReset()
-
+				go rf.call(discoverNewTermEvent, followToArgs{
+					term:     reply.Term,
+					votedFor: NULL,
+				})
 				return
 			}
 
@@ -155,14 +148,10 @@ func makeHeartbeat(rf *Raft) {
 				}
 
 				if detectReply.Term > rf.currentTerm {
-					rf.state = FOLLOWER
-					rf.currentTerm = detectReply.Term
-					// reset timer
-					if !rf.electionTimer.Stop() {
-						debugPrintf("[server: %v]Leader change to follower1: drain timer\n", rf.me)
-						<-rf.electionTimer.C
-					}
-					rf.electionTimerReset()
+					go rf.call(discoverNewTermEvent, followToArgs{
+						term:     reply.Term,
+						votedFor: NULL,
+					})
 					return
 				}
 
@@ -194,18 +183,10 @@ func makeHeartbeat(rf *Raft) {
 			}
 
 			if forceReply.Term > rf.currentTerm {
-				rf.state = FOLLOWER
-				rf.currentTerm = forceReply.Term
-
-				// reset timer
-				if !rf.electionTimer.Stop() {
-					debugPrintf("[server: %v]Leader change to follower2: drain timer\n", rf.me)
-					<-rf.electionTimer.C
-				}
-
-				rf.electionTimerReset()
-
-				// rf.rwmu.Unlock()
+				go rf.call(discoverNewTermEvent, followToArgs{
+					term:     reply.Term,
+					votedFor: NULL,
+				})
 				return
 			}
 
