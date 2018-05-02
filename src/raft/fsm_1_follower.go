@@ -8,6 +8,11 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 先进入下一个 Term
 	rf.currentTerm++
 
+	if rf.electionTimeoutChan != nil {
+		close(rf.electionTimeoutChan)
+	}
+	rf.electionTimeoutChan = make(chan struct{})
+
 	// 先给自己投一票
 	rf.votedFor = rf.me
 
@@ -45,9 +50,8 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				// rf 不再是 candidate 状态
 				// 没有必要再统计投票结果了
 				return
-			case <-rf.electionTimer.C:
-				// 选举时间结束，需要开始新的选举
-				rf.call(electionTimeOutEvent, nil)
+			case <-rf.electionTimeoutChan:
+				// 新的 election 已经开始，可以结束这个了
 				return
 			case reply := <-requestVoteReplyChan: // 收到新的选票
 				if reply.Term > rf.currentTerm {

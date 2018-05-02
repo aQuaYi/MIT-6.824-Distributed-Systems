@@ -6,8 +6,12 @@ import (
 
 // 引用时 args 为 nil
 func comeToPower(rf *Raft, args interface{}) fsmState {
-
 	debugPrintf("# %s # come to power", rf)
+
+	if rf.electionTimeoutChan != nil {
+		close(rf.electionTimeoutChan)
+		rf.electionTimeoutChan = nil
+	}
 
 	// 新当选的 Leader 需要重置以下两个属性
 	rf.nextIndex = make([]int, len(rf.peers))
@@ -65,6 +69,11 @@ func followTo(rf *Raft, args interface{}) fsmState {
 	if rf.convertToFollowerChan != nil {
 		close(rf.convertToFollowerChan)
 		rf.convertToFollowerChan = nil
+	}
+
+	if rf.electionTimeoutChan != nil {
+		close(rf.electionTimeoutChan)
+		rf.electionTimeoutChan = nil
 	}
 
 	return FOLLOWER
