@@ -49,7 +49,7 @@ type followToArgs struct {
 func followTo(rf *Raft, args interface{}) fsmState {
 	a, ok := args.(followToArgs)
 	if !ok {
-		panic("becomeFollower 需要正确的参数")
+		panic("followTo 需要正确的参数")
 	}
 	rf.currentTerm = max(rf.currentTerm, a.term)
 	rf.votedFor = a.votedFor
