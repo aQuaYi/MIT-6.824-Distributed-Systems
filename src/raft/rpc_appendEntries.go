@@ -153,7 +153,7 @@ func newForceAppendEntriesArgs(rf *Raft, firstTermIndex int) *AppendEntriesArgs 
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// NOTICE: Your code here. (2A, 2B)
 
-	debugPrintf("[%s] receive appendEntriesArgs [%s]", rf, args)
+	debugPrintf("# %s # receive appendEntriesArgs [%s]", rf, args)
 
 	reply.Term = rf.currentTerm
 
@@ -180,7 +180,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
-		debugPrintf("[%s] log doesn't contain PrevLogIndex\n", rf)
+		debugPrintf("# %s # log doesn't contain PrevLogIndex\n", rf)
 		reply.nextIndex = len(rf.logs)
 		reply.Success = false
 		return
@@ -213,7 +213,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 4. append any new entries not already in the log
 
 	if len(args.Entries) == 0 {
-		debugPrintf("[%s] received heartbeat\n", rf)
+		debugPrintf("# %s # received heartbeat\n", rf)
 	} else {
 		rf.logs = rf.logs[:args.PrevLogIndex+1]
 		rf.logs = append(rf.logs, args.Entries...)

@@ -6,8 +6,6 @@ import (
 
 // 引用时 args 为 nil
 func comeToPower(rf *Raft, args interface{}) fsmState {
-	rf.currentTerm++
-
 	// 新当选的 Leader 需要重置以下两个属性
 	rf.nextIndex = make([]int, len(rf.peers))
 	rf.matchIndex = make([]int, len(rf.peers))

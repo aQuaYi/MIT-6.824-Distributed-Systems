@@ -4,6 +4,7 @@ import "log"
 
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	debugPrintf("程序开始运行")
 }
 
 // needDebug for Debugging

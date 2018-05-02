@@ -11,29 +11,28 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 先给自己投一票
 	rf.votedFor = rf.me
 
-	debugPrintf("[%s]成为 term(%d) 的 candidate ，开始竞选活动", rf, rf.state)
-
-	// 根据自己的参数，生成新的 requestVoteArgs
-	// 发给所有人的都是一样的，所以只用生成一份
-	requestVoteArgs := rf.newRequestVoteArgs()
+	rf.convertToFollowerChan = make(chan struct{})
 
 	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
 	requestVoteReplyChan := make(chan *RequestVoteReply, len(rf.peers))
 	// 向每个 server 拉票
+
+	debugPrintf("# %s #  在 term(%d) 开始拉票", rf, rf.currentTerm)
 
 	for server := range rf.peers {
 		// 跳过自己
 		if server == rf.me {
 			continue
 		}
-		go func(server int, args *RequestVoteArgs, replyChan chan *RequestVoteReply) {
+		go func(server int, replyChan chan *RequestVoteReply) {
+			args := rf.newRequestVoteArgs()
 			// 生成投票结果变量
 			reply := new(RequestVoteReply)
 			// 拉票
 			rf.sendRequestVote(server, args, reply)
 			// 返回投票结果
 			replyChan <- reply
-		}(server, requestVoteArgs, requestVoteReplyChan)
+		}(server, requestVoteReplyChan)
 	}
 
 	go func(replyChan chan *RequestVoteReply) {

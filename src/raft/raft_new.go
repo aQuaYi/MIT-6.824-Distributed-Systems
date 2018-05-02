@@ -65,7 +65,7 @@ type Raft struct {
 }
 
 func (rf *Raft) String() string {
-	return fmt.Sprintf("%d:%s:%d, commitIndex:%d, lastApplied:%d, logs:%v",
+	return fmt.Sprintf("S%d:%s:%d, commitIndex:%d, lastApplied:%d, logs:%v",
 		rf.me, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
@@ -83,7 +83,6 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		handlers:               make(map[fsmState]map[fsmEvent]fsmHandler, 3),
 		electionTimer:          time.NewTimer(time.Second),
 		shutdownChan:           make(chan struct{}),
-		convertToFollowerChan:  make(chan struct{}),
 		resetElectionTimerChan: make(chan struct{}),
 		appendedNewEntriesChan: make(chan struct{}),
 	}
@@ -106,8 +105,10 @@ func electionTimeOutLoop(rf *Raft) {
 
 		select {
 		case <-rf.electionTimer.C:
+			debugPrintf("# %s #  将要进入 term(%d) 的 election", rf, rf.currentTerm+1)
 			rf.call(electionTimeOutEvent, nil)
 		case <-rf.resetElectionTimerChan:
+			debugPrintf("# %s # 收到重置 election timer 的信号", rf)
 			rf.electionTimerReset()
 		}
 	}

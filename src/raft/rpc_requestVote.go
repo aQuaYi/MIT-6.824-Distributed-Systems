@@ -92,7 +92,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// TODO: 注释这里的每一句话
 
-	debugPrintf("[%s] request vote by [%s]", rf, args)
+	debugPrintf("# %s # 收到投票请求 [%s]", rf, args)
 
 	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -123,7 +123,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 	((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
 	// 		((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
 	if isValidArgs(rf, args) {
-		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
+		debugPrintf("# %s #  投票给了 < %s >", rf, args)
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = true
 		rf.votedFor = args.CandidateID
@@ -178,6 +178,5 @@ func (rf *Raft) newRequestVoteArgs() *RequestVoteArgs {
 		LastLogIndex: len(rf.logs) - 1,
 		LastLogTerm:  rf.logs[len(rf.logs)-1].LogTerm,
 	}
-	debugPrintf("[%s] send RequestVote: %v\n", rf, args)
 	return args
 }
