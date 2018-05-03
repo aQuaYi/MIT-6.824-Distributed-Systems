@@ -48,7 +48,7 @@ func newAppendEntriesArgs(leader *Raft, server int) *AppendEntriesArgs {
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// NOTICE: Your code here. (2A, 2B)
 
-	debugPrintf("# %s # receive appendEntriesArgs [%s]", rf, args)
+	debugPrintf("%s  receive appendEntriesArgs [%s]", rf, args)
 
 	reply.Term = rf.currentTerm
 	reply.NextIndex = args.PrevLogIndex
@@ -70,7 +70,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 
 	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
-	debugPrintf("# %s # 准备发送重置 election timer 信号", rf)
+	debugPrintf("%s  准备发送重置 election timer 信号", rf)
 	rf.resetElectionTimerChan <- struct{}{}
 
 	// 把 lock 移动到 rf.call 的下面，避免死锁
@@ -79,7 +79,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
-		debugPrintf("# %s # log doesn't contain PrevLogIndex\n", rf)
+		debugPrintf("%s  log doesn't contain PrevLogIndex\n", rf)
 		reply.NextIndex = len(rf.logs)
 		reply.Success = false
 		return
@@ -96,7 +96,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 			rf.logs[reply.NextIndex].LogTerm == wrongTerm {
 			reply.NextIndex--
 		}
-		debugPrintf("# %s # reply.NextIndex == %d", rf, reply.NextIndex)
+		debugPrintf("%s  reply.NextIndex == %d", rf, reply.NextIndex)
 
 		// 删除失效的 log
 		rf.logs = rf.logs[:reply.NextIndex]
@@ -109,7 +109,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 4. append any new entries not already in the log
 
 	if len(args.Entries) == 0 {
-		debugPrintf("# %s # 接收到 heartbeat", rf)
+		debugPrintf("%s  接收到 heartbeat", rf)
 		reply.NextIndex = args.PrevLogIndex + 1
 		reply.Success = false
 		return
@@ -117,9 +117,9 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 只保留合规的 logs
 	rf.logs = rf.logs[:args.PrevLogIndex+1]
-	debugPrintf("# %s # len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+	debugPrintf("%s  len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
 	rf.logs = append(rf.logs, args.Entries...)
-	debugPrintf("# %s # len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+	debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
 	rf.persist()
 	reply.NextIndex = len(rf.logs)
 	reply.Success = true

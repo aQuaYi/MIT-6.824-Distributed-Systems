@@ -176,7 +176,7 @@ func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
 
 	rf.logs = append(rf.logs, *entry)
 
-	debugPrintf("# %s # 添加了新的 entry{%v}，添加后，len(rf.logs)==%d",
+	debugPrintf("%s  添加了新的 entry{%v}，添加后，len(rf.logs)==%d",
 		rf, *entry, len(rf.logs))
 
 	return
@@ -210,5 +210,5 @@ func (rf *Raft) hasShutdown() bool {
 func (rf *Raft) electionTimerReset() {
 	timeout := time.Duration(150+rand.Int31n(150)) * time.Millisecond
 	rf.electionTimer.Reset(timeout)
-	debugPrintf("# %s # election timer 已经重置，到期时间为 %s", rf, timeout)
+	debugPrintf("%s  election timer 已经重置，到期时间为 %s", rf, timeout)
 }

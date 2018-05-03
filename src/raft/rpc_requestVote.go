@@ -96,7 +96,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	// TODO: 注释这里的每一句话
 
-	debugPrintf("# %s # 收到投票请求 [%s]", rf, args)
+	debugPrintf("%s  收到投票请求 [%s]", rf, args)
 
 	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -124,16 +124,16 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 	((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
 	// 		((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
 	if isValidArgs(rf, args) {
-		debugPrintf("# %s #  投票给了 < %s >", rf, args)
+		debugPrintf("%s   投票给了 < %s >", rf, args)
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = true
 		rf.votedFor = args.CandidateID
 
 		// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
-		debugPrintf("# %s # 准备发送重置 election timer 信号", rf)
+		debugPrintf("%s  准备发送重置 election timer 信号", rf)
 		rf.resetElectionTimerChan <- struct{}{}
 	} else {
-		debugPrintf("# %s # 拒绝投票给 < %s >", rf, args)
+		debugPrintf("%s  拒绝投票给 < %s >", rf, args)
 	}
 
 }

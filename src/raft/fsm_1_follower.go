@@ -25,7 +25,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	requestVoteReplyChan := make(chan *RequestVoteReply, len(rf.peers))
 	// 向每个 server 拉票
 
-	debugPrintf("# %s #  在 term(%d) 开始拉票", rf, rf.currentTerm)
+	debugPrintf("%s   在 term(%d) 开始拉票", rf, rf.currentTerm)
 
 	for server := range rf.peers {
 		// 跳过自己
@@ -40,15 +40,15 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			// 拉票
 			ok := rf.sendRequestVote(server, args, reply)
 			if !ok {
-				debugPrintf("# %s # 无法获取 S%d 对选票 %s 的反馈", rf, server, args)
+				debugPrintf("%s  无法获取 S%d 对选票 %s 的反馈", rf, server, args)
 				return
 			}
 
 			if args.Term == rf.currentTerm && rf.state == CANDIDATE {
 				// 返回投票结果
-				debugPrintf("# %s # 已经获取 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+				debugPrintf("%s  已经获取 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
 				replyChan <- reply
-				debugPrintf("# %s # 已经发送 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+				debugPrintf("%s  已经发送 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
 			}
 		}(server, requestVoteReplyChan)
 	}
@@ -57,21 +57,21 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 		// 现在总的投票人数为 1，就是自己投给自己的那一票
 		votesForMe := 1
 		currentTerm := rf.currentTerm
-		debugPrintf("# %s # 已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, currentTerm)
-		defer debugPrintf("# %s # 已经获得选票:%d, 停止: term(%d) 等待选票", rf, votesForMe, currentTerm)
+		debugPrintf("%s  已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, currentTerm)
+		defer debugPrintf("%s  已经获得选票:%d, 停止: term(%d) 等待选票", rf, votesForMe, currentTerm)
 		for {
 
-			// debugPrintf("# %s # in newElection for {}, rf.convertToFollowerChan == %v, rf.eletctionTimeoutChan == %v, requestVoteReplyChan == %v", rf, rf.convertToFollowerChan, rf.electionTimeoutChan, requestVoteReplyChan)
+			// debugPrintf("%s  in newElection for {}, rf.convertToFollowerChan == %v, rf.eletctionTimeoutChan == %v, requestVoteReplyChan == %v", rf, rf.convertToFollowerChan, rf.electionTimeoutChan, requestVoteReplyChan)
 
 			select {
 			case <-rf.convertToFollowerChan:
 				// rf 不再是 candidate 状态
 				// 没有必要再统计投票结果了
-				debugPrintf("# %s # 已经是 %s，停止统计投票的工作", rf, rf.state)
+				debugPrintf("%s  已经是 %s，停止统计投票的工作", rf, rf.state)
 				return
 			case <-rf.electionTimeoutChan:
 				// 新的 election 已经开始，可以结束这个了
-				debugPrintf("# %s # 收到 election timeout 的信号，停止统计投票的工作", rf, rf.state)
+				debugPrintf("%s  收到 election timeout 的信号，停止统计投票的工作", rf, rf.state)
 				return
 			case reply := <-requestVoteReplyChan: // 收到新的选票
 				//

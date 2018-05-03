@@ -6,7 +6,7 @@ import (
 
 // 引用时 args 为 nil
 func comeToPower(rf *Raft, args interface{}) fsmState {
-	debugPrintf("# %s # come to power", rf)
+	debugPrintf("%s  come to power", rf)
 
 	//
 	if rf.electionTimeoutChan != nil {
@@ -31,7 +31,7 @@ func sendHeartbeat(rf *Raft) {
 	hbPeriod := time.Duration(100) * time.Millisecond
 	hbtimer := time.NewTicker(hbPeriod)
 
-	debugPrintf("# %s # 准备开始发送周期性心跳，周期:%s", rf, hbPeriod)
+	debugPrintf("%s  准备开始发送周期性心跳，周期:%s", rf, hbPeriod)
 
 	for {
 		// TODO: 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
@@ -60,7 +60,7 @@ func makeHeartbeat(rf *Raft) {
 			ok := rf.sendAppendEntries(server, args, reply)
 
 			if !ok {
-				debugPrintf("# %s # 无法获取 S%d 对 %s 的回复", rf, server, args)
+				debugPrintf("%s  无法获取 S%d 对 %s 的回复", rf, server, args)
 				return
 			}
 
