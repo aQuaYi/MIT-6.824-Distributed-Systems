@@ -51,6 +51,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	debugPrintf("# %s # receive appendEntriesArgs [%s]", rf, args)
 
 	reply.Term = rf.currentTerm
+	reply.NextIndex = args.PrevLogIndex
 
 	// 1. Replay false at once if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -58,14 +59,8 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		return
 	}
 
-	isArgsFromNewLeader := false
-
 	if args.Term > rf.currentTerm ||
 		(rf.state == CANDIDATE && args.Term >= rf.currentTerm) {
-		isArgsFromNewLeader = true
-	}
-
-	if isArgsFromNewLeader {
 		rf.call(discoverNewLeaderEvent,
 			toFollowerArgs{
 				term:     args.Term,
@@ -115,13 +110,17 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	if len(args.Entries) == 0 {
 		debugPrintf("# %s # 接收到 heartbeat", rf)
-	} else {
-		rf.logs = rf.logs[:args.PrevLogIndex+1]
-		debugPrintf("# %s # len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
-		rf.logs = append(rf.logs, args.Entries...)
-		debugPrintf("# %s # len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
-		rf.persist()
+		reply.NextIndex = args.PrevLogIndex + 1
+		reply.Success = false
+		return
 	}
+
+	// 只保留合规的 logs
+	rf.logs = rf.logs[:args.PrevLogIndex+1]
+	debugPrintf("# %s # len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+	rf.logs = append(rf.logs, args.Entries...)
+	debugPrintf("# %s # len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+	rf.persist()
 	reply.NextIndex = len(rf.logs)
 	reply.Success = true
 
@@ -131,4 +130,5 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		// TODO: 发送通知到 检查 apply 的 groutine
 	}
 
+	rf.appendedNewEntriesChan <- struct{}{}
 }
