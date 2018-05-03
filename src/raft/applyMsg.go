@@ -18,7 +18,7 @@ type ApplyMsg struct { // TODO: 注释 applyMsg 中每个属性的含义
 }
 
 // TODO: 这个函数是干什么用的
-func reportApplyMsg(rf *Raft, applyCh chan ApplyMsg) {
+func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 	for {
 		if rf.hasShutdown() {
 			debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
@@ -74,7 +74,7 @@ func reportApplyMsg(rf *Raft, applyCh chan ApplyMsg) {
 			if rf.state == LEADER {
 				rf.persist()
 			}
-			rf.rwmu.Unlock()
 		}
+		rf.rwmu.Unlock()
 	}
 }

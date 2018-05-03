@@ -44,7 +44,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				return
 			}
 
-			if args.Term == rf.currentTerm || rf.state == CANDIDATE {
+			if args.Term == rf.currentTerm && rf.state == CANDIDATE {
 				// 返回投票结果
 				debugPrintf("# %s # 已经获取 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
 				replyChan <- reply
