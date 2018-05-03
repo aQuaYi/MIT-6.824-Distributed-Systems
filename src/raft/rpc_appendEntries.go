@@ -6,18 +6,18 @@ import (
 
 // AppendEntriesArgs 是添加 log 的参数
 type AppendEntriesArgs struct {
-	Term         int // leader 的 term
-	LeaderID     int // leader 的 ID
+	Term         int // leader.currentTerm
+	LeaderID     int // leader.me
 	PrevLogIndex int // index of log entry immediately preceding new ones
 	PrevLogTerm  int // term of prevLogIndex entry
+	LeaderCommit int // leader.commitIndex
 
 	Entries []LogEntry // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
 
-	LeaderCommit int // leader 的 commitIndex
 }
 
 func (a AppendEntriesArgs) String() string {
-	return fmt.Sprintf("server:%d, term:%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v",
+	return fmt.Sprintf("appendEntriesArgs{S#%d, term:%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v}",
 		a.LeaderID, a.Term, a.PrevLogIndex, a.PrevLogTerm, a.LeaderCommit, a.Entries)
 }
 
@@ -26,6 +26,11 @@ type AppendEntriesReply struct {
 	Term      int  // 回复者的 term
 	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
 	NextIndex int  // 下一次发送的 AppendEntriesArgs.Entries[0] 在 Leader.logs 中的索引号
+}
+
+func (r AppendEntriesReply) String() string {
+	return fmt.Sprintf("appendEntriesReply{term:%d, Success:%t, NextIndex:%d}",
+		r.Term, r.Success, r.NextIndex)
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
@@ -48,7 +53,7 @@ func newAppendEntriesArgs(leader *Raft, server int) *AppendEntriesArgs {
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	// NOTICE: Your code here. (2A, 2B)
 
-	debugPrintf("%s  receive appendEntriesArgs [%s]", rf, args)
+	debugPrintf("%s receive %s", rf, args)
 
 	reply.Term = rf.currentTerm
 	reply.NextIndex = args.PrevLogIndex
