@@ -149,10 +149,11 @@ func (rf *Raft) readPersist(data []byte) {
 // the leader.
 //
 //
-func (rf *Raft) Start(command interface{}) (int, int, bool) {
-	index := -1
-	term := -1
-	isLeader := true
+func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
+
+	index = -1
+	term = -1
+	isLeader = false
 
 	// Your code here (2B).
 	// if command received from client:
@@ -160,82 +161,25 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
 
-	switch rf.state {
-	case LEADER:
-		index = len(rf.logs)
-		term = rf.currentTerm
-		isLeader = true
-
-		logEntry := new(LogEntry)
-		logEntry.LogTerm = rf.currentTerm
-		logEntry.Command = command
-
-		rf.logs = append(rf.logs, *logEntry)
-
-		debugPrintf("[server: %v]appendEntriesArgs entry: %v\n", rf.me, *logEntry)
-
-		appendEntriesArgs := make([]*AppendEntriesArgs, len(rf.peers))
-		appendEntriesReply := make([]*AppendEntriesReply, len(rf.peers))
-
-		for server := range rf.peers {
-			if server != rf.me {
-				appendEntriesArgs[server] = &AppendEntriesArgs{
-					Term:         rf.currentTerm,
-					LeaderID:     rf.me,
-					PrevLogIndex: rf.nextIndex[server] - 1,
-					PrevLogTerm:  rf.logs[rf.nextIndex[server]-1].LogTerm,
-					Entries:      []LogEntry{*logEntry},
-					LeaderCommit: rf.commitIndex}
-
-				rf.nextIndex[server] += len(appendEntriesArgs[server].Entries)
-				debugPrintf("leader:%v, nextIndex:%v\n", rf.me, rf.nextIndex)
-
-				appendEntriesReply[server] = new(AppendEntriesReply)
-
-				//go func(rf *Raft, server int, args *AppendEntriesArgs, reply *AppendEntriesReply) {
-				//    for {
-				//        DPrintf("[server: %v]qwe: %v\n", rf.me, args.Entries[0].Command)
-				//        trialReply := new(AppendEntriesReply)
-				//        ok := rf.sendAppendEntries(server, args, trialReply)
-				//        rf.mu.Lock()
-				//        if rf.state != "Leader" {
-				//            rf.mu.Unlock()
-				//            return
-				//        }
-				//        if args.Term != rf.currentTerm {
-				//            rf.mu.Unlock()
-				//            return
-				//        }
-				//        if ok && trialReply.Success {
-				//            reply.Term    = trialReply.Term
-				//            reply.Success = trialReply.Success
-				//            rf.matchIndex[server] = appendEntriesArgs[server].PrevLogIndex + len(appendEntriesArgs[server].Entries)
-				//            DPrintf("leader:%v, matchIndex:%v\n", rf.me, rf.matchIndex)
-				//            rf.mu.Unlock()
-				//            break
-				//        }
-				//        if ok && trialReply.Term > rf.currentTerm {
-				//            rf.state = "Follower"
-				//            rf.currentTerm = trialReply.Term
-				//            rf.mu.Unlock()
-				//            return
-				//        }
-				//        rf.mu.Unlock()
-				//        time.Sleep(500 * time.Millisecond)
-				//    }
-				//    DPrintf("[server: %v]AppendEntries reply of %v from follower %v, reply:%v\n", rf.me, args, server, reply);
-				//    rf.cond.Broadcast()
-				//
-				//}(rf, server, appendEntriesArgs[server], appendEntriesReply[server])
-			}
-		}
-
-	default:
-		isLeader = false
+	if rf.state != LEADER {
+		return
 	}
 
-	debugPrintf("[server: %v] return value: log index:%v, term:%v, isLeader:%v\n", rf.me, index, term, isLeader)
-	return index, term, isLeader
+	// TODO: finish 这个部分的修改工作
+	index = len(rf.logs)
+	term = rf.currentTerm
+	isLeader = true
+
+	entry := new(LogEntry)
+	entry.LogTerm = rf.currentTerm
+	entry.Command = command
+
+	rf.logs = append(rf.logs, *entry)
+
+	debugPrintf("# %s # 添加了新的 entry{%v}，添加后，len(rf.logs)==%d",
+		rf, *entry, len(rf.logs))
+
+	return
 }
 
 // Kill is
