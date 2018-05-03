@@ -103,11 +103,11 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 func electionTimeOutLoop(rf *Raft) {
 	for {
 
-		rf.electionTimerReset()
-
 		if rf.hasShutdown() {
 			return
 		}
+
+		rf.electionTimerReset()
 
 		select {
 		case <-rf.electionTimer.C:
