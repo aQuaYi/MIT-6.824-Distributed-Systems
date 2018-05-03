@@ -60,12 +60,10 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	isArgsFromNewLeader := false
 
-	rf.rwmu.RLock()
 	if args.Term > rf.currentTerm ||
 		(rf.state == CANDIDATE && args.Term >= rf.currentTerm) {
 		isArgsFromNewLeader = true
 	}
-	rf.rwmu.RUnlock()
 
 	if isArgsFromNewLeader {
 		rf.call(discoverNewLeaderEvent,
@@ -97,16 +95,13 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
 		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
 		reply.NextIndex = args.PrevLogIndex
-		// TODO: 简化这里的逻辑
-		for rf.logs[reply.NextIndex].LogTerm == rf.logs[reply.NextIndex-1].LogTerm {
-			if reply.NextIndex > rf.commitIndex {
-				reply.NextIndex--
-			} else {
-				reply.NextIndex = rf.commitIndex + 1
-				break
-			}
-			debugPrintf("[server: %v]FirstTermIndex: %v\n", rf.me, reply.NextIndex)
+		wrongTerm := rf.logs[args.PrevLogIndex].LogTerm
+
+		for reply.NextIndex > rf.commitIndex+1 &&
+			rf.logs[reply.NextIndex].LogTerm == wrongTerm {
+			reply.NextIndex--
 		}
+		debugPrintf("# %s # reply.NextIndex == %d", rf, reply.NextIndex)
 
 		// 删除失效的 log
 		rf.logs = rf.logs[:reply.NextIndex]
@@ -119,13 +114,16 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 4. append any new entries not already in the log
 
 	if len(args.Entries) == 0 {
-		debugPrintf("# %s # received heartbeat\n", rf)
+		debugPrintf("# %s # 接收到 heartbeat", rf)
 	} else {
 		rf.logs = rf.logs[:args.PrevLogIndex+1]
+		debugPrintf("# %s # len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
 		rf.logs = append(rf.logs, args.Entries...)
-		go rf.persist()
+		debugPrintf("# %s # len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+		rf.persist()
 	}
 	reply.NextIndex = len(rf.logs)
+	reply.Success = true
 
 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	if args.LeaderCommit > rf.commitIndex {
@@ -133,5 +131,4 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		// TODO: 发送通知到 检查 apply 的 groutine
 	}
 
-	reply.Success = true
 }
