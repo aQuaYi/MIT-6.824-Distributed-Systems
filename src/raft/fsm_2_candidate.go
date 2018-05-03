@@ -8,6 +8,7 @@ import (
 func comeToPower(rf *Raft, args interface{}) fsmState {
 	debugPrintf("# %s # come to power", rf)
 
+	//
 	if rf.electionTimeoutChan != nil {
 		close(rf.electionTimeoutChan)
 		rf.electionTimeoutChan = nil
@@ -38,7 +39,7 @@ func sendHeartbeat(rf *Raft) {
 		rf.electionTimerReset()
 
 		// TODO: 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
-		go makeHeartbeat(rf)
+		makeHeartbeat(rf)
 
 		select {
 		// 要么 leader 变成了 follower，就只能结束这个循环
@@ -50,42 +51,11 @@ func sendHeartbeat(rf *Raft) {
 	}
 }
 
-type toFollowerArgs struct {
-	term     int
-	votedFor int
-}
-
-// dicover leader or new term
-func toFollower(rf *Raft, args interface{}) fsmState {
-	a, ok := args.(toFollowerArgs)
-	if !ok {
-		panic("followTo 需要正确的参数")
-	}
-	rf.currentTerm = max(rf.currentTerm, a.term)
-	rf.votedFor = a.votedFor
-
-	// rf.convertToFollowerChan != nil 就一定是 open 的
-	// 这是靠锁保证的
-	if rf.convertToFollowerChan != nil {
-		close(rf.convertToFollowerChan)
-		rf.convertToFollowerChan = nil
-	}
-
-	if rf.electionTimeoutChan != nil {
-		close(rf.electionTimeoutChan)
-		rf.electionTimeoutChan = nil
-	}
-
-	return FOLLOWER
-}
-
 func makeHeartbeat(rf *Raft) {
 	for server := range rf.peers {
 		if server == rf.me {
 			continue
 		}
-		// appendEntriesArgs[server] = newAppendEntriesArgs(rf, server)
-		// appendEntriesReply[server] = new(AppendEntriesReply)
 
 		go func(server int) {
 			args, reply := newAppendEntriesArgs(rf, server), new(AppendEntriesReply)
@@ -212,4 +182,29 @@ func makeHeartbeat(rf *Raft) {
 	}
 
 	return
+}
+
+type toFollowerArgs struct {
+	term     int
+	votedFor int
+}
+
+// dicover leader or new term
+func toFollower(rf *Raft, args interface{}) fsmState {
+	a, ok := args.(toFollowerArgs)
+	if !ok {
+		panic("toFollower 需要正确的参数")
+	}
+
+	rf.currentTerm = max(rf.currentTerm, a.term)
+	rf.votedFor = a.votedFor
+
+	// rf.convertToFollowerChan != nil 就一定是 open 的
+	// 这是靠锁保证的
+	if rf.convertToFollowerChan != nil {
+		close(rf.convertToFollowerChan)
+		rf.convertToFollowerChan = nil
+	}
+
+	return FOLLOWER
 }

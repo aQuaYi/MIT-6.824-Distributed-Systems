@@ -8,6 +8,8 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 先进入下一个 Term
 	rf.currentTerm++
 
+	// 如果前一个 election 还有残留
+	// 就通知前一个 election 彻底关闭
 	if rf.electionTimeoutChan != nil {
 		close(rf.electionTimeoutChan)
 	}
@@ -16,6 +18,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 先给自己投一票
 	rf.votedFor = rf.me
 
+	// 当 server 从
 	rf.convertToFollowerChan = make(chan struct{})
 
 	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
@@ -40,21 +43,26 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				debugPrintf("# %s # 无法获取 S%d 对选票 %s 的反馈", rf, server, args)
 				return
 			}
-			// 返回投票结果
-			debugPrintf("# %s # 已经获取 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
-			replyChan <- reply
-			debugPrintf("# %s # 已经发送 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+
+			if args.Term == rf.currentTerm || rf.state == CANDIDATE {
+				// 返回投票结果
+				debugPrintf("# %s # 已经获取 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+				replyChan <- reply
+				debugPrintf("# %s # 已经发送 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+			}
 		}(server, requestVoteReplyChan)
 	}
 
 	go func(replyChan chan *RequestVoteReply) {
 		// 现在总的投票人数为 1，就是自己投给自己的那一票
 		votesForMe := 1
-
-		debugPrintf("# %s # 已经获得选票:%d, 开始:等待选票", rf, votesForMe)
-		defer debugPrintf("# %s # 已经获得选票:%d, 停止:等待选票", rf, votesForMe)
+		currentTerm := rf.currentTerm
+		debugPrintf("# %s # 已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, currentTerm)
+		defer debugPrintf("# %s # 已经获得选票:%d, 停止: term(%d) 等待选票", rf, votesForMe, currentTerm)
 		for {
-			debugPrintf("# %s # in newElection for {}, rf.convertToFollowerChan == %v, rf.eletctionTimeoutChan == %v, requestVoteReplyChan == %v", rf, rf.convertToFollowerChan, rf.electionTimeoutChan, requestVoteReplyChan)
+
+			// debugPrintf("# %s # in newElection for {}, rf.convertToFollowerChan == %v, rf.eletctionTimeoutChan == %v, requestVoteReplyChan == %v", rf, rf.convertToFollowerChan, rf.electionTimeoutChan, requestVoteReplyChan)
+
 			select {
 			case <-rf.convertToFollowerChan:
 				// rf 不再是 candidate 状态
@@ -66,6 +74,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				debugPrintf("# %s # 收到 election timeout 的信号，停止统计投票的工作", rf, rf.state)
 				return
 			case reply := <-requestVoteReplyChan: // 收到新的选票
+				//
 				if reply.Term > rf.currentTerm {
 					rf.call(discoverNewTermEvent,
 						toFollowerArgs{
@@ -89,24 +98,4 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	}(requestVoteReplyChan)
 
 	return CANDIDATE
-}
-
-func convertToFollower(rf *Raft, term interface{}) fsmState {
-	newTerm, ok := term.(int)
-	if !ok {
-		panic("convertToFollower 需要正确的参数")
-	}
-	rf.currentTerm = max(rf.currentTerm, newTerm)
-	rf.votedFor = NULL
-
-	// rf.convertToFollowerChan != nil
-	// 说明，rf 是 candidate 或 leader
-	if rf.convertToFollowerChan != nil {
-		close(rf.convertToFollowerChan)
-		rf.convertToFollowerChan = nil
-	}
-
-	// TODO: 这里需要重置 election timer 吗
-
-	return FOLLOWER
 }
