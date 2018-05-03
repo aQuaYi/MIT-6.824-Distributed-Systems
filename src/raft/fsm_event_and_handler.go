@@ -13,22 +13,22 @@ var (
 // 添加 FOLLOWER 状态下的处理函数
 func (rf *Raft) addFollowerHandler() {
 	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
-	rf.addHandler(FOLLOWER, discoverNewTermEvent, fsmHandler(followTo))
-	rf.addHandler(FOLLOWER, discoverNewLeaderEvent, fsmHandler(followTo))
+	rf.addHandler(FOLLOWER, discoverNewTermEvent, fsmHandler(toFollower))
+	rf.addHandler(FOLLOWER, discoverNewLeaderEvent, fsmHandler(toFollower))
 }
 
 // 添加 CANDIDATE 状态下的处理函数
 func (rf *Raft) addCandidateHandler() {
 	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, discoverNewLeaderEvent, fsmHandler(followTo))
-	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(followTo))
+	rf.addHandler(CANDIDATE, discoverNewLeaderEvent, fsmHandler(toFollower))
+	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(toFollower))
 	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
 }
 
 // 添加 LEADER 状态下的处理函数
 func (rf *Raft) addLeaderHandler() {
-	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(followTo))
-	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(followTo))
+	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(toFollower))
+	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(toFollower))
 }
 
 func (rf *Raft) addAllHandler() {

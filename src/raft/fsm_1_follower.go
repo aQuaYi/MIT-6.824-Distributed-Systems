@@ -68,7 +68,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			case reply := <-requestVoteReplyChan: // 收到新的选票
 				if reply.Term > rf.currentTerm {
 					rf.call(discoverNewTermEvent,
-						followToArgs{
+						toFollowerArgs{
 							term:     reply.Term,
 							votedFor: NULL,
 						})

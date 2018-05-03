@@ -50,14 +50,14 @@ func sendHeartbeat(rf *Raft) {
 	}
 }
 
-type followToArgs struct {
+type toFollowerArgs struct {
 	term     int
 	votedFor int
 }
 
-// 发现了 leader with new term
-func followTo(rf *Raft, args interface{}) fsmState {
-	a, ok := args.(followToArgs)
+// dicover leader or new term
+func toFollower(rf *Raft, args interface{}) fsmState {
+	a, ok := args.(toFollowerArgs)
 	if !ok {
 		panic("followTo 需要正确的参数")
 	}
@@ -129,7 +129,7 @@ func makeHeartbeat(rf *Raft) {
 			}
 
 			if reply.Term > rf.currentTerm {
-				go rf.call(discoverNewTermEvent, followToArgs{
+				go rf.call(discoverNewTermEvent, toFollowerArgs{
 					term:     reply.Term,
 					votedFor: NULL,
 				})
@@ -158,7 +158,7 @@ func makeHeartbeat(rf *Raft) {
 				}
 
 				if detectReply.Term > rf.currentTerm {
-					go rf.call(discoverNewTermEvent, followToArgs{
+					go rf.call(discoverNewTermEvent, toFollowerArgs{
 						term:     reply.Term,
 						votedFor: NULL,
 					})
@@ -193,7 +193,7 @@ func makeHeartbeat(rf *Raft) {
 			}
 
 			if forceReply.Term > rf.currentTerm {
-				go rf.call(discoverNewTermEvent, followToArgs{
+				go rf.call(discoverNewTermEvent, toFollowerArgs{
 					term:     reply.Term,
 					votedFor: NULL,
 				})

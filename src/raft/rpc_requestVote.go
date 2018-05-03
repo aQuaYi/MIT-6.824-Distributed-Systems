@@ -109,7 +109,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 更新选民的 currentTerm
 	if args.Term > rf.currentTerm {
 		rf.call(discoverNewTermEvent,
-			followToArgs{
+			toFollowerArgs{
 				term:     args.Term,
 				votedFor: NULL,
 			})
