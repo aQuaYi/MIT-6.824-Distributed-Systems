@@ -56,7 +56,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	debugPrintf("%s receive %s", rf, args)
 
 	reply.Term = rf.currentTerm
-	reply.NextIndex = args.PrevLogIndex
+	reply.NextIndex = args.PrevLogIndex + 1
 
 	// 1. Replay false at once if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -75,7 +75,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 
 	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
-	debugPrintf("%s  准备发送重置 election timer 信号", rf)
+	debugPrintf("%s 收到了 valid appendEntries RPC 信号，准备重置 election timer", rf)
 	rf.resetElectionTimerChan <- struct{}{}
 
 	// 把 lock 移动到 rf.call 的下面，避免死锁
@@ -84,7 +84,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
-		debugPrintf("%s  log doesn't contain PrevLogIndex\n", rf)
+		debugPrintf("%s 含有的 logs 太短，不含有 PrevLogIndex == %d", rf, args.PrevLogIndex)
 		reply.NextIndex = len(rf.logs)
 		reply.Success = false
 		return
@@ -93,7 +93,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 3. if an existing entry conflicts with a new one (same index but diff terms),
 	//    delete the existing entry and all that follows it
 	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
-		debugPrintf("[server: %v] log contains PrevLogIndex, but term doesn't match\n", rf.me)
+		debugPrintf("%s 中 rf.logs[args.PrevLogIndex].LogTerm(%d)!=args.PrevLogTerm(%d) ", rf, rf.logs[args.PrevLogIndex].LogTerm, args.PrevLogTerm)
 		reply.NextIndex = args.PrevLogIndex
 		wrongTerm := rf.logs[args.PrevLogIndex].LogTerm
 
@@ -101,9 +101,9 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 			rf.logs[reply.NextIndex].LogTerm == wrongTerm {
 			reply.NextIndex--
 		}
-		debugPrintf("%s  reply.NextIndex == %d", rf, reply.NextIndex)
+		debugPrintf("%s reply.NextIndex == %d", rf, reply.NextIndex)
 
-		// 删除失效的 log
+		// 删除失效的 logs
 		rf.logs = rf.logs[:reply.NextIndex]
 		reply.Success = false
 		return
@@ -132,7 +132,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = min(args.LeaderCommit, len(rf.logs)-1)
-		// TODO: 发送通知到 检查 apply 的 groutine
 	}
 
 	rf.appendedNewEntriesChan <- struct{}{}

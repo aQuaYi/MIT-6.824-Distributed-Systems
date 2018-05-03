@@ -70,8 +70,8 @@ type Raft struct {
 }
 
 func (rf *Raft) String() string {
-	return fmt.Sprintf("S%d:%2d:%s:%d, commitIndex:%d, lastApplied:%d, logs:%v",
-		rf.me, rf.votedFor, rf.state, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs)
+	return fmt.Sprintf("{S#%d:%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v}",
+		rf.me, rf.currentTerm, rf.state, rf.votedFor, rf.commitIndex, rf.lastApplied, rf.logs)
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
@@ -81,7 +81,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		me:                     me,
 		currentTerm:            0,
 		votedFor:               NULL,
-		logs:                   make([]LogEntry, 1),
+		logs:                   make([]LogEntry, 1), // NOTICE: logs 的序列号从 1 开始
 		commitIndex:            0,
 		lastApplied:            0,
 		state:                  FOLLOWER,
@@ -111,10 +111,10 @@ func electionTimeOutLoop(rf *Raft) {
 
 		select {
 		case <-rf.electionTimer.C:
-			debugPrintf("%s   election timeout, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
+			debugPrintf("%s election timeout, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
 			rf.call(electionTimeOutEvent, nil)
 		case <-rf.resetElectionTimerChan:
-			debugPrintf("%s  已经收到重置 election timer 信号", rf)
+			debugPrintf("%s  已经收到重置 election timer 的信号", rf)
 		}
 	}
 }

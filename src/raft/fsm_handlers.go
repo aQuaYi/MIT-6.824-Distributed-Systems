@@ -42,15 +42,15 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			// 拉票
 			ok := rf.sendRequestVote(server, args, reply)
 			if !ok {
-				debugPrintf("%s  无法获取 S%d 对选票 %s 的反馈", rf, server, args)
+				debugPrintf("%s  无法获取 S#%d 对选票 %s 的反馈", rf, server, args)
 				return
 			}
 
 			if args.Term == rf.currentTerm && rf.state == CANDIDATE {
 				// 返回投票结果
-				debugPrintf("%s  已经获取 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+				debugPrintf("%s  已经获取 S#%d 对选票 %s 的反馈: %s", rf, server, args, reply)
 				replyChan <- reply
-				debugPrintf("%s  已经发送 S%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+				debugPrintf("%s  已经发送 S#%d 对选票 %s 的反馈: %s", rf, server, args, reply)
 			}
 		}(server, requestVoteReplyChan)
 	}
@@ -158,7 +158,7 @@ func makeHeartbeat(rf *Raft) {
 			ok := rf.sendAppendEntries(server, args, reply)
 
 			if !ok {
-				debugPrintf("%s  无法获取 S%d 对 %s 的回复", rf, server, args)
+				debugPrintf("%s  无法获取 S#%d 对 %s 的回复", rf, server, args)
 				return
 			}
 
