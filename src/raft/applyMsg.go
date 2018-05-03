@@ -29,7 +29,6 @@ func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 		<-rf.appendedNewEntriesChan
 
 		matchIndexCntr := make(map[int]int)
-		rf.rwmu.Lock()
 		// update rf.commitIndex based on matchIndex[]
 		// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N
 		// and log[N].term == currentTerm:
@@ -55,26 +54,29 @@ func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 			debugPrintf("[server: %v]matchIndex: %v, cntr: %v, rf.commitIndex: %v\n", rf.me, rf.matchIndex, matchIndexCntr, rf.commitIndex)
 		}
 
-		if rf.lastApplied < rf.commitIndex {
-			debugPrintf("[server: %v]lastApplied: %v, commitIndex: %v\n", rf.me, rf.lastApplied, rf.commitIndex)
-			for rf.lastApplied < rf.commitIndex {
-				rf.lastApplied++
-				applyMsg := ApplyMsg{
-					CommandValid: true,
-					Command:      rf.logs[rf.lastApplied].Command,
-					CommandIndex: rf.lastApplied}
-				debugPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
-				// rf.mu.Unlock()
-				applyCh <- applyMsg
-				// rf.mu.Lock()
-			}
-			// persist only when possible committed data
-			// for leader, it's easy to determine
-			// persist leader during commit
-			if rf.state == LEADER {
-				rf.persist()
-			}
+		if rf.lastApplied == rf.commitIndex {
+			continue
 		}
-		rf.rwmu.Unlock()
+
+		debugPrintf("[server: %v]lastApplied: %v, commitIndex: %v\n", rf.me, rf.lastApplied, rf.commitIndex)
+		for rf.lastApplied < rf.commitIndex {
+			rf.lastApplied++
+			applyMsg := ApplyMsg{
+				CommandValid: true,
+				Command:      rf.logs[rf.lastApplied].Command,
+				CommandIndex: rf.lastApplied}
+			debugPrintf("[server: %v]send committed log to service: %v\n", rf.me, applyMsg)
+			// rf.mu.Unlock()
+			applyCh <- applyMsg
+			// rf.mu.Lock()
+		}
+
+		// persist only when possible committed data
+		// for leader, it's easy to determine
+		// persist leader during commit
+		if rf.state == LEADER {
+			rf.persist()
+		}
+
 	}
 }
