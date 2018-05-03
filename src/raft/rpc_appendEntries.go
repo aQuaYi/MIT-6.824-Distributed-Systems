@@ -32,25 +32,15 @@ func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *Ap
 	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
 }
 
-func newAppendEntriesArgs(rf *Raft, server int) *AppendEntriesArgs {
+func newAppendEntriesArgs(leader *Raft, server int) *AppendEntriesArgs {
+	prevLogIndex := leader.nextIndex[server] - 1
 	return &AppendEntriesArgs{
-		Term:         rf.currentTerm,
-		LeaderID:     rf.me,
-		PrevLogIndex: rf.nextIndex[server] - 1,
-		PrevLogTerm:  rf.logs[rf.nextIndex[server]-1].LogTerm,
-		Entries:      nil,
-		LeaderCommit: rf.commitIndex,
-	}
-}
-
-func newForceAppendEntriesArgs(rf *Raft, firstTermIndex int) *AppendEntriesArgs {
-	return &AppendEntriesArgs{
-		Term:         rf.currentTerm,
-		LeaderID:     rf.me,
-		PrevLogIndex: firstTermIndex - 1,
-		PrevLogTerm:  rf.logs[firstTermIndex-1].LogTerm,
-		Entries:      rf.logs[firstTermIndex:],
-		LeaderCommit: rf.commitIndex,
+		Term:         leader.currentTerm,
+		LeaderID:     leader.me,
+		PrevLogIndex: prevLogIndex,
+		PrevLogTerm:  leader.logs[prevLogIndex].LogTerm,
+		Entries:      leader.logs[prevLogIndex+1:],
+		LeaderCommit: leader.commitIndex,
 	}
 }
 

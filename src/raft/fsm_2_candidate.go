@@ -144,7 +144,7 @@ func makeHeartbeat(rf *Raft) {
 			}
 
 			debugPrintf("[server: %v]Consistency check: server: %v, firstTermIndex: %v", rf.me, server, firstTermIndex)
-			forceAppendEntriesArgs := newForceAppendEntriesArgs(rf, firstTermIndex)
+			forceAppendEntriesArgs := newAppendEntriesArgs(rf, server)
 			forceReply := new(AppendEntriesReply)
 
 			rf.rwmu.Unlock()
