@@ -6,9 +6,15 @@
 	"onDidUpdateBookmarkEmitter": {},
 	"bookmarks": [
 		{
-			"fsPath": "$ROOTPATH$/src/raft/applyError.txt",
+			"fsPath": "$ROOTPATH$/src/raft/raft_new.go",
 			"bookmarks": [
-				278
+				112
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/raft_main.go",
+			"bookmarks": [
+				42
 			]
 		}
 	]

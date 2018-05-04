@@ -83,6 +83,7 @@ func (rf *Raft) addLeaderHandler() {
 	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(toFollower))
 }
 
+// 添加 rf 转换状态时的处理函数
 func (rf *Raft) addAllHandler() {
 	rf.addFollowerHandler()
 	rf.addCandidateHandler()
