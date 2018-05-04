@@ -49,7 +49,8 @@ func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 
 			// find the max matchIndex committed
 			// paper 5.4.2, only log entries from the leader's current term are committed by counting replicas
-			if mmIndex > rf.commitIndex && rf.logs[mmIndex].LogTerm == rf.currentTerm {
+			if mmIndex > rf.commitIndex &&
+				rf.logs[mmIndex].LogTerm == rf.currentTerm {
 				rf.commitIndex = mmIndex
 			}
 			debugPrintf("%s matchIndex:%v, maxMajorityIndex:%d, rf.commitIndex:%d", rf, rf.matchIndex, mmIndex, rf.commitIndex)
@@ -66,7 +67,7 @@ func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 				CommandValid: true,
 				Command:      rf.logs[rf.lastApplied].Command,
 				CommandIndex: rf.lastApplied}
-			debugPrintf("%s 实施 %s", rf.me, applyMsg)
+			debugPrintf("%s 实施 %s", rf, applyMsg)
 			applyCh <- applyMsg
 		}
 
