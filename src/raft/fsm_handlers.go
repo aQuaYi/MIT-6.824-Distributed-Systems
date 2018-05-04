@@ -58,9 +58,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	go func(replyChan chan *RequestVoteReply) {
 		// 现在总的投票人数为 1，就是自己投给自己的那一票
 		votesForMe := 1
-		currentTerm := rf.currentTerm
-		debugPrintf("%s  已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, currentTerm)
-		defer debugPrintf("%s  已经获得选票:%d, 停止: term(%d) 等待选票", rf, votesForMe, currentTerm)
+		debugPrintf("%s  已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, rf.currentTerm)
 		for {
 
 			// debugPrintf("%s  in newElection for {}, rf.convertToFollowerChan == %v, rf.eletctionTimeoutChan == %v, requestVoteReplyChan == %v", rf, rf.convertToFollowerChan, rf.electionTimeoutChan, requestVoteReplyChan)

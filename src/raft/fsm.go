@@ -56,7 +56,7 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 // for all servers
 var (
 	//
-	electionTimeOutEvent     = fsmEvent("election time out")
+	electionTimeOutEvent     = fsmEvent("election timeout")
 	discoverNewTermEvent     = fsmEvent("discover new term")
 	winThisTermElectionEvent = fsmEvent("win this term election")
 	discoverNewLeaderEvent   = fsmEvent("meet a leader with higher term")

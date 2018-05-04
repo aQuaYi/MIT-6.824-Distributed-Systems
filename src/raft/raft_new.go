@@ -63,7 +63,7 @@ type Raft struct {
 	// logs 中添加了新的 entries 以后，会通过这个发送信号
 	appendedNewEntriesChan chan struct{}
 
-	// election timeout chan 用于通知 election time out
+	// election timeout chan 用于通知 election timeout
 	electionTimeoutChan chan struct{}
 
 	//
