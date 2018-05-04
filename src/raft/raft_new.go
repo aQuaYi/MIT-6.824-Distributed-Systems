@@ -93,7 +93,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		electionTimer:          time.NewTimer(time.Second),
 		shutdownChan:           make(chan struct{}),
 		resetElectionTimerChan: make(chan struct{}, 1),
-		appendedNewEntriesChan: make(chan struct{}),
+		appendedNewEntriesChan: make(chan struct{}, 1),
 	}
 
 	rf.addAllHandler()

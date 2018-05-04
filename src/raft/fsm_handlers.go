@@ -20,7 +20,8 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 先给自己投一票
 	rf.votedFor = rf.me
 
-	// 当 server 从
+	// 当 server 从其他状态转变到 Follower 的时候，
+	// 需要关闭这个 channel 来发送通知
 	rf.convertToFollowerChan = make(chan struct{})
 
 	// 通过 requestVoteReplyChan 获取 goroutine 获取的 reply
