@@ -8,7 +8,7 @@ func init() {
 }
 
 // needDebug for Debugging
-const needDebug = false
+const needDebug = true
 
 // debugPrintf 根据设置打印输出
 func debugPrintf(format string, a ...interface{}) {

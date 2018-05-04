@@ -19,11 +19,16 @@ package raft
 
 import (
 	"labrpc"
+	"sync"
 )
 
 const (
 	// NOBODY 表示没有投票给任何人
 	NOBODY = -1
+)
+
+var (
+	shutdownWG sync.WaitGroup
 )
 
 // Make is

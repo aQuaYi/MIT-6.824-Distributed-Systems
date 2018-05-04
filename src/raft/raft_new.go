@@ -117,20 +117,21 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 // 不停地
 func electionLoop(rf *Raft) {
+	shutdownWG.Add(1)
+
 	for {
 		rf.electionTimerReset()
 
-		if rf.hasShutdown() {
-			debugPrintf(" S#%d 关闭 electionLoop", rf.me)
-			return
-		}
-
 		select {
 		case <-rf.electionTimer.C:
-			debugPrintf("%s 在 func electionLoop 中，从 case <-rf.electionTimer.C 收到信号, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
+			debugPrintf("%s 在 electionLoop 中，从 case <-rf.electionTimer.C 收到信号, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
 			rf.call(electionTimeOutEvent, nil)
 		case <-rf.resetElectionTimerChan:
-			debugPrintf("%s 在 func electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
+			debugPrintf("%s 在 electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
+		case <-rf.shutdownChan:
+			debugPrintf(" S#%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
+			shutdownWG.Done()
+			return
 		}
 	}
 }

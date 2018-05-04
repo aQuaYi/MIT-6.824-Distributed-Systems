@@ -192,19 +192,10 @@ func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
 //
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
-	rf.rwmu.Lock()
-	defer rf.rwmu.Unlock()
-	close(rf.shutdownChan)
+	debugPrintf("S#%d Killing", rf.me)
 	rf.toCheckApplyChan <- struct{}{}
-}
-
-func (rf *Raft) hasShutdown() bool {
-	select {
-	case <-rf.shutdownChan:
-		return true
-	default:
-		return false
-	}
+	close(rf.shutdownChan)
+	shutdownWG.Wait()
 }
 
 func (rf *Raft) electionTimerReset() {
