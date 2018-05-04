@@ -35,7 +35,7 @@ func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 			return
 		}
 
-		<-rf.appendedNewEntriesChan
+		<-rf.isLogsUpdatedChan
 
 		// update rf.commitIndex based on matchIndex[]
 		// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N

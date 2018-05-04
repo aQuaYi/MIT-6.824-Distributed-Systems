@@ -133,5 +133,5 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.commitIndex = min(args.LeaderCommit, len(rf.logs)-1)
 	}
 
-	rf.appendedNewEntriesChan <- struct{}{}
+	rf.isLogsUpdatedChan <- struct{}{}
 }

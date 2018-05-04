@@ -61,7 +61,7 @@ type Raft struct {
 	convertToFollowerChan chan struct{}
 
 	// logs 中添加了新的 entries 以后，会通过这个发送信号
-	appendedNewEntriesChan chan struct{}
+	isLogsUpdatedChan chan struct{}
 
 	// election timeout chan 用于通知 election timeout
 	electionTimeoutChan chan struct{}
@@ -93,7 +93,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		electionTimer:          time.NewTimer(time.Second),
 		shutdownChan:           make(chan struct{}),
 		resetElectionTimerChan: make(chan struct{}, 1),
-		appendedNewEntriesChan: make(chan struct{}, 1),
+		isLogsUpdatedChan:      make(chan struct{}, 2),
 	}
 
 	rf.addAllHandler()
