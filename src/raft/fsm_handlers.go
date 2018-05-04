@@ -195,7 +195,7 @@ func makeHeartbeat(rf *Raft) {
 			if reply.Success {
 				rf.nextIndex[server] = max(rf.nextIndex[server], reply.NextIndex)
 				rf.matchIndex[server] = rf.nextIndex[server] - 1
-				rf.isLogsUpdatedChan <- struct{}{}
+				rf.toCheckApplyChan <- struct{}{}
 			} else {
 				rf.nextIndex[server] = min(rf.nextIndex[server], reply.NextIndex)
 			}

@@ -42,7 +42,7 @@ const (
 func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := newRaft(peers, me, persister)
 
-	go rf.reportApplyMsg(applyCh)
+	go rf.checkApplyLoop(applyCh)
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())

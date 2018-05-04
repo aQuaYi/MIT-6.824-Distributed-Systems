@@ -195,7 +195,7 @@ func (rf *Raft) Kill() {
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
 	close(rf.shutdownChan)
-	rf.isLogsUpdatedChan <- struct{}{}
+	rf.toCheckApplyChan <- struct{}{}
 }
 
 func (rf *Raft) hasShutdown() bool {

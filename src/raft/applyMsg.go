@@ -27,7 +27,7 @@ func (a ApplyMsg) String() string {
 }
 
 // TODO: 这个函数是干什么用的
-func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
+func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 	for {
 		if rf.hasShutdown() {
 			debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
@@ -35,7 +35,7 @@ func (rf *Raft) reportApplyMsg(applyCh chan ApplyMsg) {
 			return
 		}
 
-		<-rf.isLogsUpdatedChan
+		<-rf.toCheckApplyChan
 
 		// update rf.commitIndex based on matchIndex[]
 		// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N
