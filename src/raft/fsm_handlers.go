@@ -2,6 +2,7 @@ package raft
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -141,7 +142,7 @@ func heartbeating(rf *Raft) {
 		// TODO: 删除此处内容
 		if time.Since(nowTime) > time.Millisecond*150 {
 			msg := fmt.Sprintf("@@ S#%d:%d:%s 心跳间隔 %s", rf.me, rf.currentTerm, rf.state, time.Since(nowTime))
-			panic(msg)
+			log.Println(msg)
 		}
 		nowTime = time.Now()
 
@@ -167,6 +168,13 @@ func makeHeartbeat(rf *Raft) {
 
 		go func(server int) {
 			args, reply := newAppendEntriesArgs(rf, server), new(AppendEntriesReply)
+
+			// TODO: 清除这个修补方案。确保，rf 不再是 Leader 的时候
+			// 不再 makeHeartbeat
+			if rf.state != LEADER {
+				return
+			}
+
 			ok := rf.sendAppendEntries(server, args, reply)
 
 			if !ok {

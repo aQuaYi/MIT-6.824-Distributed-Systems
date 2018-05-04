@@ -18,10 +18,22 @@
 			]
 		},
 		{
+			"fsPath": "$ROOTPATH$/src/raft/test_test.go",
+			"bookmarks": [
+				293
+			]
+		},
+		{
 			"fsPath": "$ROOTPATH$/src/raft/output.applyError.txt",
 			"bookmarks": [
 				248,
 				271,
+				278
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/applyError.txt",
+			"bookmarks": [
 				278
 			]
 		}

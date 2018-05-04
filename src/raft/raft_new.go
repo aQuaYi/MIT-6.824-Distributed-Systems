@@ -92,7 +92,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		handlers:               make(map[fsmState]map[fsmEvent]fsmHandler, 3),
 		electionTimer:          time.NewTimer(time.Second),
 		shutdownChan:           make(chan struct{}),
-		resetElectionTimerChan: make(chan struct{}, 1),
+		resetElectionTimerChan: make(chan struct{}, 2),
 		toCheckApplyChan:       make(chan struct{}, 2),
 	}
 
