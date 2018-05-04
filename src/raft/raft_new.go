@@ -108,9 +108,9 @@ func electionTimeoutLoop(rf *Raft) {
 	for {
 		rf.electionTimerReset()
 
-		// if rf.hasShutdown() {
-		// 	return
-		// }
+		if rf.hasShutdown() {
+			return
+		}
 
 		select {
 		case <-rf.electionTimer.C:
