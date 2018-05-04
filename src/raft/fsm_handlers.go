@@ -1,8 +1,6 @@
 package raft
 
 import (
-	"fmt"
-	"log"
 	"time"
 )
 
@@ -85,7 +83,6 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 							term:     reply.Term,
 							votedFor: NULL,
 						})
-					// TODO: 这个 return 应该是 写不写都行
 					return
 				}
 				if reply.IsVoteGranted {
@@ -132,19 +129,9 @@ func heartbeating(rf *Raft) {
 
 	debugPrintf("%s  准备开始发送周期性心跳，周期:%s", rf, hbPeriod)
 
-	// TODO: 删除此处内容
-	nowTime := time.Now()
-
 	for {
 		// 对于自己只用直接重置 timer
 		rf.resetElectionTimerChan <- struct{}{}
-
-		// TODO: 删除此处内容
-		if time.Since(nowTime) > time.Millisecond*150 {
-			msg := fmt.Sprintf("@@ S#%d:%d:%s 心跳间隔 %s", rf.me, rf.currentTerm, rf.state, time.Since(nowTime))
-			log.Println(msg)
-		}
-		nowTime = time.Now()
 
 		// 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
 		go makeHeartbeat(rf)

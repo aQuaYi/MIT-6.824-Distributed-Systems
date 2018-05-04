@@ -14,7 +14,7 @@ import (
 func (rf *Raft) GetState() (int, bool) {
 	var term int
 	var isleader bool
-	// NOTICE: Your code here (2A).
+	// Your code here (2A).
 
 	// // TODO: 这里为什么要上锁呢
 	// rf.mu.Lock()
@@ -42,7 +42,7 @@ func (rf *Raft) getLastTerm() int {
 // see paper's Figure 2 for a description of what should be persistent.
 //
 func (rf *Raft) persist() {
-	// NOTICE: Your code here (2C).
+	// Your code here (2C).
 	// Example:
 	// w := new(bytes.Buffer)
 	// e := labgob.NewEncoder(w)

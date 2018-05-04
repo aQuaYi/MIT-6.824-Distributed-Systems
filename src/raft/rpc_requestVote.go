@@ -9,7 +9,7 @@ import (
 // field names must start with capital letters!
 //
 type RequestVoteArgs struct {
-	// NOTICE: Your data here (2A, 2B).
+	// Your data here (2A, 2B).
 
 	Term         int // candidate's term
 	CandidateID  int // candidate requesting vote
@@ -27,7 +27,7 @@ func (a RequestVoteArgs) String() string {
 // field names must start with capital letters!
 //
 type RequestVoteReply struct {
-	// NOTICE: Your data here (2A).
+	// Your data here (2A).
 	Term          int  // 投票人的 currentTerm
 	IsVoteGranted bool // 返回 true，表示获得投票
 }
@@ -40,7 +40,7 @@ func (reply RequestVoteReply) String() string {
 // // example RequestVote RPC handler.
 // //
 // func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-// 	// NOTICE: Your code here (2A, 2B).
+// 	// Your code here (2A, 2B).
 
 // 	// TODO: 注释这里的每一句话
 
@@ -92,7 +92,7 @@ func (reply RequestVoteReply) String() string {
 // example RequestVote RPC handler.
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	// NOTICE: Your code here (2A, 2B).
+	// Your code here (2A, 2B).
 
 	// TODO: 注释这里的每一句话
 

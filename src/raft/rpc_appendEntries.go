@@ -51,7 +51,7 @@ func newAppendEntriesArgs(leader *Raft, server int) *AppendEntriesArgs {
 
 // AppendEntries is
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-	// NOTICE: Your code here. (2A, 2B)
+	// Your code here. (2A, 2B)
 
 	debugPrintf("%s receive %s", rf, args)
 
