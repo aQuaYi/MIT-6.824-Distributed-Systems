@@ -103,7 +103,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 	return rf
 }
 
-//
+// haha
 func electionTimeOutLoop(rf *Raft) {
 	for {
 
