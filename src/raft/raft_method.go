@@ -208,7 +208,7 @@ func (rf *Raft) hasShutdown() bool {
 }
 
 func (rf *Raft) electionTimerReset() {
-	timeout := time.Duration(150+rand.Int31n(150)) * time.Millisecond
+	timeout := time.Duration(150+rand.Int63n(151)) * time.Millisecond
 	rf.electionTimer.Reset(timeout)
 	debugPrintf("%s  election timer 已经重置，到期时间为 %s", rf, timeout)
 }
