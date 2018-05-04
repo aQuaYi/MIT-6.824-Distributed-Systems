@@ -16,6 +16,14 @@
 			"bookmarks": [
 				64
 			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/output.applyError.txt",
+			"bookmarks": [
+				248,
+				271,
+				278
+			]
 		}
 	]
 }

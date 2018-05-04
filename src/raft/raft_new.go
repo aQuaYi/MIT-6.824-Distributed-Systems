@@ -74,8 +74,8 @@ func (rf *Raft) String() string {
 	if rf.state == LEADER {
 		postfix = fmt.Sprintf(", nextIndex%v, matchIndex%v", rf.nextIndex, rf.matchIndex)
 	}
-	return fmt.Sprintf("@@ S#%d:%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
-		rf.me, rf.currentTerm, rf.state, rf.votedFor, rf.commitIndex, rf.lastApplied, rf.logs, postfix)
+	return fmt.Sprintf("@@ S#%d:%d:%s:%2d:%d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
+		rf.me, rf.currentTerm, rf.state, rf.votedFor, len(rf.logs), rf.commitIndex, rf.lastApplied, rf.logs, postfix)
 }
 
 func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {

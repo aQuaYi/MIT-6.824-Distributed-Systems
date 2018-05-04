@@ -1,0 +1,305 @@
+2018/05/04 15:50:02.511883 @@ S#0:3:Candidate: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  come to power
+2018/05/04 15:50:02.511895 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[0 0 0] @@  发生事件 (win this term election) ，已从 (Candidate) → (Leader)
+2018/05/04 15:50:02.511919 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[0 0 0] @@  准备开始发送周期性心跳，周期:100ms
+2018/05/04 15:50:02.511963 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[0 0 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.511976 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[0 0 0] @@  election timer 已经重置，到期时间为 295ms
+2018/05/04 15:50:02.512056 @@ S#1:3:Follower: 0:6, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 1 102} {3 1 103} {4 1 104} {5 1 104}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:02.512064 @@ S#1:3:Follower: 0:6, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 1 102} {3 1 103} {4 1 104} {5 1 104}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:02.512070 @@ S#1:3:Follower: 0:6, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 1 102} {3 1 103} {4 1 104} {5 1 104}] @@ 中 rf.logs[args.PrevLogIndex].LogTerm(1)!=args.PrevLogTerm(2) 
+2018/05/04 15:50:02.512076 @@ S#1:3:Follower: 0:6, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 1 102} {3 1 103} {4 1 104} {5 1 104}] @@ reply.NextIndex == 2
+2018/05/04 15:50:02.512112 @@ S#1:3:Follower: 0:2, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.512121 @@ S#1:3:Follower: 0:2, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101}] @@  election timer 已经重置，到期时间为 178ms
+2018/05/04 15:50:02.553960 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:02.589483 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.589506 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 151ms
+2018/05/04 15:50:02.612466 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[0 0 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.612491 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[0 0 0] @@  election timer 已经重置，到期时间为 162ms
+2018/05/04 15:50:02.612664 @@ S#1:3:Follower: 0:2, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]}
+2018/05/04 15:50:02.612674 @@ S#1:3:Follower: 0:2, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:02.612686 @@ S#1:3:Follower: 0:2, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101}] @@  len(rf.logs)== 2，准备 添加 entries{[{2 2 103}]}, len(entries)==1
+2018/05/04 15:50:02.612692 @@ S#1:3:Follower: 0:3, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  len(rf.logs)== 3，已经 添加 entries{[{2 2 103}]}, len(entries)==1
+2018/05/04 15:50:02.612708 @@ S#1:3:Follower: 0:3, commitIndex:1, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ Encode: rf currentTerm: 3, votedFor: 0, log:[{0 0 <nil>} {1 1 101} {2 2 103}]
+2018/05/04 15:50:02.612776 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@ , maxMajorityIndex:2, rf.commitIndex:2
+2018/05/04 15:50:02.612784 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.612790 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 247ms
+2018/05/04 15:50:02.612797 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:1, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ lastApplied: 1, commitIndex: 2
+2018/05/04 15:50:02.612803 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ apply applyMsg[idx:2, cmd:103]
+2018/05/04 15:50:02.688726 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.688757 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 300ms
+2018/05/04 15:50:02.698505 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:02.713143 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:02.713164 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:02.713174 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:02.713196 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.713207 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 297ms
+2018/05/04 15:50:02.713260 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.713274 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 206ms
+2018/05/04 15:50:02.738474 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#0 对选票 Candidate 3 in Term 4 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.749040 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:02.773972 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:02.790057 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.790094 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 165ms
+2018/05/04 15:50:02.812415 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.812436 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 185ms
+2018/05/04 15:50:02.812595 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:02.812607 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:02.812615 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:02.812643 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.812655 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  无法获取 S#0 对 appendEntriesArgs{S#1, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 2 103} {3 1 103} {4 1 104}]} 的回复
+2018/05/04 15:50:02.812655 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 236ms
+2018/05/04 15:50:02.859066 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#1 对选票 Candidate 3 in Term 2 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.889080 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.889143 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 237ms
+2018/05/04 15:50:02.899539 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对选票 Candidate 2 in Term 3 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.900426 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#4 对选票 Candidate 2 in Term 7 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.911019 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#2 对选票 Candidate 3 in Term 10 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.912478 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.912498 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 297ms
+2018/05/04 15:50:02.912618 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:02.912627 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:02.912637 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:02.912666 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.912677 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 230ms
+2018/05/04 15:50:02.931062 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#1 对选票 Candidate 3 in Term 4 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.966701 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#4 对选票 Candidate 2 in Term 5 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:02.989597 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:02.989624 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 215ms
+2018/05/04 15:50:02.997045 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.011977 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.012003 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 260ms
+2018/05/04 15:50:03.012184 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.012198 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.012207 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.012274 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.012286 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 155ms
+2018/05/04 15:50:03.031040 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#0 对选票 Candidate 1 in Term 7 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.033852 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#0 对选票 Candidate 1 in Term 9 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.046164 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.051563 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对选票 Candidate 1 in Term 4 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.086656 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.088874 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.088898 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 160ms
+2018/05/04 15:50:03.111992 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.112018 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 221ms
+2018/05/04 15:50:03.112159 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.112168 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.112177 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.112207 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.112218 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 231ms
+2018/05/04 15:50:03.115062 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.126038 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对选票 Candidate 2 in Term 8 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.140528 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  无法获取 S#2 对 appendEntriesArgs{S#1, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 2 103} {3 1 103} {4 1 104}]} 的回复
+2018/05/04 15:50:03.160005 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:03.179014 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#4 对选票 Candidate 2 in Term 10 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.189114 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.189141 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 208ms
+2018/05/04 15:50:03.204524 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#4 对选票 Candidate 1 in Term 8 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.212010 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.212033 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 249ms
+2018/05/04 15:50:03.212194 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.212207 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.212214 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.212239 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.212262 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 207ms
+2018/05/04 15:50:03.289105 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.289129 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 223ms
+2018/05/04 15:50:03.312088 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.312114 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 183ms
+2018/05/04 15:50:03.312263 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.312275 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.312280 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.312317 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.312332 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 251ms
+2018/05/04 15:50:03.323040 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#1 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]} 的回复
+2018/05/04 15:50:03.341218 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#4 对选票 Candidate 2 in Term 9 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.341759 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#1 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]} 的回复
+2018/05/04 15:50:03.361147 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#0 对选票 Candidate 2 in Term 8 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.389066 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.389090 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 280ms
+2018/05/04 15:50:03.412548 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.412575 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 159ms
+2018/05/04 15:50:03.412782 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.412795 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.412817 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.412893 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.412905 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 203ms
+2018/05/04 15:50:03.428933 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对选票 Candidate 2 in Term 8 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.464552 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.487879 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#4 对选票 Candidate 3 in Term 10 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.488804 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.488827 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 285ms
+2018/05/04 15:50:03.512080 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.512112 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 239ms
+2018/05/04 15:50:03.512247 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.512261 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.512283 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.512351 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.512364 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 237ms
+2018/05/04 15:50:03.572608 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#0 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:03.589133 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.589155 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 218ms
+2018/05/04 15:50:03.591079 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#1 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]} 的回复
+2018/05/04 15:50:03.612615 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.612638 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 228ms
+2018/05/04 15:50:03.612760 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.612766 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.612771 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.612829 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.612835 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 161ms
+2018/05/04 15:50:03.625053 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.688095 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.688790 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.688862 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 229ms
+2018/05/04 15:50:03.691287 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.708606 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#4 对选票 Candidate 3 in Term 8 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.712085 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.712103 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 274ms
+2018/05/04 15:50:03.712298 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.712316 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.712342 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.712426 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.712442 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 159ms
+2018/05/04 15:50:03.748840 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.750138 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:03.788984 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.789005 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 160ms
+2018/05/04 15:50:03.790251 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#1 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]} 的回复
+2018/05/04 15:50:03.812128 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.812147 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 281ms
+2018/05/04 15:50:03.812277 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.812285 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.812289 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.812359 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.812367 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 289ms
+2018/05/04 15:50:03.812571 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对选票 Candidate 2 in Term 7 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.844636 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#2 对选票 Candidate 3 in Term 2 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.852621 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#1 对选票 Candidate 3 in Term 7 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.866158 @@ S#2:13:Candidate: 2:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对选票 Candidate 2 in Term 2 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.868481 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对选票 Candidate 1 in Term 4 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.878192 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:03.883133 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#2 对选票 Candidate 3 in Term 6 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.888885 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.888925 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 186ms
+2018/05/04 15:50:03.905600 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  无法获取 S#0 对 appendEntriesArgs{S#1, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 2 103} {3 1 103} {4 1 104}]} 的回复
+2018/05/04 15:50:03.912157 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.912176 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 160ms
+2018/05/04 15:50:03.912302 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:03.912309 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:03.912314 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:03.912373 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.912380 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 182ms
+2018/05/04 15:50:03.929618 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:03.969641 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#2 对选票 Candidate 3 in Term 11 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:03.989184 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:03.989205 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 271ms
+2018/05/04 15:50:04.010123 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#1 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:04.012278 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.012309 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 167ms
+2018/05/04 15:50:04.012500 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:04.012507 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.012513 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:04.012630 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.012642 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 269ms
+2018/05/04 15:50:04.026125 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对选票 Candidate 1 in Term 9 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:04.053975 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#1 对选票 Candidate 3 in Term 6 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:04.058339 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#1 对选票 Candidate 3 in Term 11 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:04.078172 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#1 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]} 的回复
+2018/05/04 15:50:04.089307 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.089343 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 291ms
+2018/05/04 15:50:04.111123 @@ S#1:13:Candidate: 1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#0 对选票 Candidate 1 in Term 6 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:04.112110 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.112126 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 202ms
+2018/05/04 15:50:04.112257 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:04.112263 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.112268 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:04.112342 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.112350 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 286ms
+2018/05/04 15:50:04.190270 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.190293 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 189ms
+2018/05/04 15:50:04.201183 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:04.212182 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.212204 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 160ms
+2018/05/04 15:50:04.212317 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:04.212322 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.212327 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:04.212380 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.212385 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 188ms
+2018/05/04 15:50:04.281247 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#4 对选票 Candidate 3 in Term 7 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:04.281470 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:04.288722 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.288738 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 205ms
+2018/05/04 15:50:04.294654 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:04.302188 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:04.313227 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.313254 @@ S#0:3:Leader: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 261ms
+2018/05/04 15:50:04.313395 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]}
+2018/05/04 15:50:04.313400 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.313405 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  接收到 heartbeat
+2018/05/04 15:50:04.313464 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.313470 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  election timer 已经重置，到期时间为 150ms
+2018/05/04 15:50:04.321153 @@ S#0:3:Leader: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 3 3], matchIndex[2 2 0] @@ add new entry:{3 3 104}，添加后，len(rf.logs)==4
+2018/05/04 15:50:04.343235 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  无法获取 S#1 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103}]} 的回复
+2018/05/04 15:50:04.351703 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:04.366159 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#3 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:04.389284 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.389306 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 225ms
+2018/05/04 15:50:04.393713 @@ S#0:13:Candidate: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}] @@  无法获取 S#2 对 appendEntriesArgs{S#0, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 12 30}]} 的回复
+2018/05/04 15:50:04.412746 @@ S#0:3:Leader: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 3 3], matchIndex[2 2 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.412769 @@ S#0:3:Leader: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 3 3], matchIndex[2 2 0] @@  election timer 已经重置，到期时间为 171ms
+2018/05/04 15:50:04.412932 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[{3 3 104}]}
+2018/05/04 15:50:04.412941 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.412949 @@ S#1:3:Follower: 0:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  len(rf.logs)== 3，准备 添加 entries{[{3 3 104}]}, len(entries)==1
+2018/05/04 15:50:04.412956 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  len(rf.logs)== 4，已经 添加 entries{[{3 3 104}]}, len(entries)==1
+2018/05/04 15:50:04.412976 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ Encode: rf currentTerm: 3, votedFor: 0, log:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}]
+2018/05/04 15:50:04.413052 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@ , maxMajorityIndex:3, rf.commitIndex:3
+2018/05/04 15:50:04.413059 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@ lastApplied: 2, commitIndex: 3
+2018/05/04 15:50:04.413066 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@ apply applyMsg[idx:3, cmd:104]
+2018/05/04 15:50:04.413114 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@ Encode: rf currentTerm: 3, votedFor: 0, log:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}]
+2018/05/04 15:50:04.413132 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.413140 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  election timer 已经重置，到期时间为 169ms
+2018/05/04 15:50:04.455204 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  无法获取 S#0 对 appendEntriesArgs{S#1, term:1, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:1, entries:[{2 2 103} {3 3 104} {4 1 104}]} 的回复
+2018/05/04 15:50:04.467105 @@ S#3:12:Leader: 3:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 10} {2 12 30} {3 12 1000}], nextIndex[4 4 4 4 4], matchIndex[3 3 3 3 3] @@  无法获取 S#0 对选票 Candidate 3 in Term 11 with LastLogIndex(1) and LastLogTerm:(1) 的反馈
+2018/05/04 15:50:04.489194 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.489221 @@ S#2:2:Leader: 2:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[3 2 3], matchIndex[2 0 2] @@  election timer 已经重置，到期时间为 172ms
+2018/05/04 15:50:04.515226 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.515250 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@  election timer 已经重置，到期时间为 163ms
+2018/05/04 15:50:04.515369 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:3, PrevLogTerm:3, LeaderCommit:3, entries:[]}
+2018/05/04 15:50:04.515380 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.515390 @@ S#1:3:Follower: 0:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  接收到 heartbeat
+2018/05/04 15:50:04.515441 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.515450 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ lastApplied: 2, commitIndex: 3
+2018/05/04 15:50:04.515457 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@  election timer 已经重置，到期时间为 180ms
+2018/05/04 15:50:04.515461 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ apply applyMsg[idx:3, cmd:104]
+2018/05/04 15:50:04.525378 @@ S#2:2:Leader: 2:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[3 2 4], matchIndex[2 0 2] @@ add new entry:{3 2 105}，添加后，len(rf.logs)==4
+2018/05/04 15:50:04.549964 @@ S#2:2:Leader: 2:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[3 2 4], matchIndex[2 0 2] @@  无法获取 S#0 对 appendEntriesArgs{S#2, term:2, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[]} 的回复
+2018/05/04 15:50:04.589006 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ receive appendEntriesArgs{S#2, term:2, PrevLogIndex:1, PrevLogTerm:1, LeaderCommit:2, entries:[{2 2 103} {3 2 105}]}
+2018/05/04 15:50:04.589173 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@  发生事件 (discover new term) ，已从 (Leader) → (Follower)
+2018/05/04 15:50:04.589194 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.589203 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@  election timer 已经重置，到期时间为 277ms
+2018/05/04 15:50:04.589323 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@ receive appendEntriesArgs{S#2, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:2, entries:[{3 2 105}]}
+2018/05/04 15:50:04.589336 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}], nextIndex[4 4 3], matchIndex[3 3 0] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.589344 @@ S#0:3:Leader: 0:3, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103}], nextIndex[4 4 3], matchIndex[3 3 0] @@  len(rf.logs)== 3，准备 添加 entries{[{3 2 105}]}, len(entries)==1
+2018/05/04 15:50:04.589351 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 3], matchIndex[3 3 0] @@  len(rf.logs)== 4，已经 添加 entries{[{3 2 105}]}, len(entries)==1
+2018/05/04 15:50:04.589371 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 3], matchIndex[3 3 0] @@ Encode: rf currentTerm: 3, votedFor: 0, log:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}]
+2018/05/04 15:50:04.589440 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 3], matchIndex[3 3 0] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.589453 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 3], matchIndex[3 3 0] @@  election timer 已经重置，到期时间为 290ms
+2018/05/04 15:50:04.589463 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 3], matchIndex[3 3 0] @@ , maxMajorityIndex:3, rf.commitIndex:3
+2018/05/04 15:50:04.612384 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:2, PrevLogTerm:2, LeaderCommit:3, entries:[{3 2 105}]}
+2018/05/04 15:50:04.612411 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.612419 @@ S#2:3:Follower:-1:3, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103}] @@  len(rf.logs)== 3，准备 添加 entries{[{3 2 105}]}, len(entries)==1
+2018/05/04 15:50:04.612426 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@  len(rf.logs)== 4，已经 添加 entries{[{3 2 105}]}, len(entries)==1
+2018/05/04 15:50:04.612480 @@ S#2:3:Follower:-1:4, commitIndex:2, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@ Encode: rf currentTerm: 3, votedFor: -1, log:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}]
+2018/05/04 15:50:04.612560 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 4], matchIndex[3 3 3] @@ , maxMajorityIndex:3, rf.commitIndex:3
+2018/05/04 15:50:04.612575 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 4], matchIndex[3 3 3] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.612584 @@ S#0:3:Leader: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}], nextIndex[4 4 4], matchIndex[3 3 3] @@  election timer 已经重置，到期时间为 165ms
+2018/05/04 15:50:04.612714 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ receive appendEntriesArgs{S#0, term:3, PrevLogIndex:3, PrevLogTerm:2, LeaderCommit:3, entries:[]}
+2018/05/04 15:50:04.612727 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ 收到了 valid appendEntries RPC 信号，准备重置 election timer
+2018/05/04 15:50:04.612732 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ 中 rf.logs[args.PrevLogIndex].LogTerm(3)!=args.PrevLogTerm(2) 
+2018/05/04 15:50:04.612737 @@ S#1:3:Follower: 0:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 3 104}] @@ reply.NextIndex == 3
+2018/05/04 15:50:04.612798 @@ S#2:3:Follower:-1:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@  已经收到重置 election timer 的信号
+2018/05/04 15:50:04.612809 @@ S#2:3:Follower:-1:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@  election timer 已经重置，到期时间为 295ms
+2018/05/04 15:50:04.612817 @@ S#2:3:Follower:-1:4, commitIndex:3, lastApplied:2, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@ lastApplied: 2, commitIndex: 3
+2018/05/04 15:50:04.612823 @@ S#2:3:Follower:-1:4, commitIndex:3, lastApplied:3, logs:[{0 0 <nil>} {1 1 101} {2 2 103} {3 2 105}] @@ apply applyMsg[idx:3, cmd:105]
+2018/05/04 15:50:04.612828 apply error: commit index=3 S#2 105 != S#1 104
+exit status 1
+FAIL	raft	22.455s
