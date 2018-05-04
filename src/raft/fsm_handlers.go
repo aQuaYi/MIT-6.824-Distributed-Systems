@@ -1,6 +1,9 @@
 package raft
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // election time out 意味着，
 // 进入新的 term
@@ -60,9 +63,8 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 		// 现在总的投票人数为 1，就是自己投给自己的那一票
 		votesForMe := 1
 		debugPrintf("%s  已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, rf.currentTerm)
-		for {
 
-			// debugPrintf("%s  in newElection for {}, rf.convertToFollowerChan == %v, rf.eletctionTimeoutChan == %v, requestVoteReplyChan == %v", rf, rf.convertToFollowerChan, rf.electionTimeoutChan, requestVoteReplyChan)
+		for {
 
 			select {
 			case <-rf.convertToFollowerChan:
@@ -118,24 +120,33 @@ func comeToPower(rf *Raft, args interface{}) fsmState {
 	}
 	rf.matchIndex = make([]int, len(rf.peers))
 
-	go sendHeartbeat(rf)
+	go heartbeating(rf)
 
 	return LEADER
 }
 
-// TODO: finish this goroutine
-func sendHeartbeat(rf *Raft) {
+func heartbeating(rf *Raft) {
 	hbPeriod := time.Duration(100) * time.Millisecond
 	hbtimer := time.NewTicker(hbPeriod)
 
 	debugPrintf("%s  准备开始发送周期性心跳，周期:%s", rf, hbPeriod)
 
+	// TODO: 删除此处内容
+	nowTime := time.Now()
+
 	for {
 		// 对于自己只用直接重置 timer
 		rf.resetElectionTimerChan <- struct{}{}
 
+		// TODO: 删除此处内容
+		if time.Since(nowTime) > time.Millisecond*150 {
+			msg := fmt.Sprintf("@@ S#%d:%d:%s 心跳间隔 %s", rf.me, rf.currentTerm, rf.state, time.Since(nowTime))
+			panic(msg)
+		}
+		nowTime = time.Now()
+
 		// 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
-		makeHeartbeat(rf)
+		go makeHeartbeat(rf)
 
 		select {
 		// 要么 leader 变成了 follower，就只能结束这个循环
