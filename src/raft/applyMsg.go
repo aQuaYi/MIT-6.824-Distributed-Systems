@@ -16,21 +16,23 @@ import (
 // snapshots) on the applyCh; at that point you can add fields to
 // ApplyMsg, but set CommandValid to false for these other uses.
 //
-type ApplyMsg struct { // TODO: 注释 applyMsg 中每个属性的含义
+type ApplyMsg struct {
 	CommandValid bool
-	Command      interface{}
-	CommandIndex int
+	CommandIndex int         // Command zd Raft.logs 中的索引号
+	Command      interface{} // Command 的具体内容
 }
 
 func (a ApplyMsg) String() string {
-	return fmt.Sprintf("applyMsg[idx:%d, cmd:%v]", a.CommandIndex, a.Command)
+	return fmt.Sprintf("ApplyMsg[idx:%d, cmd:%v]", a.CommandIndex, a.Command)
 }
 
-// TODO: 这个函数是干什么用的
+// 每当 rf.logs 或 rf.commitIndex 有变化时，就收到通知
+// 然后，检查发现有可以 commit 的 entry 的话
+// 就通过 applyCh 发送 ApplyMsg 给 replication state machine 进行 commit
 func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 	for {
 		if rf.hasShutdown() {
-			debugPrintf("[server: %v]Close logs handling goroutine\n", rf.me)
+			debugPrintf(" S#%d 关闭 checkApplyLoop", rf.me)
 			//rf.mu.Unlock()
 			return
 		}

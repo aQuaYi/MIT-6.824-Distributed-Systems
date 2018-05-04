@@ -10,12 +10,6 @@
 			"bookmarks": [
 				112
 			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/raft/raft_main.go",
-			"bookmarks": [
-				42
-			]
 		}
 	]
 }

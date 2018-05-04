@@ -110,17 +110,18 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 	rf.addAllHandler()
 
-	go electionTimerLoop(rf)
+	go electionLoop(rf)
 
 	return rf
 }
 
 // 不停地
-func electionTimerLoop(rf *Raft) {
+func electionLoop(rf *Raft) {
 	for {
 		rf.electionTimerReset()
 
 		if rf.hasShutdown() {
+			debugPrintf(" S#%d 关闭 electionLoop", rf.me)
 			return
 		}
 
