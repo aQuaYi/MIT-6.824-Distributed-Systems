@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	// NULL 表示没有投票给任何人
-	NULL = -1
+	// NOBODY 表示没有投票给任何人
+	NOBODY = -1
 )
 
 // Make is

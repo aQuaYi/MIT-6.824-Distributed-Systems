@@ -111,7 +111,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		rf.call(discoverNewTermEvent,
 			toFollowerArgs{
 				term:     args.Term,
-				votedFor: NULL,
+				votedFor: NOBODY,
 			})
 	}
 
@@ -139,7 +139,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 }
 
 func isValidArgs(rf *Raft, args *RequestVoteArgs) bool {
-	return (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
+	return (rf.votedFor == NOBODY || rf.votedFor == args.CandidateID) &&
 		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
 			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1))
 }

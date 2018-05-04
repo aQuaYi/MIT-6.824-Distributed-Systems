@@ -84,7 +84,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		persister:              persister,
 		me:                     me,
 		currentTerm:            0,
-		votedFor:               NULL,
+		votedFor:               NOBODY,
 		logs:                   make([]LogEntry, 1), // NOTICE: logs 的序列号从 1 开始
 		commitIndex:            0,
 		lastApplied:            0,

@@ -81,7 +81,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 					rf.call(discoverNewTermEvent,
 						toFollowerArgs{
 							term:     reply.Term,
-							votedFor: NULL,
+							votedFor: NOBODY,
 						})
 					return
 				}
@@ -172,7 +172,7 @@ func makeHeartbeat(rf *Raft) {
 			if reply.Term > rf.currentTerm {
 				go rf.call(discoverNewTermEvent, toFollowerArgs{
 					term:     reply.Term,
-					votedFor: NULL,
+					votedFor: NOBODY,
 				})
 				return
 			}
