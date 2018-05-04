@@ -6,32 +6,6 @@
 	"onDidUpdateBookmarkEmitter": {},
 	"bookmarks": [
 		{
-			"fsPath": "$ROOTPATH$/src/raft/raft_candidate.go",
-			"bookmarks": [
-				45
-			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/raft/rpc_appendEntries.go",
-			"bookmarks": [
-				64
-			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/raft/test_test.go",
-			"bookmarks": [
-				293
-			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/raft/output.applyError.txt",
-			"bookmarks": [
-				248,
-				271,
-				278
-			]
-		},
-		{
 			"fsPath": "$ROOTPATH$/src/raft/applyError.txt",
 			"bookmarks": [
 				278

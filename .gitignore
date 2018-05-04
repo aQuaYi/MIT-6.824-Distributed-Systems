@@ -26,3 +26,5 @@ api.key
 output.*
 
 grep
+
+pkg/
