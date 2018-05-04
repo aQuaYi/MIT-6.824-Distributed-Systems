@@ -76,10 +76,8 @@ func server() {
 			// 使用 rpcs.ServeConn 处理刚刚生成的 conn
 			go rpcs.ServeConn(conn)
 		}
-		// TODO: 真的会被 Close 吗
-		fmt.Println("l.Close()")
+
 		l.Close()
-		fmt.Println("l.Close()")
 	}()
 
 }
