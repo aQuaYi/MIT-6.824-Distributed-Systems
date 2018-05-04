@@ -30,7 +30,7 @@ func (a ApplyMsg) String() string {
 // 然后，检查发现有可以 commit 的 entry 的话
 // 就通过 applyCh 发送 ApplyMsg 给 replication state machine 进行 commit
 func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
-	shutdownWG.Add(1)
+	rf.shutdownWG.Add(1)
 	for {
 
 		select {
@@ -38,7 +38,7 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.toCheckApplyChan，收到信号。将要检查是否有新的 entry 可以 commig", rf.me)
 		case <-rf.shutdownChan:
 			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.shutdownChan，收到信号。关闭 checkApplyLoop", rf.me)
-			shutdownWG.Done()
+			rf.shutdownWG.Done()
 			return
 		}
 

@@ -195,7 +195,7 @@ func (rf *Raft) Kill() {
 	debugPrintf("S#%d Killing", rf.me)
 	rf.toCheckApplyChan <- struct{}{}
 	close(rf.shutdownChan)
-	shutdownWG.Wait()
+	rf.shutdownWG.Wait()
 }
 
 func (rf *Raft) electionTimerReset() {

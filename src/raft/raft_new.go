@@ -51,6 +51,7 @@ type Raft struct {
 
 	// 用于通知 raft 已经关闭的信息
 	shutdownChan chan struct{}
+	shutdownWG   sync.WaitGroup
 
 	// 当 rf 接收到合格的 rpc 信号时，会通过 resetElectionTimerChan 发送信号
 	resetElectionTimerChan chan struct{}
@@ -117,7 +118,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 // 不停地
 func electionLoop(rf *Raft) {
-	shutdownWG.Add(1)
+	rf.shutdownWG.Add(1)
 
 	for {
 		rf.electionTimerReset()
@@ -130,7 +131,7 @@ func electionLoop(rf *Raft) {
 			debugPrintf("%s 在 electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
 		case <-rf.shutdownChan:
 			debugPrintf(" S#%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
-			shutdownWG.Done()
+			rf.shutdownWG.Done()
 			return
 		}
 	}

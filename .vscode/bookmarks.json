@@ -6,9 +6,21 @@
 	"onDidUpdateBookmarkEmitter": {},
 	"bookmarks": [
 		{
-			"fsPath": "$ROOTPATH$/src/raft/raft_new.go",
+			"fsPath": "$ROOTPATH$/src/raft/raft_candidate.go",
 			"bookmarks": [
-				112
+				45
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/rpc_requestVote.go",
+			"bookmarks": [
+				110
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/rpc_appendEntries.go",
+			"bookmarks": [
+				160
 			]
 		}
 	]
