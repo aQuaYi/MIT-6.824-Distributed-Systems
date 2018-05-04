@@ -92,7 +92,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		handlers:               make(map[fsmState]map[fsmEvent]fsmHandler, 3),
 		electionTimer:          time.NewTimer(time.Second),
 		shutdownChan:           make(chan struct{}),
-		resetElectionTimerChan: make(chan struct{}),
+		resetElectionTimerChan: make(chan struct{}, 1),
 		appendedNewEntriesChan: make(chan struct{}),
 	}
 
@@ -108,9 +108,9 @@ func electionTimeoutLoop(rf *Raft) {
 	for {
 		rf.electionTimerReset()
 
-		if rf.hasShutdown() {
-			return
-		}
+		// if rf.hasShutdown() {
+		// 	return
+		// }
 
 		select {
 		case <-rf.electionTimer.C:
