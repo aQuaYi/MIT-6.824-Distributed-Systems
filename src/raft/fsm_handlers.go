@@ -132,7 +132,10 @@ func sendHeartbeat(rf *Raft) {
 	debugPrintf("%s  准备开始发送周期性心跳，周期:%s", rf, hbPeriod)
 
 	for {
-		// TODO: 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
+		// 对于自己只用直接重置 timer
+		rf.resetElectionTimerChan <- struct{}{}
+
+		// 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
 		makeHeartbeat(rf)
 
 		select {
@@ -146,10 +149,9 @@ func sendHeartbeat(rf *Raft) {
 }
 
 func makeHeartbeat(rf *Raft) {
+
 	for server := range rf.peers {
 		if server == rf.me {
-			// 对于自己只用直接重置 timer
-			rf.electionTimerReset()
 			continue
 		}
 

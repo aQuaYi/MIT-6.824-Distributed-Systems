@@ -176,6 +176,7 @@ func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
 	entry.Command = command
 
 	rf.logs = append(rf.logs, *entry)
+	rf.nextIndex[rf.me] = len(rf.logs)
 
 	debugPrintf("%s add new entry:%v，添加后，len(rf.logs)==%d",
 		rf, *entry, len(rf.logs))

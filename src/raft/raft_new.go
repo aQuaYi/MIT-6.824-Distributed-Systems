@@ -74,7 +74,7 @@ func (rf *Raft) String() string {
 	if rf.state == LEADER {
 		postfix = fmt.Sprintf(", nextIndex%v, matchIndex%v", rf.nextIndex, rf.matchIndex)
 	}
-	return fmt.Sprintf("{S#%d:%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s}",
+	return fmt.Sprintf("@@ S#%d:%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
 		rf.me, rf.currentTerm, rf.state, rf.votedFor, rf.commitIndex, rf.lastApplied, rf.logs, postfix)
 }
 
@@ -98,20 +98,19 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 	rf.addAllHandler()
 
-	go electionTimeOutLoop(rf)
+	go electionTimeoutLoop(rf)
 
 	return rf
 }
 
 // haha
-func electionTimeOutLoop(rf *Raft) {
+func electionTimeoutLoop(rf *Raft) {
 	for {
+		rf.electionTimerReset()
 
 		if rf.hasShutdown() {
 			return
 		}
-
-		rf.electionTimerReset()
 
 		select {
 		case <-rf.electionTimer.C:
