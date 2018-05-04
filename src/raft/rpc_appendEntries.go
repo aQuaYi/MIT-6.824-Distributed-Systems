@@ -117,17 +117,16 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		debugPrintf("%s  接收到 heartbeat", rf)
 		reply.NextIndex = args.PrevLogIndex + 1
 		reply.Success = false
-		return
+	} else {
+		// 只保留合规的 logs
+		rf.logs = rf.logs[:args.PrevLogIndex+1]
+		debugPrintf("%s  len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+		rf.logs = append(rf.logs, args.Entries...)
+		debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+		rf.persist()
+		reply.NextIndex = len(rf.logs)
+		reply.Success = true
 	}
-
-	// 只保留合规的 logs
-	rf.logs = rf.logs[:args.PrevLogIndex+1]
-	debugPrintf("%s  len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
-	rf.logs = append(rf.logs, args.Entries...)
-	debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
-	rf.persist()
-	reply.NextIndex = len(rf.logs)
-	reply.Success = true
 
 	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	if args.LeaderCommit > rf.commitIndex {
