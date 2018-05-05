@@ -78,10 +78,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	debugPrintf("%s 收到了 valid appendEntries RPC 信号，准备重置 election timer", rf)
 	rf.resetElectionTimerChan <- struct{}{}
 
-	// 把 lock 移动到 rf.call 的下面，避免死锁
-	rf.rwmu.Lock()
-	defer rf.rwmu.Unlock()
-
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {
 		debugPrintf("%s 含有的 logs 太短，不含有 PrevLogIndex == %d", rf, args.PrevLogIndex)
@@ -89,6 +85,9 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		reply.Success = false
 		return
 	}
+
+	rf.rwmu.Lock()
+	defer rf.rwmu.Unlock()
 
 	// 3. if an existing entry conflicts with a new one (same index but diff terms),
 	//    delete the existing entry and all that follows it
