@@ -156,19 +156,35 @@ func heartbeating(rf *Raft) {
 
 func oneHearteat(rf *Raft) {
 
+	// 如果，在发送 RPC 前才生成 args 的话
+	//
+	// 某个旧 term 的 oldLeader 掉线很久以后，还是会一直坚持不懈地发送 appendEntries RPC
+	// oldLeader 在其最后一个 oneHeartbeat 刚刚开始后，重新上线后
+	// 在收到此 oneHeartbeat 的第一个回复后，
+	// 会发现自己的 Term 落后了，然后更新
+	// 		oldLeader.currentTerm 为最新值
+	// 		oldLeader.state 为 FOLLOWER
+	// ** 但是 **
+	// 此 oneHeartbeat 还没有发送的 RPC 还会继续发送
+	// rpc args.Term 却是更新后的最新 term 了
+	// 此时就相当于，此 term 有两个 leader 在向外部发送 appendEntries RPC
+	//
+	// 所以，在 oneHeartbeat 的开始，就一口气生成后所有的 args
+	// 然后，如果 rf 不再是 leader 的话，就取不再发送
+	// 这样的话，即使 rf 在 oneHeartbeat 内不再是 leader
+	// 其 rpc args 的内容，还是以前的内容，不会出现，同一个 term 两个 leader 的情况
+	appendEntriesArgsSlice := genAppendEntriesArgsSlice(rf)
+	if rf.state != LEADER {
+		return
+	}
+
 	for server := range rf.peers {
 		if server == rf.me {
 			continue
 		}
 
-		go func(server int) {
-			args, reply := newAppendEntriesArgs(rf, server), new(AppendEntriesReply)
-
-			// TODO: 清除这个修补方案。确保，rf 不再是 Leader 的时候
-			// 不再 makeHeartbeat
-			if rf.state != LEADER {
-				return
-			}
+		go func(server int, args *AppendEntriesArgs) {
+			reply := new(AppendEntriesReply)
 
 			ok := rf.sendAppendEntries(server, args, reply)
 
@@ -221,10 +237,21 @@ func oneHearteat(rf *Raft) {
 				rf.nextIndex[server] = min(rf.nextIndex[server], reply.NextIndex)
 			}
 
-		}(server)
+		}(server, appendEntriesArgsSlice[server])
 	}
 
 	return
+}
+
+func genAppendEntriesArgsSlice(rf *Raft) []*AppendEntriesArgs {
+	res := make([]*AppendEntriesArgs, len(rf.peers))
+	for server := range rf.peers {
+		if server == rf.me {
+			continue
+		}
+		res[server] = newAppendEntriesArgs(rf, server)
+	}
+	return res
 }
 
 type toFollowerArgs struct {
