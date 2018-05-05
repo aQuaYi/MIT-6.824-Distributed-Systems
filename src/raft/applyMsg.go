@@ -41,37 +41,28 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 			return
 		}
 
-		// update rf.commitIndex based on matchIndex[]
-		// if there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N
-		// and log[N].term == currentTerm:
-		// set commitIndex = N
+		// 如果 rf 是 LEADER
+		// 先检查能否更新 rf.commitIndex
 		if rf.state == LEADER {
-			// 先获取的自己的 matchIndex
-
-			// TODO: 删除此处内容
-			// rf.matchIndex[rf.me] = len(rf.logs) - 1
-
-			// 然后统计
-			mmIndex := maxMajorityIndex(rf.matchIndex)
-
-			// find the max matchIndex committed
+			idx := maxMajorityIndex(rf.matchIndex)
 			// paper 5.4.2, only log entries from the leader's current term are committed by counting replicas
-			if mmIndex > rf.commitIndex &&
-				rf.logs[mmIndex].LogTerm == rf.currentTerm {
-				rf.commitIndex = mmIndex
+			if idx > rf.commitIndex &&
+				rf.logs[idx].LogTerm == rf.currentTerm {
+				rf.commitIndex = idx
+				debugPrintf("%s 发现了新的 maxMajorityIndex==%d, 已经更新 rf.commitIndex", rf, idx)
 			}
-			debugPrintf("%s , maxMajorityIndex:%d, rf.commitIndex:%d", rf, mmIndex, rf.commitIndex)
 		}
 
+		// 如果无 entry 可 commit，就 continue
 		if rf.lastApplied == rf.commitIndex {
 			continue
 		}
 
-		debugPrintf("%s lastApplied: %d, commitIndex: %d", rf, rf.lastApplied, rf.commitIndex)
+		debugPrintf("%s 有新的 entry 可以 commit ，因为 lastApplied(%d) < commitIndex(%d)", rf, rf.lastApplied, rf.commitIndex)
 		for rf.lastApplied < rf.commitIndex {
 			rf.lastApplied++
 			applyMsg := ApplyMsg{
-				CommandValid: true,
+				CommandValid: true, // TODO: ApplyMsg.CommandValid 属性是做什么用的
 				Command:      rf.logs[rf.lastApplied].Command,
 				CommandIndex: rf.lastApplied}
 			debugPrintf("%s apply %s", rf, applyMsg)

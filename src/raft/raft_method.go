@@ -165,16 +165,19 @@ func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
 		return
 	}
 
+	// 修改结果值
 	index = len(rf.logs)
 	term = rf.currentTerm
 	isLeader = true
 
+	// 生成新的 entry
 	entry := &LogEntry{
 		LogIndex: index,
 		LogTerm:  term,
 		Command:  command,
 	}
 
+	// 修改 rf 的属性
 	rf.logs = append(rf.logs, *entry)
 	rf.nextIndex[rf.me] = len(rf.logs)
 	rf.matchIndex[rf.me] = len(rf.logs) - 1
