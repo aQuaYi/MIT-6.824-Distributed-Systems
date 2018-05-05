@@ -38,7 +38,6 @@ func (rf *Raft) addHandler(state fsmState, event fsmEvent, handler fsmHandler) {
 
 func (rf *Raft) call(event fsmEvent, args interface{}) {
 	rf.rwmu.Lock()
-	defer rf.rwmu.Unlock()
 
 	oldState := rf.state
 
@@ -50,42 +49,41 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	rf.state = rf.handlers[oldState][event](rf, args)
 
-	debugPrintf("%s  发生事件 (%s) ，已从 (%s) → (%s)", rf, event, oldState, rf.state)
+	debugPrintf("%s  事件(%s)，已从 (%s) → (%s)", rf, event, oldState, rf.state)
+
+	rf.rwmu.Unlock()
+
 }
 
-// for all servers
+// 全部的事件
 var (
-	//
-	electionTimeOutEvent     = fsmEvent("election timeout")
-	discoverNewTermEvent     = fsmEvent("discover new term")
-	winThisTermElectionEvent = fsmEvent("win this term election")
-	discoverNewLeaderEvent   = fsmEvent("meet a leader with higher term")
+	// election timer 超时
+	electionTimeOutEvent = fsmEvent("election timeout")
+	// CANDIDATE 获取 majority 选票的时候，会触发此事件
+	winElectionEvent = fsmEvent("win this term election")
+	// server 在 RPC 通讯中，会首先检查对方的 term
+	// 如果发现对方的 term 数比自己的高，会触发此事件
+	discoverNewTermEvent = fsmEvent("discover new term")
+	// server 在接收到 appendEntriesArgs 后，发现对方的 term
+	discoverNewLeaderEvent = fsmEvent("disover a leader with higher term")
 )
-
-// 添加 FOLLOWER 状态下的处理函数
-func (rf *Raft) addFollowerHandler() {
-	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
-	rf.addHandler(FOLLOWER, discoverNewTermEvent, fsmHandler(toFollower))
-	rf.addHandler(FOLLOWER, discoverNewLeaderEvent, fsmHandler(toFollower))
-}
-
-// 添加 CANDIDATE 状态下的处理函数
-func (rf *Raft) addCandidateHandler() {
-	rf.addHandler(CANDIDATE, winThisTermElectionEvent, fsmHandler(comeToPower))
-	rf.addHandler(CANDIDATE, discoverNewLeaderEvent, fsmHandler(toFollower))
-	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(toFollower))
-	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
-}
-
-// 添加 LEADER 状态下的处理函数
-func (rf *Raft) addLeaderHandler() {
-	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(toFollower))
-	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(toFollower))
-}
 
 // 添加 rf 转换状态时的处理函数
 func (rf *Raft) addAllHandler() {
-	rf.addFollowerHandler()
-	rf.addCandidateHandler()
-	rf.addLeaderHandler()
+
+	// 添加 FOLLOWER 状态下的处理函数
+	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
+	rf.addHandler(FOLLOWER, discoverNewTermEvent, fsmHandler(toFollower))
+	rf.addHandler(FOLLOWER, discoverNewLeaderEvent, fsmHandler(toFollower))
+
+	// 添加 CANDIDATE 状态下的处理函数
+	rf.addHandler(CANDIDATE, electionTimeOutEvent, fsmHandler(startNewElection))
+	rf.addHandler(CANDIDATE, winElectionEvent, fsmHandler(comeToPower))
+	rf.addHandler(CANDIDATE, discoverNewTermEvent, fsmHandler(toFollower))
+	rf.addHandler(CANDIDATE, discoverNewLeaderEvent, fsmHandler(toFollower))
+
+	// 添加 LEADER 状态下的处理函数
+	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(toFollower))
+	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(toFollower))
+
 }

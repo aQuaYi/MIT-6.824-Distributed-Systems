@@ -90,7 +90,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 					votesForMe++
 					// 如果投票任务过半，那我就是新的 LEADER 了
 					if votesForMe > len(rf.peers)/2 {
-						rf.call(winThisTermElectionEvent, nil)
+						rf.call(winElectionEvent, nil)
 						return
 					}
 				}
