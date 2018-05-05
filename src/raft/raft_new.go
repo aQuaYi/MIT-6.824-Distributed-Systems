@@ -29,10 +29,9 @@ type Raft struct {
 	// from Figure 2
 
 	// Persistent state on call servers
-	currentTerm int // 此 server 当前所处的 term 编号
-	votedFor    int // 此 server 在此 term 中投票给了谁，是 peers 中的索引号
-	// votedTerm   int        // 此 server 投票时所在的 term
-	logs []LogEntry // 此 server 中保存的 logs
+	currentTerm int        // 此 server 当前所处的 term 编号
+	votedFor    int        // 此 server 在此 term 中投票给了谁，是 peers 中的索引号
+	logs        []LogEntry // 此 server 中保存的 logs
 
 	// Volatile state on all servers:
 	commitIndex int // logs 中已经 commited 的 log 的最大索引号
