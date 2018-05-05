@@ -16,12 +16,6 @@
 			"bookmarks": [
 				110
 			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/raft/fsm_handlers.go",
-			"bookmarks": [
-				29
-			]
 		}
 	]
 }

@@ -18,7 +18,7 @@ type RequestVoteArgs struct {
 }
 
 func (a RequestVoteArgs) String() string {
-	return fmt.Sprintf("Candidate %d in Term %d with LastLogIndex(%d) and LastLogTerm:(%d)",
+	return fmt.Sprintf("voteArgs{S#%d;Term:%d;LastLogIndex:%d;LastLogTerm:%d}",
 		a.CandidateID, a.Term, a.LastLogIndex, a.LastLogTerm)
 }
 
@@ -33,7 +33,7 @@ type RequestVoteReply struct {
 }
 
 func (reply RequestVoteReply) String() string {
-	return fmt.Sprintf("term(%d);granted(%t)", reply.Term, reply.IsVoteGranted)
+	return fmt.Sprintf("voteReply{Term:%d,isGranted:%t}", reply.Term, reply.IsVoteGranted)
 }
 
 // // RequestVote 投票工作

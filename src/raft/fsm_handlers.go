@@ -26,8 +26,8 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	// 需要关闭这个 channel 来发送通知
 	rf.convertToFollowerChan = make(chan struct{})
 
-	// 通过 collectVoteReplyChan 发送获取的 VoteReply 到同一个 goroutine 进行统计
-	collectVoteReplyChan := make(chan *RequestVoteReply, len(rf.peers))
+	// 通过 replyChan 发送获取的 VoteReply 到同一个 goroutine 进行统计
+	replyChan := make(chan *RequestVoteReply, len(rf.peers))
 	// 向每个 server 拉票
 
 	debugPrintf("%s 在 term(%d) 开始拉票", rf, rf.currentTerm)
@@ -37,6 +37,8 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 		if server == rf.me {
 			continue
 		}
+
+		// 并行拉票
 		go func(server int, replyChan chan *RequestVoteReply) {
 			args := rf.newRequestVoteArgs()
 			// 生成投票结果变量
@@ -45,17 +47,17 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			// 拉票
 			ok := rf.sendRequestVote(server, args, reply)
 			if !ok {
-				debugPrintf("%s 无法获取 S#%d 对选票 %s 的反馈", rf, server, args)
+				debugPrintf("%s 无法获取 S#%d 对 %s 的反馈", rf, server, args)
 				return
 			}
 
 			if args.Term == rf.currentTerm && rf.state == CANDIDATE {
 				// 返回投票结果
-				debugPrintf("%s 已经获取 S#%d 对选票 %s 的反馈: %s", rf, server, args, reply)
 				replyChan <- reply
-				debugPrintf("%s 已经发送 S#%d 对选票 %s 的反馈: %s", rf, server, args, reply)
+				debugPrintf("%s 已经收集 S#%d 对 %s 的 %s", rf, server, args, reply)
 			}
-		}(server, collectVoteReplyChan)
+
+		}(server, replyChan)
 	}
 
 	go func(replyChan chan *RequestVoteReply) {
@@ -75,7 +77,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				// 新的 election 已经开始，可以结束这个了
 				debugPrintf("%s 收到 election timeout 的信号，停止统计投票的工作", rf, rf.state)
 				return
-			case reply := <-collectVoteReplyChan: // 收到新的选票
+			case reply := <-replyChan: // 收到新的选票
 				//
 				if reply.Term > rf.currentTerm {
 					rf.call(discoverNewTermEvent,
@@ -96,7 +98,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				}
 			}
 		}
-	}(collectVoteReplyChan)
+	}(replyChan)
 
 	return CANDIDATE
 }
