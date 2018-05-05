@@ -17,13 +17,13 @@ import (
 // ApplyMsg, but set CommandValid to false for these other uses.
 //
 type ApplyMsg struct {
-	CommandValid bool
+	CommandValid bool        // TODO: 弄清楚这个干嘛的
 	CommandIndex int         // Command zd Raft.logs 中的索引号
 	Command      interface{} // Command 的具体内容
 }
 
 func (a ApplyMsg) String() string {
-	return fmt.Sprintf("ApplyMsg[idx:%d, cmd:%v]", a.CommandIndex, a.Command)
+	return fmt.Sprintf("ApplyMsg{idx:%d,cmd:%v}", a.CommandIndex, a.Command)
 }
 
 // 每当 rf.logs 或 rf.commitIndex 有变化时，就收到通知
@@ -32,7 +32,6 @@ func (a ApplyMsg) String() string {
 func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 	rf.shutdownWG.Add(1)
 	for {
-
 		select {
 		case <-rf.toCheckApplyChan:
 			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.toCheckApplyChan，收到信号。将要检查是否有新的 entry 可以 commig", rf.me)
@@ -48,7 +47,10 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 		// set commitIndex = N
 		if rf.state == LEADER {
 			// 先获取的自己的 matchIndex
-			rf.matchIndex[rf.me] = len(rf.logs) - 1
+
+			// TODO: 删除此处内容
+			// rf.matchIndex[rf.me] = len(rf.logs) - 1
+
 			// 然后统计
 			mmIndex := maxMajorityIndex(rf.matchIndex)
 

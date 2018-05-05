@@ -165,20 +165,21 @@ func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
 		return
 	}
 
-	// TODO: finish 这个部分的修改工作
 	index = len(rf.logs)
 	term = rf.currentTerm
 	isLeader = true
 
-	entry := new(LogEntry)
-	entry.LogIndex = index
-	entry.LogTerm = rf.currentTerm
-	entry.Command = command
+	entry := &LogEntry{
+		LogIndex: index,
+		LogTerm:  term,
+		Command:  command,
+	}
 
 	rf.logs = append(rf.logs, *entry)
 	rf.nextIndex[rf.me] = len(rf.logs)
+	rf.matchIndex[rf.me] = len(rf.logs) - 1
 
-	debugPrintf("%s add new entry:%v，添加后，len(rf.logs)==%d", rf, *entry, len(rf.logs))
+	debugPrintf("%s 添加了新的 entry:%v", rf, *entry)
 
 	return
 }

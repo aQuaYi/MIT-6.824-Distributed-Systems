@@ -16,12 +16,6 @@
 			"bookmarks": [
 				110
 			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/raft/rpc_appendEntries.go",
-			"bookmarks": [
-				160
-			]
 		}
 	]
 }
