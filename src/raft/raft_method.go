@@ -67,30 +67,20 @@ func (rf *Raft) persist() {
 //     Decode returns io.EOF and does not modify e
 //
 func (rf *Raft) readPersist(data []byte) {
-	//DPrintf("[server: %v]read persist data: %v, len of data: %v\n", rf.me, data, len(data));
 	if data == nil || len(data) < 1 { // bootstrap without any state?
 		return
 	}
 	// Your code here (2C).
-	// Example:
-	// r := bytes.NewBuffer(data)
-	// d := labgob.NewDecoder(r)
-	// var xxx
-	// var yyy
-	// if d.Decode(&xxx) != nil ||
-	//    d.Decode(&yyy) != nil {
-	//   error...
-	// } else {
-	//   rf.xxx = xxx
-	//   rf.yyy = yyy
-	// }
 
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
+
 	buffer := bytes.NewBuffer(data)
 	d := labgob.NewDecoder(buffer)
+
 	var currentTerm int
 	var votedFor int
+
 	if d.Decode(&currentTerm) != nil ||
 		d.Decode(&votedFor) != nil {
 		debugPrintf("error in decode currentTerm and votedFor, err: %v\n", d.Decode(&currentTerm))
@@ -98,6 +88,7 @@ func (rf *Raft) readPersist(data []byte) {
 		rf.currentTerm = currentTerm
 		rf.votedFor = votedFor
 	}
+
 	for {
 		var log LogEntry
 		if err := d.Decode(&log.LogTerm); err != nil {
@@ -113,10 +104,8 @@ func (rf *Raft) readPersist(data []byte) {
 		}
 		rf.logs = append(rf.logs, log)
 	}
-	//rf.commitIndex = len(rf.logs) - 1
-	//rf.lastApplied = len(rf.logs) - 1
-	debugPrintf("[server: %v]Decode: rf currentTerm: %v, votedFor: %v, log:%v, persist data: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, data)
 
+	debugPrintf("%s readPersisted!", rf)
 }
 
 // Start 启动
