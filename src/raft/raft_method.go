@@ -33,12 +33,11 @@ func (rf *Raft) GetState() (int, bool) {
 func (rf *Raft) persist() {
 	// Your code here (2C).
 
+	// 不需要上锁的原因是，persist 总是在锁定的环境中被调用
+
 	buffer := new(bytes.Buffer)
 
 	e := labgob.NewEncoder(buffer)
-
-	// TODO: 为什么不能上锁
-	// rf.rwmu.RLock()
 
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
@@ -47,8 +46,6 @@ func (rf *Raft) persist() {
 		e.Encode(log.LogTerm)
 		e.Encode(&log.Command)
 	}
-
-	// rf.rwmu.RUnlock()
 
 	data := buffer.Bytes()
 	rf.persister.SaveRaftState(data)

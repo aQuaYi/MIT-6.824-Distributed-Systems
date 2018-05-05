@@ -41,6 +41,8 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 			return
 		}
 
+		rf.rwmu.Lock()
+
 		// 如果 rf 是 LEADER
 		// 先检查能否更新 rf.commitIndex
 		if rf.state == LEADER {
@@ -53,12 +55,10 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 			}
 		}
 
-		// 如果无 entry 可 commit，就 continue
-		if rf.lastApplied == rf.commitIndex {
-			continue
+		if rf.lastApplied < rf.commitIndex {
+			debugPrintf("%s 有新的 log 可以 commit ，因为 lastApplied(%d) < commitIndex(%d)", rf, rf.lastApplied, rf.commitIndex)
 		}
 
-		debugPrintf("%s 有新的 entry 可以 commit ，因为 lastApplied(%d) < commitIndex(%d)", rf, rf.lastApplied, rf.commitIndex)
 		for rf.lastApplied < rf.commitIndex {
 			rf.lastApplied++
 			applyMsg := ApplyMsg{
@@ -69,13 +69,9 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 			applyCh <- applyMsg
 		}
 
-		// persist only when possible committed data
-		// for leader, it's easy to determine
-		// persist leader during commit
-		if rf.state == LEADER {
-			rf.persist()
-		}
+		rf.persist()
 
+		rf.rwmu.Unlock()
 	}
 }
 
@@ -89,10 +85,7 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 func maxMajorityIndex(matchIndex []int) int {
 	temp := make([]int, len(matchIndex))
 	copy(temp, matchIndex)
-
 	sort.Ints(temp)
-
 	i := (len(matchIndex) - 1) / 2
-
 	return temp[i]
 }

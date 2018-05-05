@@ -124,9 +124,8 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	} else {
 		// 只保留合规的 logs
 		rf.logs = rf.logs[:args.PrevLogIndex+1]
-		debugPrintf("%s  len(rf.logs)== %d，准备 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
 		rf.logs = append(rf.logs, args.Entries...)
-		debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}, len(entries)==%d", rf, len(rf.logs), args.Entries, len(args.Entries))
+		debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}", rf, len(rf.logs), args.Entries)
 		rf.persist()
 		reply.NextIndex = len(rf.logs)
 		reply.Success = true
