@@ -75,7 +75,7 @@ func (rf *Raft) String() string {
 	if rf.state == LEADER {
 		postfix = fmt.Sprintf(", nextIndex%v, matchIndex%v", rf.nextIndex, rf.matchIndex)
 	}
-	return fmt.Sprintf("@@ S#%d:%d:%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
+	return fmt.Sprintf("@@ S#%d:T%d:L%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
 		rf.me, rf.currentTerm, len(rf.logs), rf.state, rf.votedFor,
 		rf.commitIndex, rf.lastApplied, rf.logs, postfix)
 }
