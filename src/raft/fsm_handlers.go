@@ -27,11 +27,11 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	rf.convertToFollowerChan = make(chan struct{})
 
 	// 通过 replyChan 发送获取的 VoteReply 到同一个 goroutine 进行统计
-	replyChan := make(chan *RequestVoteReply, len(rf.peers))
-	// 向每个 server 拉票
+	replyChan := make(chan *RequestVoteReply)
 
 	debugPrintf("%s 在 term(%d) 开始拉票", rf, rf.currentTerm)
 
+	// 向每个 server 拉票
 	for server := range rf.peers {
 		// 跳过自己
 		if server == rf.me {
