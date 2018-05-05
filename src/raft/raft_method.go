@@ -37,7 +37,8 @@ func (rf *Raft) persist() {
 
 	e := labgob.NewEncoder(buffer)
 
-	rf.rwmu.RLock()
+	// TODO: 为什么不能上锁
+	// rf.rwmu.RLock()
 
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
@@ -47,7 +48,7 @@ func (rf *Raft) persist() {
 		e.Encode(&log.Command)
 	}
 
-	rf.rwmu.RUnlock()
+	// rf.rwmu.RUnlock()
 
 	data := buffer.Bytes()
 	rf.persister.SaveRaftState(data)
