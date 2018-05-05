@@ -63,7 +63,7 @@ type Raft struct {
 	// logs 中添加了新的 entries 以后，会通过这个发送信号
 	toCheckApplyChan chan struct{}
 
-	// 关闭，则表示 election timer 超时
+	// 关闭，则表示需要终结此次 election
 	endElectionChan chan struct{}
 
 	//
@@ -102,14 +102,14 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 		// 靠关闭来传递信号，所以，不设置缓冲
 		shutdownChan: make(chan struct{}),
-		// electionTimeoutChan 需要用到的时候，再赋值
+		// endElectionChan 需要用到的时候，再赋值
 
 		// 靠数据来传递信号，所以,  设置缓冲
 		resetElectionTimerChan: make(chan struct{}, 3),
 		toCheckApplyChan:       make(chan struct{}, 3),
 	}
 
-	rf.addAllHandler()
+	rf.addHandlers()
 
 	go electionLoop(rf)
 

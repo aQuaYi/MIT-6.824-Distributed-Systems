@@ -69,7 +69,7 @@ var (
 )
 
 // 添加 rf 转换状态时的处理函数
-func (rf *Raft) addAllHandler() {
+func (rf *Raft) addHandlers() {
 
 	// 添加 FOLLOWER 状态下的处理函数
 	rf.addHandler(FOLLOWER, electionTimeOutEvent, fsmHandler(startNewElection))
