@@ -31,10 +31,12 @@ func (a ApplyMsg) String() string {
 // 就通过 applyCh 发送 ApplyMsg 给 replication state machine 进行 commit
 func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 	rf.shutdownWG.Add(1)
+	isChanged := false
+
 	for {
 		select {
 		case <-rf.toCheckApplyChan:
-			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.toCheckApplyChan，收到信号。将要检查是否有新的 entry 可以 commig", rf.me)
+			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.toCheckApplyChan，收到信号。将要检查是否有新的 entry 可以 commit", rf.me)
 		case <-rf.shutdownChan:
 			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.shutdownChan，收到信号。关闭 checkApplyLoop", rf.me)
 			rf.shutdownWG.Done()
@@ -52,10 +54,12 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 				rf.logs[idx].LogTerm == rf.currentTerm {
 				rf.commitIndex = idx
 				debugPrintf("%s 发现了新的 maxMajorityIndex==%d, 已经更新 rf.commitIndex", rf, idx)
+				isChanged = true
 			}
 		}
 
 		if rf.lastApplied < rf.commitIndex {
+			isChanged = true
 			debugPrintf("%s 有新的 log 可以 commit ，因为 lastApplied(%d) < commitIndex(%d)", rf, rf.lastApplied, rf.commitIndex)
 		}
 
@@ -69,7 +73,10 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 			applyCh <- applyMsg
 		}
 
-		rf.persist()
+		if isChanged {
+			rf.persist()
+			isChanged = false
+		}
 
 		rf.rwmu.Unlock()
 	}

@@ -142,7 +142,7 @@ func heartbeating(rf *Raft) {
 		rf.resetElectionTimerChan <- struct{}{}
 
 		// 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
-		go makeHeartbeat(rf)
+		go oneHearteat(rf)
 
 		select {
 		// 要么，leader 变成了 follower，就只能结束这个循环
@@ -154,7 +154,7 @@ func heartbeating(rf *Raft) {
 	}
 }
 
-func makeHeartbeat(rf *Raft) {
+func oneHearteat(rf *Raft) {
 
 	for server := range rf.peers {
 		if server == rf.me {
@@ -173,7 +173,7 @@ func makeHeartbeat(rf *Raft) {
 			ok := rf.sendAppendEntries(server, args, reply)
 
 			if !ok {
-				debugPrintf("%s  无法获取 S#%d 对 %s 的回复", rf, server, args)
+				debugPrintf("%s 无法获取 S#%d 对 %s 的回复", rf, server, args)
 				return
 			}
 
@@ -206,10 +206,18 @@ func makeHeartbeat(rf *Raft) {
 			//    decrement nextIndex and retry
 
 			if reply.Success {
+				// reply.Success == true，表示，args.Entries 确实添加到了 server.logs
+				// 但是，由于每 100ms 就会发送一个 appendEntries RPC
+				// 所以，很有可能，先发送 RPC 返回的 reply 会延后几个周期才被处理
+				// 此时 reply.NextIndex 的确有可能比 rf.nextIndex[server] 小
+				// 所以，使用 max 来更新
 				rf.nextIndex[server] = max(rf.nextIndex[server], reply.NextIndex)
-				rf.matchIndex[server] = rf.nextIndex[server] - 1
-				rf.toCheckApplyChan <- struct{}{}
+				if rf.matchIndex[server] < rf.nextIndex[server]-1 {
+					rf.matchIndex[server] = rf.nextIndex[server] - 1
+					rf.toCheckApplyChan <- struct{}{}
+				}
 			} else {
+				// 使用 min 来更新，与 reply.Success == true 同理
 				rf.nextIndex[server] = min(rf.nextIndex[server], reply.NextIndex)
 			}
 
