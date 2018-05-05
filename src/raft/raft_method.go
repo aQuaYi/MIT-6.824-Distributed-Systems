@@ -16,24 +16,13 @@ func (rf *Raft) GetState() (int, bool) {
 	var isleader bool
 	// Your code here (2A).
 
-	// // TODO: 这里为什么要上锁呢
-	// rf.mu.Lock()
-	// defer rf.mu.Unlock()
-
+	// 添加 RLock 是为了避免在 Lock 期间读取到数据
+	rf.rwmu.RLock()
 	term = rf.currentTerm
 	isleader = rf.state == LEADER
+	rf.rwmu.RUnlock()
 
 	return term, isleader
-}
-
-// TODO: 这个是有必要的吗
-func (rf *Raft) getLastIndex() int {
-	return rf.logs[len(rf.logs)-1].LogIndex
-}
-
-// TODO: 这个是有必要的吗
-func (rf *Raft) getLastTerm() int {
-	return rf.logs[len(rf.logs)-1].LogTerm
 }
 
 //
@@ -43,33 +32,27 @@ func (rf *Raft) getLastTerm() int {
 //
 func (rf *Raft) persist() {
 	// Your code here (2C).
-	// Example:
-	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// data := w.Bytes()
-	// rf.persister.SaveRaftState(data)
-	//
 
 	buffer := new(bytes.Buffer)
+
 	e := labgob.NewEncoder(buffer)
+
+	rf.rwmu.RLock()
+
 	e.Encode(rf.currentTerm)
 	e.Encode(rf.votedFor)
-	for i, b := range rf.logs {
-		if i == 0 {
-			continue
-		}
-		//if i > rf.commitIndex {
-		//    break
-		//}
-		//DPrintf("[server: %v]Encode log: %v", rf.me, b)
-		e.Encode(b.LogTerm)
-		e.Encode(&b.Command)
+	for i := 1; i < len(rf.logs); i++ {
+		log := rf.logs[i]
+		e.Encode(log.LogTerm)
+		e.Encode(&log.Command)
 	}
+
+	rf.rwmu.RUnlock()
+
 	data := buffer.Bytes()
-	debugPrintf("%s Encode: rf currentTerm: %v, votedFor: %v, log:%v\n", rf, rf.currentTerm, rf.votedFor, rf.logs)
 	rf.persister.SaveRaftState(data)
+
+	debugPrintf("%s persisted!")
 }
 
 //
