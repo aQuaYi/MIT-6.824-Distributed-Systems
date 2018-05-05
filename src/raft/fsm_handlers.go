@@ -8,16 +8,15 @@ import (
 // 进入新的 term
 // 并开始新一轮的选举
 func startNewElection(rf *Raft, null interface{}) fsmState {
-
 	// 先进入下一个 Term
 	rf.currentTerm++
 
-	// 如果前一个 election 还有残留
-	// 就通知前一个 election 彻底关闭
-	if rf.electionTimeoutChan != nil {
-		close(rf.electionTimeoutChan)
+	// 如果 rf 转换前的状态是 Candidate，
+	// 且前一个 election 还没有结束, 就通知前一个 election 彻底关闭
+	if rf.endElectionChan != nil {
+		close(rf.endElectionChan)
 	}
-	rf.electionTimeoutChan = make(chan struct{})
+	rf.endElectionChan = make(chan struct{})
 
 	// 先给自己投一票
 	rf.votedFor = rf.me
@@ -71,7 +70,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 				// 没有必要再统计投票结果了
 				debugPrintf("%s  已经是 %s，停止统计投票的工作", rf, rf.state)
 				return
-			case <-rf.electionTimeoutChan:
+			case <-rf.endElectionChan:
 				// 新的 election 已经开始，可以结束这个了
 				debugPrintf("%s  收到 election timeout 的信号，停止统计投票的工作", rf, rf.state)
 				return
@@ -106,9 +105,9 @@ func comeToPower(rf *Raft, args interface{}) fsmState {
 	debugPrintf("%s  come to power", rf)
 
 	//
-	if rf.electionTimeoutChan != nil {
-		close(rf.electionTimeoutChan)
-		rf.electionTimeoutChan = nil
+	if rf.endElectionChan != nil {
+		close(rf.endElectionChan)
+		rf.endElectionChan = nil
 	}
 
 	// 新当选的 Leader 需要重置以下两个属性

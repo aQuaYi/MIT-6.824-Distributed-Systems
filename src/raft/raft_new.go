@@ -64,7 +64,7 @@ type Raft struct {
 	toCheckApplyChan chan struct{}
 
 	// 关闭，则表示 election timer 超时
-	electionTimeoutChan chan struct{}
+	endElectionChan chan struct{}
 
 	//
 }
