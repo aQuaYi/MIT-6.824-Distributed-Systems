@@ -105,13 +105,19 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 
 // 引用时 args 为 nil
 func comeToPower(rf *Raft, args interface{}) fsmState {
-	debugPrintf("%s  come to power", rf)
+	debugPrintf("%s come to power", rf)
 
-	//
+	// 及时清理 channel
 	if rf.endElectionChan != nil {
 		close(rf.endElectionChan)
 		rf.endElectionChan = nil
 	}
+
+	// 及时清理 channel
+	if rf.convertToFollowerChan != nil {
+		close(rf.convertToFollowerChan)
+	}
+	rf.convertToFollowerChan = make(chan struct{})
 
 	// 新当选的 Leader 需要重置以下两个属性
 	rf.nextIndex = make([]int, len(rf.peers))
@@ -127,9 +133,9 @@ func comeToPower(rf *Raft, args interface{}) fsmState {
 
 func heartbeating(rf *Raft) {
 	hbPeriod := time.Duration(100) * time.Millisecond
-	hbtimer := time.NewTicker(hbPeriod)
+	hbTimer := time.NewTicker(hbPeriod)
 
-	debugPrintf("%s  准备开始发送周期性心跳，周期:%s", rf, hbPeriod)
+	debugPrintf("%s 开始发送周期性心跳，周期:%s", rf, hbPeriod)
 
 	for {
 		// 对于自己只用直接重置 timer
@@ -139,11 +145,11 @@ func heartbeating(rf *Raft) {
 		go makeHeartbeat(rf)
 
 		select {
-		// 要么 leader 变成了 follower，就只能结束这个循环
+		// 要么，leader 变成了 follower，就只能结束这个循环
 		case <-rf.convertToFollowerChan:
 			return
-		// 要么此次 heartbeat 结束
-		case <-hbtimer.C:
+		// 要么，开始下一次循环
+		case <-hbTimer.C:
 		}
 	}
 }
@@ -182,14 +188,13 @@ func makeHeartbeat(rf *Raft) {
 			// if get an old RPC reply
 			// TODO: 为什么接收到一个 old rpc reply
 			if args.Term != rf.currentTerm {
-				// rf.rwmu.Unlock()
 				return
 			}
 
-			if rf.state != LEADER {
-				// rf.rwmu.Unlock()
-				return
-			}
+			// if rf.state != LEADER {
+			// 	// rf.rwmu.Unlock()
+			// 	return
+			// }
 
 			rf.rwmu.Lock()
 			defer rf.rwmu.Unlock()
@@ -226,7 +231,9 @@ func toFollower(rf *Raft, args interface{}) fsmState {
 		panic("toFollower 需要正确的参数")
 	}
 
+	// 遇到新 term 的话，需要更新 currentTerm
 	rf.currentTerm = max(rf.currentTerm, a.term)
+	// 遇到新 leader 的话，需要更新 votedFor
 	rf.votedFor = a.votedFor
 
 	// rf.convertToFollowerChan != nil 就一定是 open 的
@@ -234,6 +241,11 @@ func toFollower(rf *Raft, args interface{}) fsmState {
 	if rf.convertToFollowerChan != nil {
 		close(rf.convertToFollowerChan)
 		rf.convertToFollowerChan = nil
+	}
+
+	if rf.endElectionChan != nil {
+		close(rf.endElectionChan)
+		rf.endElectionChan = nil
 	}
 
 	return FOLLOWER

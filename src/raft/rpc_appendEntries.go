@@ -24,7 +24,7 @@ func (a AppendEntriesArgs) String() string {
 // AppendEntriesReply 是 flower 回复 leader 的内容
 type AppendEntriesReply struct {
 	Term      int  // 回复者的 term
-	Success   bool // 返回 true，如果回复者满足 prevLogIndex 和 prevLogTerm
+	Success   bool // 返回 true，如果被调用的 rf.logs 真的 append 了 entries
 	NextIndex int  // 下一次发送的 AppendEntriesArgs.Entries[0] 在 Leader.logs 中的索引号
 }
 
@@ -114,9 +114,13 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// 4. append any new entries not already in the log
 
 	if len(args.Entries) == 0 {
-		debugPrintf("%s  接收到 heartbeat", rf)
-		reply.NextIndex = args.PrevLogIndex + 1
+		debugPrintf("%s 接收到 heartbeat", rf)
+		// 由于并没有给 rf.logs 添加 entries
+		// 所以，reply.Succuess 为 false
+		// 避免了频繁的 checkApply
 		reply.Success = false
+		// 下次继续发送 leader.logs[PrevLogIndex+1:] 过来，就好了
+		reply.NextIndex = args.PrevLogIndex + 1
 	} else {
 		// 只保留合规的 logs
 		rf.logs = rf.logs[:args.PrevLogIndex+1]
