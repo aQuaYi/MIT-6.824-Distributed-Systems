@@ -27,7 +27,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	rf.convertToFollowerChan = make(chan struct{})
 
 	// 通过 replyChan 发送获取的 VoteReply 到同一个 goroutine 进行统计
-	replyChan := make(chan *RequestVoteReply)
+	replyChan := make(chan *RequestVoteReply, len(rf.peers))
 
 	debugPrintf("%s 在 term(%d) 开始拉票", rf, rf.currentTerm)
 
@@ -63,7 +63,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 	go func(replyChan chan *RequestVoteReply) {
 		// 现在总的投票人数为 1，就是自己投给自己的那一票
 		votesForMe := 1
-		debugPrintf("%s  已经获得选票:%d, 开始: term(%d) 等待选票", rf, votesForMe, rf.currentTerm)
+		debugPrintf("%s 等待 term(%d) 的选票", rf, rf.currentTerm)
 
 		for {
 
