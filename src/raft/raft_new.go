@@ -45,8 +45,8 @@ type Raft struct {
 	state    fsmState
 	handlers map[fsmState]map[fsmEvent]fsmHandler
 
-	//
-	electionTimer *time.Timer // 超时，就由 FOLLOWER 变 CANDIDATE
+	// 超时，就由 FOLLOWER 变 CANDIDATE
+	electionTimer *time.Timer
 
 	// 用于通知 raft 已经关闭的信息
 	shutdownChan chan struct{}
@@ -63,7 +63,7 @@ type Raft struct {
 	// logs 中添加了新的 entries 以后，会通过这个发送信号
 	toCheckApplyChan chan struct{}
 
-	// election timeout chan 用于通知 election timeout
+	// 关闭，则表示 election timer 超时
 	electionTimeoutChan chan struct{}
 
 	//
@@ -87,7 +87,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		currentTerm: 0,
 		votedFor:    NOBODY,
 
-		// NOTICE: logs 的序列号从 1 开始
+		// logs 的序列号从 1 开始
 		logs:        make([]LogEntry, 1),
 		commitIndex: 0,
 		lastApplied: 0,
@@ -102,8 +102,9 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 		// 靠关闭来传递信号，所以，不设置缓冲
 		shutdownChan: make(chan struct{}),
+		// electionTimeoutChan 需要用到的时候，再赋值
 
-		// 靠数据来传递信号，所以，  设置缓冲
+		// 靠数据来传递信号，所以,  设置缓冲
 		resetElectionTimerChan: make(chan struct{}, 3),
 		toCheckApplyChan:       make(chan struct{}, 3),
 	}
@@ -115,7 +116,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 	return rf
 }
 
-// 不停地
+// 触发 election timer 超时，就开始新的选举
 func electionLoop(rf *Raft) {
 	rf.shutdownWG.Add(1)
 
