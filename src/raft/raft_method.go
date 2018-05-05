@@ -108,7 +108,7 @@ func (rf *Raft) readPersist(data []byte) {
 	debugPrintf("%s readPersisted!", rf)
 }
 
-// Start 启动
+// Start 给 server 发送命令
 // the service using Raft (e.g. a k/v server) wants to start
 // agreement on the next command to be appended to Raft's log. if this
 // server isn't the leader, returns false. otherwise start the
@@ -170,13 +170,17 @@ func (rf *Raft) Start(command interface{}) (index, term int, isLeader bool) {
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
 	debugPrintf("S#%d Killing", rf.me)
+
+	// 关闭前，先去检查一遍 apply
 	rf.toCheckApplyChan <- struct{}{}
+
 	close(rf.shutdownChan)
+
 	rf.shutdownWG.Wait()
 }
 
-func (rf *Raft) electionTimerReset() {
+func (rf *Raft) resetElectionTimer() {
 	timeout := time.Duration(150+rand.Int63n(151)) * time.Millisecond
 	rf.electionTimer.Reset(timeout)
-	debugPrintf("%s  election timer 已经重置，到期时间为 %s", rf, timeout)
+	debugPrintf("%s election timer 已经重置, 时长： %s", rf, timeout)
 }

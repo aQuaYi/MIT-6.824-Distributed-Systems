@@ -121,7 +121,7 @@ func electionLoop(rf *Raft) {
 	rf.shutdownWG.Add(1)
 
 	for {
-		rf.electionTimerReset()
+		rf.resetElectionTimer()
 
 		select {
 		case <-rf.electionTimer.C:
