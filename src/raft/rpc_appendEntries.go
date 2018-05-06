@@ -86,6 +86,16 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		return
 	}
 
+	if args.PrevLogIndex < rf.commitIndex {
+		debugPrintf("%s 收到一个旧的 appendEntriesArgs，因为 args.PrevLogIndex(%d) < rf.commitIndex(%d)", rf, args.PrevLogIndex, rf.commitIndex)
+		reply.Success = false
+		// reply,Success == false，会使用 min 方法更新 leader.nextIndex[server]
+		// 所以，把 reply.NextIndex 设置成最大值，
+		// 这样就不会更改 leader.nextIndex[server]
+		reply.NextIndex = 1<<63 - 1
+		return
+	}
+
 	rf.rwmu.Lock()
 	defer rf.rwmu.Unlock()
 

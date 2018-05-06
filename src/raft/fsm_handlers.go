@@ -173,7 +173,7 @@ func oneHearteat(rf *Raft) {
 	// 然后，如果 rf 不再是 leader 的话，就取不再发送
 	// 这样的话，即使 rf 在 oneHeartbeat 内不再是 leader
 	// 其 rpc args 的内容，还是以前的内容，不会出现，同一个 term 两个 leader 的情况
-	appendEntriesArgsSlice := genAppendEntriesArgsSlice(rf)
+	argsSlice := genAppendEntriesArgsSlice(rf)
 	if rf.state != LEADER {
 		return
 	}
@@ -207,11 +207,6 @@ func oneHearteat(rf *Raft) {
 				return
 			}
 
-			// if rf.state != LEADER {
-			// 	// rf.rwmu.Unlock()
-			// 	return
-			// }
-
 			rf.rwmu.Lock()
 			defer rf.rwmu.Unlock()
 
@@ -237,7 +232,7 @@ func oneHearteat(rf *Raft) {
 				rf.nextIndex[server] = min(rf.nextIndex[server], reply.NextIndex)
 			}
 
-		}(server, appendEntriesArgsSlice[server])
+		}(server, argsSlice[server])
 	}
 
 	return
