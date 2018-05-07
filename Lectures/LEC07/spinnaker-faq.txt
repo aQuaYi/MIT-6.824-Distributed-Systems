@@ -1,0 +1,164 @@
+Spinnaker FAQ
+
+Q: What is timeline consistency?
+
+A: It's a form of relaxed consistency that can provide faster reads at
+the expense of visibly anomalous behavior. All replicas apply writes
+in the same order (clients send writes to the leader, and the leader
+picks an order and forwards the writes to the replicas). Clients are
+allowed to send reads to any replica, and that replica replies with
+whatever data it current has. The replica may not yet have received
+recent writes from the leader, so the client may see stale data. If a
+client sends a read to one replica, and then another, the client may
+get older data from the second read. Unlike strong consistency,
+timeline consistency makes clients aware of the fact that there are
+replicas, and that the replicas may differ.
+
+Q: When there is only 1 node up in the cohort, the paper says it鈥檚
+still timeline consistency; how is that possible?
+
+A: Timeline consistency allows the system to return stale values: a
+get can return a value that was written in the past, but is not the
+most recent one. Thus, if a server is partitioned off from the
+majority, and perhaps has missed some Puts, it can still execute a
+timeline-consistent Get.
+
+Q: What are the trade-offs of the different consistency levels?
+
+A: Strongly-consistent systems are easier to program because they
+behave like a non-replicated systems. Building applications on top of
+eventually-consistent systems is generally more difficult because the
+programmer must consider scenarios that couldn't come up in a
+non-replicated system. On the other hand, one can often obtain higher
+performance from weaker consistency models.
+
+Q: How does Spinnaker implement timeline reads, as opposed to
+consistent reads?
+
+A: Section 5 says that clients are allowed to send timeline read
+requests to any replica, not just the leader. Replicas serve timeline
+read requests from their latest committed version of the data, which
+may be out of date (because the replica hasn't seen recent writes).
+
+Q: Why are Spinnaker's timeline reads faster than its consistent
+reads, in Figure 8?
+
+A: It's not clear why timeline reads improve read performance; perhaps
+the read throughput is higher by being split over multiple replicas,
+perhaps the leader can serve reads without talking to the followers,
+or perhaps all replicas can execute reads without waiting for
+processing from prior writes to complete. On the other hand, the paper
+says the read workload is uniform random (ruling out the first
+explanation, since the Figure 2 arrangement evenly spreads the work
+regardless); the paper implies that the leader doesn't send read
+requests to the followers (ruling out the second explanation), and
+it's not obvious why either kind of read would ever have to wait for
+concurrent writes to complete.
+
+Q: Why do Spinnaker's consistent reads have much higher performance
+than Cassandra's quorum reads, in Figure 8?
+
+A: The paper says that Spinnaker's consistent reads are processed only
+by the leader, while Cassandra's reads involve messages to two
+servers. It's not clear why it's legal for consistent reads to consult
+only the leader -- suppose leadership has changed, but the old leader
+isn't yet aware; won't that cause the old leader to serve up stale
+data to a consistent read? We'd expect that either the leader wait for
+the read to be committed to the log, or that the leader have a lease,
+but the paper doesn't mention anything about leases.
+
+Q: What is the CAP theorem about?
+
+A: The key point is that if there is a network partition, you have two
+choices: both partitions can continue to operate independently,
+sacrificing consistency (since they won't see each others' writes); or
+at most one partition can continue to operate, preserving consistency
+but sacrificing forward progress in the other partitions.
+
+Q: Where does Spinnaker sit in the CAP scheme?
+
+A: Spinnaker's consistent reads allow operation in at most one
+partition: reads in the majority partition see the latest write, but
+minority partitions are not allowed to operate. Raft and Lab 3 are
+similar. Spinnaker's timeline reads allow replicas in minority
+partitions to process reads, but they are not consistent, since they may
+not reflect recent writes.
+
+Q: Could Spinnaker use Raft as the replication protocol rather than Paxos?
+
+A: Although the details are slightly different, my thinking is that
+they are interchangeable to first order. The main reason that we
+reading this paper is as a case study of how to build a complete
+system using a replicated log. It is similar to lab 3 and lab 4,
+except you will be using your Raft library.
+
+Q: The paper mentions Paxos hadn't previously been used for database
+replication. What was it used for?
+
+A: Paxos was not often used at all until recently. By 2011 most uses
+were for configuration services (e.g., Google's Chubby or Zookeeper),
+but not to directly replicate data.
+
+Q: What is the reason for logical truncation?
+
+A: The logical truncation exists because Spinnaker merges logs of 3
+cohorts into a single physical log for performance on magnetic disks.
+This complicates log truncation, because when one cohort wants to
+truncate the log there maybe log entries from other cohorts, which it
+cannot truncate. So, instead of truncating the log, it remembers its
+entries that are truncated in a skip list. When the cohort recovers,
+and starts replaying log entries from the beginning of the log, it
+skips the entries in the skip list, because they are already present
+in the last checkpoint of memtables.
+
+Q: What exactly is the key range (i.e. 'r') defined in the paper for
+leader election?
+
+A: One of the key ranges of a shard (e.g., [0,199] in figure 2).
+
+Q: Is there a more detailed description of Spinnaker's replication
+protocol somewhere?
+
+A: http://www.vldb.org/2011/files/slides/research15/rSession15-1.ppt
+
+Q: How does Spinnaker's leader election ensure there is at most one leader?
+
+A: The new leader is the candidate with the max n.lst in the Zookeeper
+under /r/candidates, using Zookeeper sequence numbers to break ties.
+
+Q: Does Spinnaker have something corresponding to Raft's terms?
+
+Yes, it has epoch numbers (see appendix B).
+
+Q: Section 9.1 says that a Spinnaker leader replies to a consistent
+read without consulting the followers. How does the leader ensure that
+it is still the leader, so that it doesn't reply to a consistent read
+with stale data?
+
+A: Unclear. Maybe the leader learns from Zookeeper that it isn't the
+leader anymore, because some lease/watch times out.
+
+Q: Would it be possible to replace the use of Zookeeper with a
+Raft-like leader election protocol?
+
+A: Yes, that would be a very reasonable thing to do. My guess is that
+they needed Zookeeper for shard assignment and then decided to also
+use it for leader election.
+
+Q: What is the difference between a forced and a non-forced log write?
+
+A: After a forced write returns, then it is guaranteed that the data
+is on persistent storage. After a non-forced write returns, the write
+to persistent storage has been issued, but may not yet be on
+persistent storage.
+
+Q: Step 6 of Figure 7 seems to say that the candidate with the longest
+long gets to be the next leader. But in Raft we saw that this rule
+doesn't work, and that Raft has to use the more elaborate Election
+Restriction. Why can Spinnaker safely use longest log?
+
+A: Spinnaker actually seems to use a rule similar to Raft's. Figure 7
+compares LSNs (Log Sequence Numbers), and Appendix B says that an LSN
+has the "epoch number" in the high bits. The epoch number is
+equivalent to Raft's term. So step 6's "max n.lst" actuall boils down
+to "highest epoch wins; if epochs are equal, longest log wins."
