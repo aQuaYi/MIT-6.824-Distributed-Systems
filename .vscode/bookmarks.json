@@ -12,9 +12,29 @@
 			]
 		},
 		{
-			"fsPath": "$ROOTPATH$/src/raft/rpc_requestVote.go",
+			"fsPath": "$ROOTPATH$/src/raft/rpc_appendEntries.go",
 			"bookmarks": [
-				110
+				64
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/test_test.go",
+			"bookmarks": [
+				293
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/output.applyError.txt",
+			"bookmarks": [
+				248,
+				271,
+				278
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/raft/applyError.txt",
+			"bookmarks": [
+				278
 			]
 		}
 	]
