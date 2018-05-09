@@ -21,9 +21,9 @@
 
 ## 课堂讲义
 
-[讲义](l-vm-ft.txt.md)
+[讲义](l-vm-ft.txt)
 
-[FAQ ANSWERS](vm-ft-faq.txt.md)
+[FAQ ANSWERS](vm-ft-faq.txt)
 
 ## 作业
 

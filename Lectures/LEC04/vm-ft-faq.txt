@@ -1,4 +1,4 @@
-# VMware FT FAQ
+VMware FT FAQ
 
 Q: The introduction says that it is more difficult to ensure
 deterministic execution on physical servers than on VMs. Why is this

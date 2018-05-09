@@ -1,4 +1,4 @@
-# 6.824 2018 Lecture 4: Primary/Backup Replication
+6.824 2018 Lecture 4: Primary/Backup Replication
 
 Today
   Primary/Backup Replication for Fault Tolerance
