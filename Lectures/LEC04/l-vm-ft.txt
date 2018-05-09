@@ -195,7 +195,7 @@ What about disk/network output?
   Primary's FT actually does the output
   Backup's FT discards the output
 
-But: the paper's Output Rule (Section 2.2) says primary primary must
+But: the paper's Output Rule (Section 2.2) says primary must
 tell backup when it produces output, and delay the output until the
 backup says it has received the log entry.
 
