@@ -19,6 +19,8 @@
 1. How secure is this system?
 1. Is it reasonable to address only the fail-stop failures? What are other type of failures?
 
+[FAQ ANSWERS](vm-ft-faq.txt.md)
+
 ## 课堂讲义
 
 [讲义](l-vm-ft.txt.md)
