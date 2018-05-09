@@ -29,7 +29,7 @@
 1. Can a leader in Raft ever stop being a leader except by crashing?
 1. When are followers' log entries sent to their state machines?
 1. Should the leader wait for replies to AppendEntries RPCs?
-1. What happens if more than half of the servers die? 
+1. What happens if more than half of the servers die?
 1. Why is the Raft log 1-indexed?
 1. When network partition happens, wouldn't client requests in minority partitions be lost?
 1. Is the argument in 5.4.3 a complete proof?
