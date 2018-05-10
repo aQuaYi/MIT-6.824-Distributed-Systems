@@ -12,7 +12,7 @@ type clock struct {
 
 func newClock() *clock {
 	return &clock{
-		time: rand.Intn(100),
+		time: 1 + rand.Intn(100),
 	}
 }
 

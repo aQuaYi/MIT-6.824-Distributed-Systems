@@ -4,7 +4,7 @@ type message struct {
 	msgType  msgType
 	time     int // 发送 message 时， process.clock 的时间
 	senderID int // message 发送方的 ID
-	request  request
+	request  *request
 }
 
 type msgType int

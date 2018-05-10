@@ -17,7 +17,7 @@ type process struct {
 	clock            *clock
 	resource         *resource
 	peers            []chan message
-	requestQueue     []request
+	requestQueue     []*request
 	sentTime         []int         // 给各个 process 中发送的消息，所携带的最后时间
 	receiveTime      []int         // 从各个 process 中收到的消息，所携带的最后时间
 	minReceiveTime   int           // lastReceiveTime 中的最小值
@@ -27,8 +27,8 @@ type process struct {
 }
 
 func newProcess(me, takenTimes int, r *resource, peers []chan message) *process {
-	rq := make([]request, 1, len(peers)*takenTimes*2)
-	rq[0] = request{
+	rq := make([]*request, 1, len(peers)*takenTimes*2)
+	rq[0] = &request{
 		time:    -1,
 		process: 0,
 	}
@@ -67,7 +67,7 @@ func (p *process) resourceLoop() {
 }
 
 func (p *process) request() {
-	r := request{
+	r := &request{
 		time:    p.clock.getTime(),
 		process: p.me,
 	}
@@ -88,11 +88,12 @@ func (p *process) release() {
 	r := p.requestQueue[i]
 
 	p.resource.release(p.me)
+	p.isTaken = false
 
 	// TODO: 这算不算一个 event 呢
 	p.clock.tick()
 
-	p.delete(r)
+	p.delete()
 
 	// TODO: 这算不算一个 event 呢
 	p.clock.tick()
@@ -100,7 +101,7 @@ func (p *process) release() {
 	p.messaging(releaseResource, r)
 }
 
-func (p *process) messaging(mt msgType, r request) {
+func (p *process) messaging(mt msgType, r *request) {
 	for i, ch := range p.peers {
 		if i == p.me {
 			continue
@@ -140,7 +141,7 @@ func (p *process) receiveLoop() {
 		case requestResource:
 			p.append(msg.request)
 		case releaseResource:
-			p.delete(msg.request)
+			p.delete()
 		}
 
 		p.toCheckRule5Chan <- struct{}{}
@@ -149,20 +150,13 @@ func (p *process) receiveLoop() {
 	}
 }
 
-func (p *process) append(r request) {
+func (p *process) append(r *request) {
 	p.requestQueue = append(p.requestQueue, r)
 }
 
-func (p *process) delete(r request) {
-	i := 0
-	// r 一定再 p.requestQueue 中
-	for p.requestQueue[i] != r {
-		i++
-	}
-
+func (p *process) delete() {
 	last := len(p.requestQueue) - 1
-
-	p.requestQueue[i], p.requestQueue[last] = p.requestQueue[last], p.requestQueue[i]
+	p.requestQueue[0], p.requestQueue[last] = p.requestQueue[last], p.requestQueue[0]
 	p.requestQueue = p.requestQueue[:last]
 }
 
@@ -185,8 +179,8 @@ func (p *process) requestLoop() {
 		p.rwmu.Lock()
 
 		if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
-			p.requestQueue[0].process == p.me && // repuest 是 p
-			p.requestQueue[0].time < p.minReceiveTime {
+			p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
+			p.requestQueue[0].time < p.minReceiveTime { // p 在 request 后，收到过所有其他 p 的回复
 			p.resource.request(p.me)
 			p.isTaken = true
 
