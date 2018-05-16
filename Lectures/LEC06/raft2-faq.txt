@@ -88,11 +88,11 @@ The paper doesn't provide details. I believe it's the identities
 > that means. Isn't it following either the network configuration of
 > C_old or of C_new? What if the two networks disagreed on a connection?
 
-During the period of joint consensus (while Cold,new is active), the
+During the period of joint consensus (while C_{old,new} is active), the
 leader is required to get a majority from both the servers in Cold and
 the servers in Cnew.
 
-There can't really be disagreement, because after Cold,new is committed
+There can't really be disagreement, because after C_{old,new} is committed
 into the logs of both Cold and Cnew (i.e. after the period of joint
 consensus has started), any new leader in either Cold or Cnew is
 guaranteed to see the log entry for Cold,Cnew.
@@ -130,18 +130,18 @@ protocol is one way to solve this problem.
 
 > The last two paragraphs of section 6 discuss removed servers
 > interfering with the cluster by trying to get elected even though
-> they鈥檝e been removed from the configuration.
-> Wouldn鈥檛 a simpler solution be to require servers to be
+> they've been removed from the configuration.
+> Wouldn't a simpler solution be to require servers to be
 > shut down when they leave the configuration? It seems that leaving the
-> cluster implies that a server can鈥檛 send or receive RPCs to
-> the rest of the cluster anymore, but the paper doesn鈥檛
-> assume that. Why not? Why can鈥檛 you assume that the servers
+> cluster implies that a server can't send or receive RPCs to
+> the rest of the cluster anymore, but the paper doesn't
+> assume that. Why not? Why can't you assume that the servers
 > will shut down right away?
 
 I think the immediate problem is that the Section 6 protocol doesn't
 commit Cnew to the old servers, it only commits Cnew to the servers in
 Cnew. So the servers that are not in Cnew never learn when Cnew takes
-over from Cold,new.
+over from C_{old,new}.
 
 The paper does say this:
 
@@ -185,8 +185,8 @@ The purpose of non-voting servers is to allow those servers to get a
 complete copy of the leader's log without holding up new commits. The
 point is to allow a subsequent configuration change to be quick. If the
 new servers didn't already have nearly-complete logs, then the leader
-wouldn't be able to commit Cold,new until they caught up; and no new
-client commands can be executed between the time Cold,new is first sent
+wouldn't be able to commit C_{old,new} until they caught up; and no new
+client commands can be executed between the time C_{old,new} is first sent
 out and the time at which it is committed.
 
 
@@ -211,11 +211,11 @@ in Raft at all.
 The paper doesn't have much detail here. I imagine that the leader won't
 start the configuration change until the servers to be added (the
 non-voting members) are close to completely caught up. When the leader
-sends out the Cold,new log entry in AppendEntries RPCs to those new
+sends out the C_{old,new} log entry in AppendEntries RPCs to those new
 servers, the leader will bring them fully up to date (using the Figure 2
-machinery). The leader won't be able to commit the Cold,new message
+machinery). The leader won't be able to commit the C_{old,new} message
 until a majority of those new servers are fully caught up. Once the
-Cold,new message is committed, those new servers can vote.
+C_{old,new} message is committed, those new servers can vote.
 
 
 > A question on "In Search of an Understandable Consensus Algorithm" (the RAFT paper)
@@ -237,7 +237,7 @@ why they designed it that way. Your idea seems like a reasonable
 starting point. One complication is that there may be situations in
 which a server in Cnew is leader during the joint consensus phase, but
 at that time some servers in Cold may not know about the joint consensus
-phase (i.e. they only know about Cold, not Cold,new); we would not want
+phase (i.e. they only know about Cold, not C_{old,new}); we would not want
 the latter servers to ignore the legitimate leader.
 
 
@@ -246,9 +246,9 @@ the latter servers to ignore the legitimate leader.
 
 
 Joint consensus is in progress when the current leader is aware of
-Cold,new. If the leader doesn't manage to commit Cold,new, and crashes,
-and the new leader doesn't have Cold,new in its log, then joint
-consensus ends early. If a leader manages to commit Cold,new, then joint
+C_{old,new}. If the leader doesn't manage to commit C_{old,new}, and crashes,
+and the new leader doesn't have C_{old,new} in its log, then joint
+consensus ends early. If a leader manages to commit C_{old,new}, then joint
 consensus has not just started but will eventually complete, when a
 leader commits Cnew.
 
@@ -256,8 +256,8 @@ leader commits Cnew.
 > (assuming that the log entry has not been committed)?
 
 
-Yes, that is possible, if the original leader trying to send out Cold,new
-crashes before it commits the Cold,new.
+Yes, that is possible, if the original leader trying to send out C_{old,new}
+crashes before it commits the C_{old,new}.
 
 
 > How can the "C_{o,n}" log entry ever be committed? It seems like it must be
