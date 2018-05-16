@@ -19,16 +19,16 @@
 1. How common is it to get a majority from both the old and new configurations when doing things like elections and entry commitment, if it's uncommon, how badly would this affect performance?
 1. and how important is the decision to have both majorities?
 1. Just to be clear, the process of having new members join as non-voting entities isn't to speed up the process of replicating the log, but rather to influence the election process? How does this increase availability? These servers that need to catch up are not going to be available regardless, right?
-1. If the cluster leader does not have the new configuration, why doesn't it just remove itself from majority while committing C_new, and then when done return to being leader? Is there a need for a new election process? 
+1. If the cluster leader does not have the new configuration, why doesn't it just remove itself from majority while committing C_new, and then when done return to being leader? Is there a need for a new election process?
 1. How does the non-voting membership status work in the configuration change portion of Raft. Does that server state only last during the changeover (i.e. while c_new not committed) or do servers only get full voting privileges after being fully "caught up"? If so, at what point are they considered "caught up"?
 1. When exactly does joint consensus begin, and when does it end? Does joint consensus begin at commit time of "C_{o,n}"?
 1. Can the configuration log entry be overwritten by a subsequent leader (assuming that the log entry has not been committed)?
 1. How can the "C_{o,n}" log entry ever be committed? It seems like it must be replicated to a majority of "old" servers (as well as the "new" servers), but the append of "C_{o,n}" immediately transitions the old server to new, right?
-1. When snapshots are created, is the data and state used the one for the client application? If it's the client's data then is this something that the client itself would need to support in addition to the modifications mentioned in the raft paper? 
+1. When snapshots are created, is the data and state used the one for the client application? If it's the client's data then is this something that the client itself would need to support in addition to the modifications mentioned in the raft paper?
 1. The paper says that "if the follower receives a snapshot that describves a prefix of its log, then log entries covered by the snapshot are deleted but entries following the snapshot are retained". This means that we could potentially be deleting operations on the state machinne.
 1. It seems that snapshots are useful when they are a lot smaller than applying the sequence of updates (e.g., frequent updates to a few keys). What happens when a snapshot is as big as the sum of its updates (e.g., each update inserts a new unique key)? Are there any cost savings from doing snapshots at all in this case?
 1. Also wouldn't a InstallSnapshot incur heavy bandwidth costs?
-1. Is there a concern that writing the snapshot can take longer than the eleciton timeout because of the amount of data that needs to be appended to the log? 
+1. Is there a concern that writing the snapshot can take longer than the eleciton timeout because of the amount of data that needs to be appended to the log?
 1. Under what circumstances would a follower receive a snapshot that is a prefix of its own log?
 1. Additionally, if the follower receives a snapshot that is a prefix of its log, and then replaces the entries in its log up to that point, the entries after that point are ones that the leader is not aware of, right?
 1. Will those entries ever get committed?
@@ -47,9 +47,11 @@
 1. What has been the impact of Raft, from the perspective of academic researchers in the field? Is it considered significant, inspiring, non-incremental work? Or is it more of "okay, this seems like a natural progression, and is a bit easier to teach, so let's teach this?"
 1. The paper states that there are a fair amount of implementations of Raft out in the wild. Have there been any improvement suggestions that would make sense to include in a revised version of the algorithm?
 
-## 课堂讲义
+## 课堂
 
 [讲义](l-raft2.txt)
+
+[FAQ 解答](raft2-faq.txt)
 
 ## 作业
 
