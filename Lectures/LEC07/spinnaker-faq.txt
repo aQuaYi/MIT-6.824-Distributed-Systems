@@ -14,7 +14,7 @@ get older data from the second read. Unlike strong consistency,
 timeline consistency makes clients aware of the fact that there are
 replicas, and that the replicas may differ.
 
-Q: When there is only 1 node up in the cohort, the paper says it鈥檚
+Q: When there is only 1 node up in the cohort, the paper says it's
 still timeline consistency; how is that possible?
 
 A: Timeline consistency allows the system to return stale values: a

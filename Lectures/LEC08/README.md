@@ -1,6 +1,8 @@
-# 课程 01
+# Lecture 8: Zookeeper Case Study
 
 ## 课前阅读
+
+[zookeeper](zookeeper.pdf)
 
 ## FAQ
 
@@ -22,6 +24,8 @@
 ## 课堂讲义
 
 [讲义](l-zookeeper.txt)
+
+[FAQ](zookeeper-faq.txt)
 
 ## 作业
 
