@@ -89,13 +89,13 @@ The paper doesn't provide details. I believe it's the identities
 > C_old or of C_new? What if the two networks disagreed on a connection?
 
 During the period of joint consensus (while C_{old,new} is active), the
-leader is required to get a majority from both the servers in Cold and
-the servers in Cnew.
+leader is required to get a majority from both the servers in C_old and
+the servers in C_new.
 
 There can't really be disagreement, because after C_{old,new} is committed
-into the logs of both Cold and Cnew (i.e. after the period of joint
-consensus has started), any new leader in either Cold or Cnew is
-guaranteed to see the log entry for Cold,Cnew.
+into the logs of both C_old and C_new (i.e. after the period of joint
+consensus has started), any new leader in either C_old or C_new is
+guaranteed to see the log entry for C_old,C_new.
 
 
 > I'm confused about Figure 11 in the paper. I'm unsure about how
@@ -139,13 +139,13 @@ protocol is one way to solve this problem.
 > will shut down right away?
 
 I think the immediate problem is that the Section 6 protocol doesn't
-commit Cnew to the old servers, it only commits Cnew to the servers in
-Cnew. So the servers that are not in Cnew never learn when Cnew takes
+commit C_new to the old servers, it only commits C_new to the servers in
+C_new. So the servers that are not in C_new never learn when C_new takes
 over from C_{old,new}.
 
 The paper does say this:
 
-  When the new configuration has been committed under the rules of Cnew,
+  When the new configuration has been committed under the rules of C_new,
   the old configuration is irrelevant and servers not in the new
   configuration can be shut down.
 
@@ -198,7 +198,7 @@ out and the time at which it is committed.
 
 Is this about the "second issue" in Section 6? The situation they
 describe is one in which the leader isn't in the new configuration at
-all. So after Cnew is committed, the leader shouldn't be participating
+all. So after C_new is committed, the leader shouldn't be participating
 in Raft at all.
 
 
@@ -235,14 +235,14 @@ C_{old,new} message is committed, those new servers can vote.
 I agree that the paper's design seems a little awkward, and I don't know
 why they designed it that way. Your idea seems like a reasonable
 starting point. One complication is that there may be situations in
-which a server in Cnew is leader during the joint consensus phase, but
-at that time some servers in Cold may not know about the joint consensus
-phase (i.e. they only know about Cold, not C_{old,new}); we would not want
+which a server in C_new is leader during the joint consensus phase, but
+at that time some servers in C_old may not know about the joint consensus
+phase (i.e. they only know about C_old, not C_{old,new}); we would not want
 the latter servers to ignore the legitimate leader.
 
 
 > When exactly does joint consensus begin, and when does it end? Does joint
-> consensus begin at commit time of "C_{o,n}"?
+> consensus begin at commit time of "C_{old,new}"?
 
 
 Joint consensus is in progress when the current leader is aware of
@@ -250,7 +250,7 @@ C_{old,new}. If the leader doesn't manage to commit C_{old,new}, and crashes,
 and the new leader doesn't have C_{old,new} in its log, then joint
 consensus ends early. If a leader manages to commit C_{old,new}, then joint
 consensus has not just started but will eventually complete, when a
-leader commits Cnew.
+leader commits C_new.
 
 > Can the configuration log entry be overwritten by a subsequent leader
 > (assuming that the log entry has not been committed)?
@@ -260,16 +260,16 @@ Yes, that is possible, if the original leader trying to send out C_{old,new}
 crashes before it commits the C_{old,new}.
 
 
-> How can the "C_{o,n}" log entry ever be committed? It seems like it must be
+> How can the "C_{old,new}" log entry ever be committed? It seems like it must be
 > replicated to a majority of "old" servers (as well as the "new" servers), but
-> the append of "C_{o,n}" immediately transitions the old server to new, right?
+> the append of "C_{old,new}" immediately transitions the old server to new, right?
 
 
-The commit does not change the set of servers in Cold or Cnew. For example,
-perhaps the original configuration contains servers S1, S2, S3; then Cold
+The commit does not change the set of servers in C_old or C_new. For example,
+perhaps the original configuration contains servers S1, S2, S3; then C_old
 is {S1,S2,S3}. Perhaps the desired configuration is S4, S5, S6; then
-Cnew is {S4,S5,S6}. Once Cnew is committed to the log, the configuration
-is Cnew={S4,S5,S6}; S1,S2, and S3 are no longer part of the configuration.
+C_new is {S4,S5,S6}. Once C_new is committed to the log, the configuration
+is C_new={S4,S5,S6}; S1,S2, and S3 are no longer part of the configuration.
 
 
 > When snapshots are created, is the data and state used the one for the
