@@ -30,3 +30,7 @@
 ## 作业
 
 One use of [Zookeeper](zookeeper.pdf) is a fault-tolerant lock service (see the section "Simple locks" on page 6). Why isn't possible that two clients can acquire the same lock? In particular, how does Zookeeper decide if a client has failed and it can give the lock to some other client?
+
+## LAB 3
+
+<6.824Lab3_Fault-tolerantKey_ValueService.html>
