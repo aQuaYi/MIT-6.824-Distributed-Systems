@@ -33,4 +33,4 @@ One use of [Zookeeper](zookeeper.pdf) is a fault-tolerant lock service (see the 
 
 ## LAB 3
 
-<6.824Lab3_Fault-tolerantKey_ValueService.html>
+[LAB 3](6.824Lab3_Fault-tolerantKey_ValueService.html)
