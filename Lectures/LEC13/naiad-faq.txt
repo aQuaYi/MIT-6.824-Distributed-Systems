@@ -1,0 +1,76 @@
+FAQ Naiad
+
+Q: Is Naiad/timely dataflow in use in production environments anywhere? If not, and what would be barriers to adoption?
+
+A: The original Naiad research prototype isn't used in production, as far as I know. However, one of the authors has implemented a Naiad-like timely dataflow system in Rust:
+
+https://github.com/frankmcsherry/timely-dataflow
+https://github.com/frankmcsherry/differential-dataflow
+
+There's no widespread industry use of it yet, perhaps because it's not backed by a company that offers commercial support, and because it doesn't support interaction with other widely-used systems (e.g., reading/writing HDFS data).
+
+One example of real-world adoption is this proposal to use of differential dataflow (which sits on top of Naiad-style timely dataflow) to speed up program analysis in the Rust compiler (https://internals.rust-lang.org/t/lets-push-non-lexical-lifetimes-nll-over-the-finish-line/7115/8). That computation only involves parallel processing on a single machine, not multiple machines, however.
+
+
+Q: The paper says that Naiad performs better than Spark. In what cases would one prefer which one over the other?
+
+Naiad performs better than Spark for incremental and streaming computations. Naiad's performance should be equal to, or better than, Spark's for other computations such as classic batch and iterative processing.
+
+There is no architectural reason why Naiad would ever be slower than Spark. However, Spark perhaps has a better story on interactive queries. In Spark, they can use existing, cached in-memory RDDs, while Naiad would require the user to recompile the program and run it again. Spark is also quite well-integrated with the Hadoop ecosystem and other systems that people already use (e.g., Python statistics libraries, cluster managers like YARN and Mesos), while Naiad is largely a standalone system.
+
+
+Q: What was the reasoning for implmenting Naiad in C#? It seems like this language choice introduced lots of pain, and performance would be better in C/C++.
+
+A: I believe it was because C#, as a memory-safe language, made development easier. Outside the data processing path (e.g., in coordination code), raw performance doesn't matter that much, and C/C++ would introduce debugging woes for little gain there.
+
+However, as you note, the authors actually had to do a fair amount of optimization work to address performance problems with C# on the critical data processing path (e.g., garbage collection, §3.5). One of the Naiad authors has recently re-implemented the system in Rust, which is a low-level compiled language, and there is some evidence that this implementation performs better than the original Naiad.
+
+
+Q: I'm confused by the OnRecv/OnNotify/SendBy/NotifyAt API. Does the user need to tell the system when to notify another vertex?
+
+A: OnRecv and OnNotify are *callbacks* that get invoked on a vertex by the Naiad runtime system, not the user. The data-flow vertex has to supply an implementation of how to deal with these callbacks when invoked.
+
+SendBy and NotifyAt are API calls available to a data-flow vertex implementation to emit output records (SendBy) and to tell the runtime system that the vertex would like to receive a callback at a certain time (NotifyAt). It's the runtime system's job to figure, using the progress tracking protocol, when it is appropriate to invoke NotifyAt.
+
+This API allows for significant flexibility: for example, SendAt() can emit a record with a timestamp in the future, rather than buffering the record internally, which makes out-of-order processing much easier. NotifyAt allows the vertex to control how often it receives notifications: maybe it only wishes to be notified every 1,000 timestamps in order to batch its processing work.
+
+Here's an example vertex implementation that both forwards records immediately and also requests a notification for a later time, at which it computes some aggregate statistics and emits them:
+
+class MyFancyVertex {
+  function OnRecv(t: Timestamp, m: message) {
+    // ... code to process message
+    out_m = compute(m);
+
+    // log this message in local state for aggregate statistics
+    this.state.append(m);
+
+    // vertex decides to send something without waiting for
+    // a notification that all messages prior to t have been received
+    this.SendBy(some_edge, out_m, t);
+
+    // now it also waits for a notification do to something when
+    // nothing prior to t + 10 can arrive any more.
+    // N.B.: simplified, as in reality the timestamps aren't integers
+    if (t % 10 == 0) {
+      this.NotifyAt(t + 10);
+    }
+  }
+
+  function OnNotify(t': Timestamp) {
+    // no more messages <= t' any more!
+
+    // collect some aggregate statistics over the last 10 times
+    stats = collect(this.state);
+
+    this.SendBy(some_other_edge, stats, t');
+  }
+}
+
+
+Q: What do the authors mean when they state systems like Spark "requires centralized modifications to the dataflow graph, which introduce substantial overhead"? Why does Spark perform worse than Naiad for iterative computations?
+
+A: Think of how Spark runs an iterative algorithm like PageRank: for every iteration, it creates new RDDs and appends them to the lineage graph (which is Spark's "data-flow graph"). This is because Spark and other systems are built upon data-flow in directed acyclic graphs (DAGs), so to add another iteration, they have to add more operators.
+
+The argument the authors make here is that Naiad's support for cycles is superior because it allows data to flow in cycles without changing the data-flow graph at all. This has advantages: changing the data-flow graph requires talking to the master/driver over the network and waiting for a response for *every* iteration of a loop, and will take at least a few milliseconds. This is the "centralized" part of that statement you quote.
+
+With Naiad, by contrast, updates can flow in cycles the master being involved.
