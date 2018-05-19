@@ -1,4 +1,4 @@
-# Lecture 10: FaRM
+# Lecture 11: FaRM
 
 ## FAQ
 
