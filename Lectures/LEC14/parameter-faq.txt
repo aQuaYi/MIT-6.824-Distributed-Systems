@@ -1,0 +1,7 @@
+Q: Is the parameter server model useful for deep neural networks? It looks like this paper was written in 2014, which was before deep learning suddenly became very popular.
+
+A: Yes! Neural networks tend to have many (millions) of parameters, so they're a good fit for a parameter server model. Indeed, the parameter server model has been quite influential in distributed deep learning frameworks. For example, TensorFlow's distributed execution uses parameter servers: https://www.tensorflow.org/deploy/distributed (the "ps" hosts are parameter servers).
+
+Even though neural networks do not always have the kind of sparse parameter spaces that the examples in the paper use, parameter servers are still beneficial for them. Each PS aggregate gradient changes from multiple workers; if the workers had to do all-to-all exchange of gradient changes, this would require much higher network bandwidth. See this example:
+
+https://stackoverflow.com/questions/39559183/what-is-the-reason-to-use-parameter-server-in-distributed-tensorflow-learning
