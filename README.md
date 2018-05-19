@@ -23,3 +23,4 @@
 - [LEC 19: Dynamo](Lectures/LEC19)
 - [LEC 20: Peer-to-peer: Bitcoin](Lectures/LEC20)
 - [LEC 21: Project demos](Lectures/LEC21)
+- [LEC 22: Project demos](Lectures/LEC22)

@@ -1,0 +1,129 @@
+Chord paper FAQ
+
+Q: Is hashing across machines a good way to get load balanced
+sharding? Why not explicitly divide up the key space so it's evenly
+split?
+
+A: If you could have a centralized server that assigns keys to shards
+then an exact division is a great plan. Many systems do just that
+(e.g., GFS or the shard master in lab 4). If you cannot have a central
+server, then you need another plan for load balancing, and consistent
+hashing is such a plan.
+
+Q: Does BitTorrent use Chord?
+
+A: The Bittorrent P2P Tracker uses Kademlia. Kademlia and Chord are
+similar. Bittorrent itself doesn't use Chord or Kademlia.
+
+Q: If you want to add fault-tolerance to a Chord-based system should
+you replicate each Chord node using Raft?
+
+A: Typical Chord-based applications don't need strong consistency, and
+have weak durability requirements (e.g., often the client must refresh
+the data periodically to ensure it isn't lost). So Raft seems too
+heavy-weight. I know of only one design (Scatter) that combines Chord
+and Paxos, where segments of the ring form a Paxos group to get
+stronger guarantees. Google "Scatter SOSP" if you are curious.
+
+Q: What if Chord DHT nodes are malicious?
+
+A: Chord (and most peer-to-peer systems) cannot handle malicious
+participants. An open Chord system is vulnerable to a Sybil attack: in an open
+Chord system, an attacker can become a participant and create many chord nodes
+under the attacker's control, and take over the whole system.  There are DHTs
+that try to handle such attacks but it is challenging in a peer-to-peer setting
+(e.g.,see http://pdos.csail.mit.edu/papers/whanau-nsdi10.pdf).
+
+Chord and application on top of it provide some security measures, however.  For
+example, node IDs are typically the SHA-1 of the IP address of a node, so that
+attacker must have control of the IP address being used.  Application typically
+advertise data in Chord under the key that corresponds to the SHA-1 of the data;
+so when when application retrieves the data, it can check that is the right
+data.
+
+Q: Is Chord used anywhere in practice?
+
+A: We don't know. Clearly Kademlia and Amazon's Dynamo are strongly influenced by
+Chord. Rumor has it that Cisco uses Chord in some of its products.
+
+Q: Could the performance be improved if the nodes knew more about
+network locality?
+
+A: Yes. The total latency for a lookup can be improved using proximity
+routing (e.g., see
+https://pdos.csail.mit.edu/papers/dhash:nsdi/paper.pdf).
+
+Q: Is it possible to design a DHT in which lookups take less than
+log(N) hops?
+
+A: There are a number of O(1) hops DHTs, but they require more
+bandwidth. Accordion is one that dynamically adjusts between O(1) and
+O(log N): www.news.cs.nyu.edu/~jinyang/pub/nsdi05-accordion.pdf
+
+Q: Does consistent hashing of keys still guarantee load balanced nodes if keys
+are not evenly distributed?
+
+A: Chord hashes the keys provided by the application using a SHA1 so that the
+keys are well distributed in the key space.
+
+Q: In the case of concurrent joins and failures, Chord pauses when a get fails
+to find the key it was looking for. If there's constant activity, how can Chord
+distinguish between the system not being stable and the key not actually
+existing?
+
+A: The idea is not to wait until the system is stable, because there might never
+be a stable system. Instead, the plan is to just retry after a certain period of
+time, because stabilization may have fix the routing info needed for that
+lookup. With good chance, Chord will go back to case 1 or 2 mentioned in that
+paragraph of the paper.
+
+Q: If I introduce a malicious peer in Chord that keeps returning wrong
+values or inexistent addresses how disruptive can it be to the whole
+DHT? How does Bittorrent deal with particular issue?
+
+A: A malicious node usually can't forge data, since the data is
+usually signed or protected with a cryptographic hash. Bittorrent
+files are protected in this way -- the original torrent file contains
+the hash of the desired file, and the client hashes the file it
+eventually gets to check that the content is correct.
+
+Still, a malicious node can deny that content exists, or route lookups
+incorrectly.
+
+If it's just a few badly behaved nodes, then the system can cope by
+replicating data at a few different nodes near the key in the DHT's ID
+space. Lookups can try a few nearby nodes.
+
+An attacker could pretend to be millions of separate nodes. If all of
+the nodes only routed queries to other fake nodes, and they all denied
+that the desired data existed, they could successfully prevent clients
+from downloading. Bittorrent has a weak defense against this attack --
+this is what the "token" mechanism in the reading refers to. Basically a
+node is not allowed to join the Kademlia DHT unless it can prove that it
+really receives packets sent to its claimed IP address. The idea is that
+an attacker probably only controls a handful of IP addresses, so this
+token defense will hopefully limit the attacker to joining the DHT only
+a handful of times.
+
+Some real-life attacks have managed to get control of hundreds or
+millions of IP addresses (by manipulating the Internet routing system),
+so the token defense it not bullet-proof.
+
+Q: Why isn’t there a danger of improper load balancing if some keys
+are simply used more than others?
+
+A: That danger does exist. I think if it was a problem in practice,
+system designers would replicate or cache data in the DHT nodes.
+
+Bittorrent effectively does this in the way it uses Kademlia -- there
+are typically many peers serving a given torrent, and each inserts an
+entry into the Kademlia DHT declaring that it is willing to serve pieces
+of the torrent. The inserts go to Kademlia nodes with IDs near the key
+ID, not necessarily to the Kademlia node that's the real home of the key
+ID. When a new client wants to find out about a torrent, its DHT lookup
+stops as soon as it encounters any entries for the key, so it might not
+have to bother the real DHT home node for the key.
+
+System built on Chord (e.g. CFS) replicate a key/value pair at the r
+nodes after the key's successor on the ring. get()s choose a random one
+of those r nodes, to avoid hot-spots.
