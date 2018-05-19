@@ -3,7 +3,7 @@
 ## FAQ
 
 1. What are some systems that currently uses FaRM?
-1. Why did Microsoft Research release this? Same goes for the research branches of Google, Facebook, Yahoo, etc. Why do they always reveal the design of these new systems? It's definitely better for the advancement of tech, but it seems like (at least in the short term) it is in their best interest to keep these designs secret. 
+1. Why did Microsoft Research release this? Same goes for the research branches of Google, Facebook, Yahoo, etc. Why do they always reveal the design of these new systems? It's definitely better for the advancement of tech, but it seems like (at least in the short term) it is in their best interest to keep these designs secret.
 1. How does FaRM compare to Thor in terms of performance? It seems easier to understand.
 1. Does FaRM really signal the end of necessary compromises in consistency/availability in distributed systems?
 1. This paper does not really focus on the negatives of FaRM. What are some of the biggest cons of using FaRM?
