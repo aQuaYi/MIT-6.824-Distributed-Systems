@@ -1,0 +1,63 @@
+Dynamo FAQ
+
+Q: What's a typical number of nodes in a Dynamo instance? Large enough that
+vector clocks will become impractical large?
+
+A: I don't know how big Amazon's Dynamo instances are, but I expect they are
+sizeable. As long as there are no failures the same node will do the puts and
+thus the VV stays small (1 item). With weird failure patterns it may grow large,
+but if the VV grows larger than 10 items, Dynamo throws out the
+least-recently-used entry. (This means that there could be cases that Dynamo
+thinks there is a conflict, but if it would have remembered all entries, there
+wasn't an actual conflict.)
+
+Q: How can deleted items resurface in a shopping cart (Section 4.4)?
+
+A: Suppose there are two copies of the shopping cart, each in a different data
+center. Suppose both copies are identical and have one item in them. Now suppose
+a user deletes the item, but the second copy is unreachable, maybe because of a
+network partition. Dynamo will update the first copy, but not the second; the
+user will see that the shopping cart is empty. Now the network reconnects, and
+the two copies must be reconciled. The application using Dynamo is responsible
+for doing the reconciliation since it knows the semantics of the objects. In the
+case of a shopping cart, the application will take the union of the shopping
+carts' contents (which is less sophisticated than Bayou but simpler). Now if the
+user looks at the shopping cart again, the deleted item has re-appeared.
+
+Q: How does Dynamo recover from permanent failure -- what is anti-entropy using
+Merkle trees?
+
+A: In this paper, anti-entropy is a big word for synchronizing two replicas. To
+determine what is different between two replicas, Dynamo traverses a Merkle
+representation of the two replicas. If a top-level node matches, then Dynamo
+doesn't descend that branch. If a node in the tree don't match, they copy the
+branch of the new version to the old one. The use of Merkle trees allows the
+authors to copy only the parts of the tree that are different. Wikipedia has a
+picture to illustrate: https://en.wikipedia.org/wiki/Merkle_tree.
+
+Q: What are virtual nodes?
+
+A: They are a scheme to balance the keys nicely across all nodes. If you throw N
+balls in B bins, you get on average B/N balls in a bin but some bins may have
+many balls. To ensure that all bins are close to the average, you can place
+multiple virtual bins in each real bin. The average of multiple random variables
+has lower variance than a single random variable.
+
+Q: Will Dynamo's use of a DHT prevent it from scaling?
+
+A: It is pretty-well understood now how to build DHTs that scale to large number
+of nodes, even O(1) DHTs (e.g., see
+http://www.news.cs.nyu.edu/~jinyang/pub/nsdi05-accordion.pdf). The Dynamo
+solution as described is an O(1) DHT, with ok scalability. I think the authors
+figured that they will use a solution from the literature once they actually
+have a scaling problem.
+
+Q: What's a gossip-based protocol?
+
+A: Any system that doesn't have a master that knows about all participants in
+the system typically has a protocol to find other members; often such protocols
+are called gossip protocols, because the participants need to gossip (gather
+information from other nodes) to determine who is part of the system. More
+generally, gossip refers to information spreading over a whole system via pairs
+of computers exchanging what they know. You can learn more about gossip
+protocols from Wikipedia: https://en.wikipedia.org/wiki/Gossip_protocol.
