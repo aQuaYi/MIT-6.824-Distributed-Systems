@@ -1,0 +1,254 @@
+Bayou FAQ
+
+Q: A lot of Bayou's design is driven by the desire to support
+disconnected operation. Is that still important today?
+
+A: Disconnected and weakly connected operation continue to be
+important, though in different guises. Dropbox, Amazon's Dynamo,
+Cassandra, git, and smartphone syncing are all real-world systems with
+high-level goals and properties similar to Bayou's: they allow
+immediate reads and writes of a local replica even when disconnected,
+they provide eventual consistency, and they have to cope with write
+conflicts.
+
+Q: Doesn't widely-available wireless Internet mean everyone is
+connected all the time?
+ 
+A: Wireless connectivity doesn't seem to have reduced the need for
+disconnected operation. Perhaps the reason is that anything short of
+100% connectivity means that software has to be designed to handle
+periods of disconnection. For example, my laptop has WiFi but not
+cellular data; there are times when I want to be able to use my laptop
+yet I either don't want to pay for WiFi, or there isn't a nearby
+access point. For git, I often do not want to see others' changes
+right away even if my laptop is connected. I want to be able to use my
+smartphone's contacts list and calendar regardless of whether it's on
+the Internet.
+
+Q: Bayou supports direct synchronization of one device to another,
+e.g. over Bluetooth or infrared, without going through the Internet or
+a server. Is that important?
+
+A: Perhaps not; I think syncing devices via an intermediate server on
+the Internet is probably good enough.
+
+Q: Does anyone use Bayou today? If not, why are we reading this paper?
+
+A: No-one uses Bayou today; it was a research prototype intended to
+explore a new architecture. Bayou uses multiple ideas that are worth
+knowing: eventual consistency, conflict resolution, logging operations
+rather than data, use of timestamps to help agreement on order,
+version vectors, and causal consistency via Lamport logical clocks.
+ 
+Q: Has the idea of applications performing conflict resolution been
+used in other distributed systems?
+ 
+A: There are synchronization systems that have application-specific
+conflict resolution. git merges different users' changes to different
+lines in the same file. When someone syncs their iPhone with their
+Mac, the calendars are merged in a way that understands about the
+structure of calendars. Similarly, Dropbox has an API that allows
+applications to intervene when Dropbox detects conflicting updates to
+the same file. However, I'm not aware of any system other than Bayou
+that syncs a log of update functions (other systems typically sync the actual
+file content).
+ 
+Q: Do companies like Dropbox use protocols similar to Bayou?
+ 
+A: I doubt Dropbox uses anything like Bayou. I suspect Dropbox moves
+file content around, rather than having a log of writes. On the other
+hand Dropbox is not as flexible as Bayou at application-specific
+resolution of conflicting updates to the same file.
+ 
+Q: What does it mean for data to be weakly consistent?
+ 
+A: It means that clients may see that different replicas are not
+identical, though the system tries to keep them as identical as it
+can.
+
+Q: Is eventual consistency the best you can do if you want to support
+disconnected operation?
+
+A: Yes, eventual consistency (or slight improvements like causal
+consistency) is the best you can do. If we want to support reads and
+writes to disconnected replicas of the data (as Bayou does), we have
+to tolerate users seeing stale data, and users causing conflicting
+writes that are only evident after synchronization. It's nice that
+it's even possible to get eventual consistency in such a system!
+ 
+Q: It seems like writing dependency checks and merge procedures for a
+variety of operations could be a tough interface for programmers to
+handle. Is there anything I'm missing there?
+ 
+A: It's true that programmer work is required. But in return Bayou
+provides a very slick solution to the difficult problem of resolving
+conflicting updates to the same data.
+
+Q: Is the primary replica a single point of failure?
+
+A: Sort of. If the primary is down or unreachable, everything works
+fine, except that writes won't be declared stable. For example, the
+calendar application would basically work, though users would have to
+live in fear that new calendar entries with low timestamps could
+appear and change the displayed schedule.
+ 
+Q: How do dependency checks detect Write-Write conflicts? The paper
+says "Such conflicts can be detected by having the dependency check
+query the current values of any data items being updated and ensure
+that they have not changed from the values they had at the time the
+Write was submitted", but I don't quite understand in this case what
+the expected result of the dependency check is.
+ 
+A: Suppose the application wants to modify calendar entry "10:00", but
+only if there's no entry already. When the application runs, there's
+no entry. So the application will produce this Bayou write operation:
+
+  dependency_check = { check that the value for "10:00" is nil }
+  update = { set the value for "10:00" to "staff meeting" }
+  mergeproc = { ... }
+
+If no other write modifies 10:00, then the dependency_check will succeed
+on all servers, and they will all set the value to "staff meeting".
+
+If some other write, by a different client at about the same time, sets
+the 10:00 entry to "grades meeting", then that's a write/write conflict:
+two different writes want to set the same DB entry to different values.
+The dependency check will detect the conflict when synchronization
+causes some servers to see both writes. One write will be first in the
+log (because it has a lower timestamp); its dependency check will
+succeed, and it will update the 10:00 entry. The write that's second in
+the log will fail the dependency check, because the DB value for 10:00
+is no longer nil.
+
+That is, checking that the DB entry has the same value that it had when
+the application originally ran does detect the situation in which a
+conflicting write was ordered first in the log.
+ 
+Q: When are dependency checks called?
+ 
+A: Each server executes new log entries that it hears during
+synchronization. For each new log entry, the server calls the entry's
+dependency check; if the check succeeds, the server applies the entry's
+update to its DB.
+ 
+Q: If two clients make conflicting calendar reservations on partitioned servers,
+do the dependency checks get called when those two servers communicate?
+ 
+A: If the two servers synchronize, then their logs will contain each
+others' reservations, and at that point both will execute the checks.
+ 
+Q: It looks like the logic in the dependency check would take place when
+you're first inserting a write operation, but you wouldn't find any
+conflicts from partitioned servers.
+ 
+A: Whenever a server synchronizes, it rolls back its DB to the earliest point at
+which synchronization modified its log, and then re-executes all log entries
+after that point (including the dependency checks).
+ 
+Q: What are anti-entropy sessions?
+ 
+A: This refers to synchronization between a pair of devices, during which
+the devices exchange log entries to ensure they have identical logs (and
+thus identical DB content).
+ 
+Q. What is an epidemic algorithm?
+ 
+A: A communication scheme in which pairs devices exchange data with
+each other, including data they have heard from other devices. The
+"epidemic" refers to the fact that, eventually, new data will spread
+to all devices via these pairwise exchanges.
+ 
+Q: Why are Write exchange sessions called anti-entropy sessions?
+ 
+A: Perhaps because they reduce disorder. One definition of "entropy" is a
+measure of disorder in a system.
+ 
+Q: In order to know if writes are stabilized, does a server have to
+contact all other servers?
+ 
+A: Bayou has a special primary that commits (stabilizes) writes by assigning
+them CSNs. You only have to contact the primary to know what's been committed.
+ 
+Q: How much time could it take for a Write to reach all servers?
+ 
+A: At worst, a server might never see updates, because it is broken.
+At best, a server may synchronize with other servers frequently, and
+thus may see updates quickly. There's not much concrete the paper can
+say about this, because it depends on whether users turn off their
+laptops, whether they spend a lot of time without network
+connectivity, &c.
+ 
+Q: In what case is automatic resolution not possible? Does it only depend
+on the application, or is it the case that for any application, it's
+possible for automatic resolution to fail?
+ 
+A: It usually depends on the application. In the calendar example, if
+I supply only two possible time slots e.g. 10:00 and 11:00, and those
+slots are already taken, Bay can't resolve the conflict. But suppose
+the data is "the number of people who can attend lunch on friday", and
+the updates are increments to the number from people who can attend.
+Those updates can always succeed -- it's always possible to add 1 to
+the count.
+
+Q: What are examples of good (quick convergence) and not-so-good anti-entropy
+policies?
+ 
+A: A example good situation is if all servers synchronize frequently
+with a single server (or more generally if there's a path between
+every two servers made up of frequently synchronizing pairs). A bad
+situation is if some servers don't synchronize frequently, or if there
+are two groups of servers, frequent synchronization within each group,
+but rare synchronization between the groups.
+ 
+Q: I don't understand why "tentative deletion may result in a tuple that appears
+in the committed view but not in the full view." (very beginning of page 8)
+ 
+A: The committed view only reflects writes that have been committed.
+So if there's a tentative operation that deletes record X, record X
+will be in the committed view, but not in the full view. The full view
+reflects all operations (including the delete), but the committed view
+reflects only committed operations (thus not the delete).
+ 
+Q: Bayou introduces a lot of new ideas, but it's not clear which ideas
+are most important for performance.
+ 
+A: I suspect Bayou is relatively slow. Their goal was not performance, but
+rather new functionality: a new kind of system that could support shared mutable
+data despite intermittent network connectivity.
+ 
+Q: What kind of information does the Undo Log contain? (e.g. does it
+contain a snapshot of changed files from a Write, or the reverse
+operation?) Or is this more of an implementation detail?
+ 
+A: I suspect that the undo log contains an entry for every write, with the value
+of DB record that the write modified *before* the modification. That allows
+Bayou to roll back the DB in reverse log order, replacing each modified DB
+record with the previous version.
+ 
+Q: How is a particular server designated as the primary?
+ 
+A: I think a human chooses.
+ 
+Q: What if communication fails in the middle of an anti-entropy session?
+ 
+A: Bayou always sends log entries in order when synchronizing, so it's OK
+for the receiver to add the entries it received to its log, even though it
+didn't hear subsequent entries from the sender.
+ 
+Q: Does Bayou cache?
+ 
+A: Each Bayou server (i.e. device like a laptop or iPhone) has a complete copy
+of all the data. So there's no need for an explicit cache.
+
+Q: What are the session guarantees mentioned by the paper?
+
+A: Bayou allows an application to switch servers, so that a client
+device can talk to a Bayou server over the network rather than having
+to run a full Bayou server. But if an application switches servers
+while it is running, the new server might not have seen all the writes
+that the application sent to the previous servers. Session guarantees
+are a technique to deal with this. The application keeps a session
+version vector summarizing all the writes it has sent to any server.
+When it connects to a new server, the application first checks that
+the new server is as least as up to date as the session version
+vector. If not, the application finds a new server that is up to date.
