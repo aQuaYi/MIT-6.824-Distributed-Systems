@@ -34,7 +34,3 @@
 ## 课堂作业
 
 [No compromises: distributed transactions with consistency, availability, and performance](farm-2015_cropped.pdf): Suppose there are two FaRM transactions that both increment the same object. They start at the same time and see the same initial value for the object. One transaction completely finishes committing (see Section 4 and Figure 4). Then the second transaction starts to commit. There are no failures. What is the evidence that FaRM will use to realize that it must abort the second transaction? At what point in the Section 4 / Figure 4 protocol will FaRM realize that it must abort?
-
-## LAB 4
-
-[LAB 4 说明](6.824 Lab 4_ Sharded Key_Value Service.html)
